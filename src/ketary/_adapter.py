@@ -46,16 +46,16 @@ def _gate_angle(value,*,allow_parameters=False):
             return value
     return _angle(value)
 
-def _validate(qc):
+def _validate(qc,*,allow_parameters=False):
     QC,_=_sdk()
     if not isinstance(qc,QC):
         raise TypeError("expected QuantumCircuit")
-    if qc.num_qubits<1 or qc.num_clbits or qc.parameters or getattr(qc,"layout",None) is not None or qc.metadata:
+    if qc.num_qubits<1 or qc.num_clbits or (qc.parameters and not allow_parameters) or getattr(qc,"layout",None) is not None or qc.metadata:
         raise UnsupportedOperation("L0 supports logical circuits with bound real parameters and without metadata/classical bits/layout")
     for item in qc.data:
         if item.clbits:
             raise UnsupportedOperation("classical operands unsupported")
-        _validate_gate(item.operation)
+        _validate_gate(item.operation,allow_parameters=allow_parameters)
     if not math.isfinite(float(qc.global_phase)):
         raise ValueError("invalid global phase")
 

@@ -125,6 +125,29 @@ class Circuit:
         from qiskit.circuit import Parameter
         return Parameter(name)
 
+    @staticmethod
+    def parameter_vector(name,size):
+        """Independent native parameter identities in declared vector order."""
+        from qiskit.circuit import ParameterVector
+        from ._validation import ResourceLimit
+        if type(name) is not str or not name or len(name)>112:
+            raise ValueError("expected a nonempty parameter prefix up to 112 characters")
+        size=_int(size,1)
+        if size>4096:
+            raise ResourceLimit("parameter vector limited to 4096 elements")
+        return tuple(ParameterVector(name,size))
+
+    @classmethod
+    def _native_ansatz(cls,n,rotations,entanglement,reps,prefix):
+        from qiskit.circuit.library import n_local
+        native=n_local(n,rotation_blocks=list(rotations),entanglement_blocks="cx",
+                       entanglement=entanglement,reps=reps,parameter_prefix=prefix)
+        _validate(native,allow_parameters=True)
+        c=cls.__new__(cls)
+        c._qc=native
+        c._symbolic=True
+        return c
+
     @property
     def parameters(self):
         return tuple(self._qc.parameters)
@@ -140,6 +163,20 @@ class Circuit:
             if len(params)!=len(self.parameters) or set(values)!=set(params):
                 raise ValueError("named binding must cover each unique parameter")
             bindings={params[name]:value for name,value in values.items()}
+        else:
+            from collections.abc import Mapping
+            from itertools import islice
+            if not isinstance(bindings,Mapping):
+                if isinstance(bindings,(str,bytes,set,frozenset)):
+                    raise TypeError("expected mapping or ordered numeric values")
+                params=self.parameters
+                try:
+                    vals=tuple(islice(iter(bindings),len(params)+1))
+                except TypeError as exc:
+                    raise TypeError("expected mapping or ordered numeric values") from exc
+                if len(vals)!=len(params):
+                    raise ValueError("ordered binding must cover exactly the native parameter order")
+                bindings=dict(zip(params,vals,strict=True))
         return self.from_parameterized(self._qc,bindings)
 
     def sweep(self,**values):
