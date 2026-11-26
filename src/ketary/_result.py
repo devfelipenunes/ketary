@@ -433,7 +433,25 @@ class _Math:
             terms=terms.to_dict(self._r._n)
         if not isinstance(terms,Mapping) or not 1<=len(terms)<=256:
             raise ValueError("expected 1..256 Pauli terms")
-        value=math.fsum(_real(coefficient)*self.expectation(label) for label,coefficient in terms.items())
+        # Native Statevector is a call-local read-only handle over the same
+        # immutable snapshot. Reuse it for ordinary labels; preserve the
+        # legacy dispatch for non-string keys and validation/evaluation order.
+        from qiskit.quantum_info import Statevector
+        n=self._r._n
+        state=None
+        def contributions():
+            nonlocal state
+            for label,coefficient in terms.items():
+                numeric=_real(coefficient)
+                if type(label) is not str:
+                    yield numeric*self.expectation(label)
+                    continue
+                if len(label)!=n or any(p not in "IXYZ" for p in label):
+                    raise ValueError("expected a full-width uppercase I/X/Y/Z Pauli label")
+                if state is None:
+                    state=Statevector(self._r._data)
+                yield numeric*self._native_pauli_value(state,label)
+        value=math.fsum(contributions())
         if not math.isfinite(value):
             raise ArithmeticError("observable expectation is not finite")
         return value
