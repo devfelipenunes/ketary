@@ -8,6 +8,9 @@ on:
       - 'tests/test_production_math_oracles.py'
       - 'tests/test_dx_coverage_promotions.py'
       - 'tests/test_dx_execution_coverage.py'
+      - 'tests/test_production_controlled_gradient.py'
+      - 'tests/test_production_pauli_robustness.py'
+      - 'tests/test_production_channels_complex.py'
   workflow_dispatch:
 permissions:
   contents: read
