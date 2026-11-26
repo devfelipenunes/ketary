@@ -21,8 +21,10 @@ def template(n,depth):
     circuit=q.Circuit.symbolic(n)
     for _ in range(depth):
         circuit.ry(a,range(n)).rz(a+b,range(n))
-    circuit.evolve(.4*q.I(),time=b)
-    return circuit
+    # Explicit native symbolic phase avoids the eight-wire evolve limit.
+    raw=circuit.to_qiskit()
+    raw.global_phase=-.4*b
+    return q.Circuit.from_symbolic(raw)
 
 def run(seed,reps):
     rng=random.Random(seed)
