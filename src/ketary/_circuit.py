@@ -419,6 +419,9 @@ class Circuit:
             rows.append(self._mapping_wires(block,wires))
         if not rows:
             raise ValueError("expected at least one placement")
+        # Consuming caller iterables can grow the source after the final yield.
+        # Recheck the existing expansion bound before entering native append.
+        self._check_expansion(block,len(rows))
         return self._apply_placements(block,rows)
 
     @staticmethod
