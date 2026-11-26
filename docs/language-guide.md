@@ -309,3 +309,16 @@ backend selection. Selected probabilities use distinct ordered full-width
 basis labels and return only those labels, without full dictionary
 enumeration or conditional renormalization. The old no-argument
 probability call is unchanged. No hidden runs.
+
+## Aligned two-wire rotations
+
+`cp`, `crx`, `cry`, `crz`, `rxx`, `ryy`, and `rzz` accept an ordered
+angle sequence with the existing `pairs=` spelling. One angle per pair,
+sequential order including repeated pairs; no implicit Cartesian expansion.
+A scalar angle still broadcasts unchanged. All pair/angle inputs are bounded
+and validated before mutation, with the existing 10,000-pair cap and native
+suffix rollback or staged symbolic/classical copy. No execution or new gates.
+
+```python
+c=q.Circuit(4).cp([.1,.2,.3],pairs=[(2,3),(1,3),(0,3)])
+```
