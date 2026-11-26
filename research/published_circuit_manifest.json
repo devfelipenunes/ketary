@@ -1,0 +1,87 @@
+{
+  "repository": "pnnl/QASMBench",
+  "commit": "357b942396d5c2b7cbc1c229c585a6ef5ccaebac",
+  "license": "https://github.com/pnnl/QASMBench/blob/357b942396d5c2b7cbc1c229c585a6ef5ccaebac/LICENSE",
+  "files": [
+    {
+      "name": "adder_n4",
+      "path": "small/adder_n4/adder_n4.qasm",
+      "git_blob_sha1": "895cf110c11cc822c7db74110336f88159ca3298"
+    },
+    {
+      "name": "bb84_n8",
+      "path": "small/bb84_n8/bb84_n8.qasm",
+      "git_blob_sha1": "379af7d98bd9189f0f4214c6310d0c77aff5fb9e"
+    },
+    {
+      "name": "cat_state_n4",
+      "path": "small/cat_state_n4/cat_state_n4.qasm",
+      "git_blob_sha1": "394ba7e47b74a8d95f7de27170004220859a4e49"
+    },
+    {
+      "name": "deutsch_n2",
+      "path": "small/deutsch_n2/deutsch_n2.qasm",
+      "git_blob_sha1": "dc0ff30f107fa83c7b62e1b1fe01b347193e3741"
+    },
+    {
+      "name": "grover_n2",
+      "path": "small/grover_n2/grover_n2.qasm",
+      "git_blob_sha1": "d52ad89fa94aecd0c40357907a4d569e4bbfa40d"
+    },
+    {
+      "name": "ising_n10",
+      "path": "small/ising_n10/ising_n10.qasm",
+      "git_blob_sha1": "d50fc0d2e699278726a30aec99bbc7ea477b23b4"
+    },
+    {
+      "name": "qaoa_n3",
+      "path": "small/qaoa_n3/qaoa_n3.qasm",
+      "git_blob_sha1": "2c3e0367d459088c6e80e651988960bc56e70f29"
+    },
+    {
+      "name": "qaoa_n6",
+      "path": "small/qaoa_n6/qaoa_n6.qasm",
+      "git_blob_sha1": "326787ca86e0a5aa716687345bcad583e1420c7f"
+    },
+    {
+      "name": "qec_sm_n5",
+      "path": "small/qec_sm_n5/qec_sm_n5.qasm",
+      "git_blob_sha1": "1cf21012876190fa48157b9a35d9b250439b1409"
+    },
+    {
+      "name": "qft_n4",
+      "path": "small/qft_n4/qft_n4.qasm",
+      "git_blob_sha1": "c6e6f124eff46718d66669afa55155bc61a6eebc"
+    },
+    {
+      "name": "simon_n6",
+      "path": "small/simon_n6/simon_n6.qasm",
+      "git_blob_sha1": "4f3fbc26538ffa072aad76a0d37d5ca58476b25b"
+    },
+    {
+      "name": "teleportation_n3",
+      "path": "small/teleportation_n3/teleportation_n3.qasm",
+      "git_blob_sha1": "b88c71b51cecd5da74dcca4417605469ac4d983f"
+    },
+    {
+      "name": "variational_n4",
+      "path": "small/variational_n4/variational_n4.qasm",
+      "git_blob_sha1": "5eea164b10a75205197db8428761bb53618377bd"
+    },
+    {
+      "name": "vqe_n4",
+      "path": "small/vqe_n4/vqe_n4.qasm",
+      "git_blob_sha1": "3e5350a5e8c48cc6373af12290db33c7f883fde5"
+    },
+    {
+      "name": "vqe_uccsd_n4",
+      "path": "small/vqe_uccsd_n4/vqe_uccsd_n4.qasm",
+      "git_blob_sha1": "9e00a37821aef2cd1c13f2ea009b9b20cf15e0ec"
+    },
+    {
+      "name": "wstate_n3",
+      "path": "small/wstate_n3/wstate_n3.qasm",
+      "git_blob_sha1": "4e08ca066153fc76ecc384110eafdde782be8fb1"
+    }
+  ]
+}
