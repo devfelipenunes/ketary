@@ -441,8 +441,8 @@ def _expectation_hessian(c,bindings,observables,*,max_bytes):
             raise ValueError("second derivative expression must be real")
         return _real(z.real)
     two=((1,.5),(-1,-.5))
-    correction=(1-sqrt(2))/4
-    four=two+((2,correction),(-2,-correction))
+    controlled_coefficient=(1-sqrt(2))/4
+    four=two+((2,controlled_coefficient),(-2,-controlled_coefficient))
     regular={"rx","ry","rz","rxx","ryy","rzz","p","cp"}
     controlled={"crx","cry","crz"}
     active=[]
