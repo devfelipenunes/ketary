@@ -33,3 +33,5 @@ The installed package ships a PEP 561 marker and public API stubs. CI checks a s
 Additional guards: exporting a dense snapshot copy is bounded by its payload; entropy bounds the smaller Schmidt dimension and matrix payload before SVD; drawings have logical gate/qubit caps; sampling rejects shot counts above signed 64-bit range. These are not guarantees about LAPACK workspace, drawing output length, native temporaries or RSS.
 
 Experimental logical transpilation delegates to Qiskit at optimization level 0 with only a supported basis and seed. No target, coupling map or backend; rejects layout/unsupported output and verifies strict full-operator equivalence up to 8 qubits. This can be expensive and is not a QPU optimization guarantee.
+
+For distribution boundaries and licensing review see [third-party review](third-party-review.md). The package is not published.
