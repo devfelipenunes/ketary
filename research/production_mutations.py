@@ -27,6 +27,8 @@ MUTANTS=(
 ("channel_ignored","_classical.py","result=state.evolve(owned)","result=state","tests/test_production_channels_complex.py::test_amplitude_damping_oracle"),
 ("channel_preflight_ignored","_classical.py","if not owned.is_cptp(atol=1e-9,rtol=0):","if False:","tests/test_production_channels_complex.py::test_channel_rejects_before_execution"),
 ("controlled_shift_frequency","_ergonomics.py","shifts=(pi/2,-pi/2,pi,-pi) if four else (pi/2,-pi/2)","shifts=(pi/2,-pi/2,pi/2,-pi/2) if four else (pi/2,-pi/2)","tests/test_production_controlled_gradient.py::test_both_controlled_frequencies"),
+("nested_depth_bypass","_classical.py","if depth>=3:","if depth>=4:","tests/test_production_nested_dynamic.py::test_nested_depth_and_expanded_budget"),
+("expanded_count_bypass","_classical.py","if work>1024:","if work>2048:","tests/test_production_nested_dynamic.py::test_nested_depth_and_expanded_budget"),
 )
 
 def run_test(root,node):
