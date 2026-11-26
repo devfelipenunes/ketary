@@ -82,3 +82,5 @@ Production/distribution requires controlled dedicated-host benchmarking,
 reviewed PoC/RFC, artifact and third-party notice/license review and explicit
 owner approval. Do not tag, upload or publish. Preserve Apache-2.0 and
 third-party notices.
+
+For resource contracts and the legacy ordered-wire policy, read docs/resource-contracts.md. Foundation and private-facade rules apply to all explicit imports, including local ones. Do not expand the baseline cyclic component without architectural review.

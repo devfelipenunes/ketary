@@ -167,10 +167,12 @@ class Circuit:
 
     def apply(self,block,*,wires=None):
         """Append a bound circuit atomically, preserving native global phase."""
-        candidate=self.compose(block,wires=wires)
-        if candidate._qc.global_phase!=self._qc.global_phase:
+        from ._adapter import _append_bound_block
+        indices=self._composition_wires(block,wires)
+        phase=self._qc.global_phase
+        _append_bound_block(self._qc,block._qc,indices)
+        if self._qc.global_phase!=phase:
             self._named_checkpoints={}
-        self._qc=candidate._qc
         return self
 
     def compute_action_uncompute(self,compute,action,*,compute_wires,action_wires):
@@ -395,7 +397,7 @@ class Circuit:
     def to_qiskit(self):
         return self._qc.copy()
 
-    def compose(self,other,*,wires=None):
+    def _composition_wires(self,other,wires):
         if not isinstance(other,Circuit):
             raise TypeError("expected Circuit")
         self._require_bound()
@@ -407,6 +409,10 @@ class Circuit:
         indices=list(range(other.num_qubits)) if wires is None else [_int(i) for i in islice(iter(wires),other.num_qubits+1)]
         if len(indices)!=other.num_qubits or len(set(indices))!=len(indices) or any(i>=self.num_qubits for i in indices):
             raise ValueError("invalid wire mapping")
+        return indices
+
+    def compose(self,other,*,wires=None):
+        indices=self._composition_wires(other,wires)
         # Composition of two validated logical circuits is closed under the gate
         # whitelist. Native imports, append and non-closed transforms retain
         # their validation. Do not scan both gate lists again on this path.

@@ -2,21 +2,8 @@
 from __future__ import annotations
 import numpy as np
 from ._validation import _int, _tol
-from ._result import CheckResult
+from ._result import CheckResult, _residual
 
-def _residual(actual,expected,ignore_global_phase,atol):
-    t=_tol(atol)
-    if type(ignore_global_phase) is not bool:
-        raise ValueError("ignore_global_phase must be bool")
-    if actual.shape!=expected.shape:
-        raise ValueError("dimension mismatch")
-    if ignore_global_phase:
-        overlap=np.vdot(expected,actual)
-        if abs(overlap)>0:
-            actual=actual*(np.conj(overlap)/abs(overlap))
-    error=float(np.max(np.abs(actual-expected)))
-    return CheckResult("PASS" if error<=t else "FAIL",error,0,t,
-                       "max absolute residual; phase "+("ignored" if ignore_global_phase else "preserved"))
 
 class _CircuitChecks:
     def __init__(self,circuit):

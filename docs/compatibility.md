@@ -34,3 +34,5 @@ Never claim cross-version numerical reproducibility solely from version labels.
 CI requires signature parity, public export inventory, native or analytic
 oracles, legacy regressions, canonical examples and clean installation.
 No tag, publishing or independent usability claim follows from passing CI.
+
+See [resource and ownership contracts](resource-contracts.md) for canonical ordered wires, retained legacy unordered iterable acceptance and concurrency limitations.

@@ -86,3 +86,11 @@ and reusing the trace cursor; A03 adds eager-import cycle and foundation guards.
 A04 remains conditional; A05 uses the existing validation and benchmark protocol.
 See [architecture progression](architecture-roadmap.md) for exit criteria. Independent human validation and dedicated-host performance remain
 separate acceptance tasks.
+
+## Audit follow-up
+
+Bound batch/apply stage and append via _adapter._append_bound_block; no
+public API change. _result owns shared residual calculation; _validation
+owns Pauli label normalization. The all-explicit-import guard protects
+foundation/private-facade rules and baseline cyclic membership, including
+local imports. See [resource and ownership contracts](resource-contracts.md).
