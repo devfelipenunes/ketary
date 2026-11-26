@@ -65,14 +65,17 @@ def _synthesize_native(template,*,seed):
     result=Circuit._from_native(raw,owned=True)
     if any(item.operation.name not in ("u","cx") for item in raw.data):
         raise UnsupportedOperation("synthesis emitted noncanonical gates")
-    if not float(abs(Operator(raw).data-reference.data).max())<=1e-9:
+    # Retain the evaluated output matrix only for this qualification.
+    # Fallback diagnostics use the same already-qualified native output.
+    actual=Operator(raw).data
+    residual=float(abs(actual-reference.data).max())
+    if not residual<=1e-9:
         # The default native synthesis can approximate near-special Weyl
         # classes. For a single bounded Hamiltonian, qualify one alternative
         # native decomposition. Never accept a merely phase-equivalent result.
         from cmath import exp, phase as complex_phase
         from qiskit.circuit.library import HamiltonianGate, Isometry
-        actual=Operator(raw).data
-        residual=float(abs(actual-reference.data).max())
+        # Reuse the evaluated output and its residual.
         phase=complex_phase(sum(complex(a).conjugate()*complex(b)
                                 for a,b in zip(actual.flat,reference.data.flat)))
         aligned_residual=float(abs(actual*exp(1j*phase)-reference.data).max())
