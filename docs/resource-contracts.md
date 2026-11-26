@@ -89,3 +89,8 @@ Derivative planners share a private call-local shifted-native-copy helper;
 all shifts retain the existing per-method preflight, full native validation
 and independent ownership. No additional state payload, caching, native
 execution or change to shift count, gate budget or formula.
+
+Scalar native Pauli expectations retain finite/imaginary validation and
+normalize by the stored squared norm, then use scalar comparisons to clip
+to [-1,1] with signed zero preserved. No change to work, memory, native
+math or public contract. See [scalar Pauli clamp](scalar-pauli-clamp.md).
