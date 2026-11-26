@@ -202,13 +202,16 @@ def _evolve(c,observable,time):
     from ._circuit import Circuit
     from ._validation import _angle
     from math import fsum
-    c._require_bound()
+    symbolic=getattr(c,"_symbolic",False)
+    if c.num_clbits or not symbolic:
+        c._require_bound()
     if not isinstance(observable,Observable):
         raise TypeError("expected Observable")
     n=c.num_qubits
     if n>8:
         raise ResourceLimit("commuting evolution supports at most eight wires")
-    t=_angle(time)
+    t=c._gate_angle(time)
+    unbound=bool(getattr(t,"parameters",()))
     terms=tuple((label,coef) for label,coef in observable.to_dict(n).items() if coef!=0)
     # Deterministic canonical term order; symplectic Pauli parity.
     # Exact evolution is deliberately unavailable for noncommuting sums.
@@ -216,25 +219,26 @@ def _evolve(c,observable,time):
         for right,_ in terms[i+1:]:
             if sum(a!="I" and b!="I" and a!=b for a,b in zip(left,right,strict=True))%2:
                 raise UnsupportedOperation("noncommuting Pauli sum requires explicit approximation")
-    if t==0 or not terms:
+    if (not unbound and t==0) or not terms:
         return c
     rows=[];phases=[];gate_count=0
     for label,coef in terms:
-        angle=_angle(2*(t*coef))
+        angle=c._gate_angle(2*(t*coef))
         active=tuple((i,axis) for i,axis in enumerate(reversed(label)) if axis!="I")
         if not active:
             phases.append(-angle/2)
             continue
-        if not angle:
+        if not getattr(angle,"parameters",()) and angle==0:
             continue
         # Worst case two basis changes per side, two parity ladders and RZ.
         gate_count+=1 if len(active)==1 or (len(active)==2 and active[0][1]==active[1][1]) else 6*len(active)-1
         if gate_count>10000:
             raise ResourceLimit("commuting evolution gate expansion exceeds 10000")
         rows.append((active,angle))
-    phase=_angle(fsum(phases))
+    phase=c._gate_angle(sum(phases) if unbound else fsum(phases))
     # Only one call-local block; no per-term Circuit objects or simulations.
-    block=Circuit(n);native=block._qc
+    block=Circuit.symbolic(n) if symbolic else Circuit(n)
+    native=block._qc
     native.global_phase=phase
     for active,theta in rows:
         if len(active)==1:
