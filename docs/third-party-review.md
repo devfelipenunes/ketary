@@ -45,3 +45,7 @@ was inconclusive; do not infer availability. No upload or reservation.
 ## Dynamic extra
 
 The optional `qiskit-aer==0.18.4` distribution is installed separately, not vendored. The dynamic CI job generates a dedicated dependency and license inventory and scans resolved versions. Its successful vulnerability scan does not replace manual review of upstream license texts, notices and redistribution obligations. The pure-state package keeps the original runtime dependency boundary. No legal clearance or publishing approval is implied.
+
+## External verifier experiment
+
+MQT QCEC 3.12.0 is installed only in isolated validation, not a required or bundled distribution. CI inventories its dependencies and scans resolved versions. Review upstream licensing and notices before distributing an external-verifier extra or bundled binary. See https://github.com/munich-quantum-toolkit/qcec and https://mqt.readthedocs.io/projects/qcec/en/stable/. The current experimental adapter uses an explicitly installed library. Automated metadata and vulnerability reports are not legal clearance.

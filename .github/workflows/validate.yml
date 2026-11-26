@@ -37,12 +37,15 @@ jobs:
         run: |
           python research/verification_comparison.py > verification-comparison.json
           cat verification-comparison.json
+          python research/public_defect_cases.py > public-defects.json
+          cat public-defects.json
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: |
             coverage.json
             verification-comparison.json
+            public-defects.json
 
   benchmark:
     needs: tests
@@ -67,11 +70,14 @@ jobs:
           python -m pip freeze > environment.txt
           python benchmark.py > benchmark_results.json
           cat benchmark_results.json
+          python research/verification_scaling.py > verification-scaling.json
+          cat verification-scaling.json
       - uses: actions/upload-artifact@v4
         with:
           name: benchmark-results
           path: |
             benchmark_results.json
+            verification-scaling.json
             environment.txt
 
   dependency-review:
@@ -206,6 +212,8 @@ jobs:
           python -m pytest -q tests_external
           python research/verification_comparison.py --external > external-comparison.json
           cat external-comparison.json
+          python research/verification_scaling.py --external > external-scaling.json
+          cat external-scaling.json
       - name: Audit external comparison dependencies
         run: |
           python -m venv audit-venv
@@ -218,6 +226,7 @@ jobs:
           path: |
             external-environment.txt
             external-comparison.json
+            external-scaling.json
             external-license-inventory.json
             external-audited-requirements.txt
             external-vulnerability-report.json

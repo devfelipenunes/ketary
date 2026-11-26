@@ -27,6 +27,8 @@ def qcec_compare(a,b,*,deadline=10):
         return dict(report,status="UNSUPPORTED",reason=type(exc).__name__)
     # Preserve the external status verbatim; only explicitly definitive
     # up-to-global-phase criteria are promoted, never probable equivalence.
+    if not isinstance(result,dict) or not isinstance(result.get('equivalence'),str):
+        return dict(report,status='INCONCLUSIVE',reason='unexpected external result schema')
     raw=result.get("equivalence")
     status="PASS" if raw in ("equivalent","equivalent_up_to_global_phase") else "FAIL" if raw=="not_equivalent" else "INCONCLUSIVE"
     return dict(report,status=status,external_equivalence=str(raw))

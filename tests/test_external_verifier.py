@@ -20,3 +20,12 @@ def test_external_missing_timeout(monkeypatch):
     import importlib.metadata
     monkeypatch.setattr(importlib.metadata,"version",lambda name:"fixture")
     assert q.bell().test.external_equivalence(q.bell())["status"]=="INCONCLUSIVE"
+
+
+@pytest.mark.parametrize("value",[None,[],{},{"equivalence":None},{"equivalence":["equivalent"]}])
+def test_malformed_external_result(monkeypatch,value):
+    fake=SimpleNamespace(verify_with_hard_timeout=lambda *a,**k:value)
+    monkeypatch.setitem(sys.modules,"mqt",SimpleNamespace(qcec=fake))
+    import importlib.metadata
+    monkeypatch.setattr(importlib.metadata,"version",lambda name:"fixture")
+    assert q.bell().test.external_equivalence(q.bell())["status"]=="INCONCLUSIVE"

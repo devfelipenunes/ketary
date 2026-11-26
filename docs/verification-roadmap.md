@@ -81,3 +81,9 @@ Prior work: [MQT QCEC](https://mqt.readthedocs.io/projects/qcec/en/stable/equiva
 precedent. Future validation: held-out real bugs, mutation operators,
 scalability, paired repeated timings/RSS on dedicated host, and developer
 evaluation. No claim of novel verification methods or improved productivity.
+
+## Public-report adaptations and scaling
+
+Six independently authored unitary cases drawn from Bugs4Q-indexed public reports (bit order, accidental builder accumulation, Bell preparation, Fourier sign, ancilla uncomputation and controlled-wire mapping) plus one dynamic reset/uncompute adaptation. Sources: https://github.com/Z-928/Bugs4Q and individual links in research/public_defect_cases.py; dynamic source https://quantumcomputing.stackexchange.com/questions/5959. These are **adaptations**, not full historical reproductions or an unbiased bug sample. Analytic tests check expected amplitudes and bit order. CI reports detection, witness reproduction and positive controls. No original code copied.
+
+research/verification_scaling.py measures raw repeated timings, median/p95 and per-method process high-water RSS on GHZ circuits at widths 2–20. Dense (<=8), selected states (<=12) and optional QCEC (<=20 in this study) have different semantics. Sample-only matches remain INCONCLUSIVE. No speedup conclusion across unequal guarantees. Dedicated host results remain a separate requirement.
