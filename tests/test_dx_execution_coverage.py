@@ -65,3 +65,40 @@ def test_noisy_density_analytic_bit_flip():
     c=q.Circuit(1).x(0)
     np.testing.assert_allclose(c.run_noisy(noise,seed=1).data,np.diag([.2,.8]),atol=1e-9,rtol=0)
     with pytest.raises(TypeError):c.run_noisy(object())
+
+
+def test_native_target_sampler_workflow():
+    # Local fake backend only. This qualifies the native handoff, not hardware.
+    from qiskit.primitives import BackendSamplerV2
+    backend=GenericBackendV2(num_qubits=2,basis_gates=["id","rz","sx","x","cx"],seed=11,noise_info=False)
+    c=q.Circuit.classical(2,2).x(0).measure([0,1],[0,1])
+    compiled=c.transpile_for(backend,seed=11)
+    sampler=BackendSamplerV2(backend=backend,options={"seed_simulator":11})
+    result=sampler.run([compiled],shots=16).result()
+    assert result[0].data.c.get_counts()=={"01":16}
+
+@pytest.mark.parametrize("bad",[None,object()])
+def test_dynamic_input_type(bad):
+    with pytest.raises(TypeError):q.Circuit.from_dynamic(bad)
+
+def test_dynamic_limits_and_register_partition():
+    from qiskit.circuit import Clbit
+    with pytest.raises(q.ResourceLimit):q.Circuit.from_dynamic(QuantumCircuit(13,1))
+    raw=QuantumCircuit(1)
+    raw.add_bits([Clbit()])
+    with pytest.raises(q.UnsupportedOperation):q.Circuit.from_dynamic(raw)
+    raw=QuantumCircuit(1,1);raw.metadata={"experiment":1}
+    with pytest.raises(q.UnsupportedOperation):q.Circuit.from_dynamic(raw)
+    raw=QuantumCircuit(1,1);raw.barrier()
+    with pytest.raises(q.UnsupportedOperation):q.Circuit.from_dynamic(raw)
+
+def test_density_and_target_limits():
+    c=q.Circuit(1)
+    with pytest.raises(TypeError):c.run_density(np.eye(2)/2)
+    with pytest.raises(ValueError):c.run_density(DensityMatrix(np.eye(4)/4))
+    with pytest.raises(q.ResourceLimit):q.Circuit(9).run_density()
+    with pytest.raises(TypeError):c.transpile_for(object())
+    b=GenericBackendV2(num_qubits=2,noise_info=False)
+    with pytest.raises(ValueError):c.transpile_for(b,optimization_level=4)
+    with pytest.raises(q.ResourceLimit):q.Circuit(3).transpile_for(b)
+    with pytest.raises(q.UnsupportedOperation):q.Circuit.symbolic(1).ry(q.Circuit.parameter("t"),0).transpile_for(b)

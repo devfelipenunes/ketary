@@ -87,3 +87,31 @@ def test_multiterm_algebra():
     np.testing.assert_allclose(A.product(B).to_matrix(),x@y,atol=1e-12,rtol=0)
     np.testing.assert_allclose(A.commutator(B).to_matrix(),x@y-y@x,atol=1e-12,rtol=0)
     np.testing.assert_allclose(A.anticommutator(B).to_qiskit().to_matrix(),x@y+y@x,atol=1e-12,rtol=0)
+
+
+def test_new_unitary_contract_rejections_and_empty_formula():
+    with pytest.raises(TypeError):q.Circuit.from_symbolic(object())
+    with pytest.raises(q.ResourceLimit):q.Circuit.from_symbolic(QuantumCircuit(63))
+    with pytest.raises(q.UnsupportedOperation):q.Circuit.classical(1,1).bind_partial({})
+    with pytest.raises(TypeError):q.Circuit(1).bind_partial([])
+    with pytest.raises(TypeError):q.Circuit.from_synthesized(object())
+    with pytest.raises(ValueError):q.Circuit.from_synthesized(QuantumCircuit(1),seed=2**32)
+    with pytest.raises(q.ResourceLimit):q.Circuit(5).control()
+    with pytest.raises(TypeError):q.Circuit(1).evolve_product(object(),time=.3,steps=1)
+    with pytest.raises(q.ResourceLimit):q.Circuit(9).evolve_product(q.X(0),time=.3,steps=1)
+    with pytest.raises(q.ResourceLimit):q.Circuit(8).evolve_product(q.Observable({"XXXXXXXX":1,"YYYYYYYY":2,"ZZZZZZZZ":3}),time=.3,steps=64)
+    c=q.bell();before=c.to_qiskit()
+    assert c.evolve_product(q.X(0),time=0,steps=1) is c
+    assert c.evolve_product(0*q.X(0),time=.3,steps=1) is c
+    assert c.to_qiskit()==before
+    with pytest.raises(TypeError):q.X(0).product(object())
+
+def test_independent_controlled_matrix():
+    raw=QuantumCircuit(1);raw.ry(.4,0);raw.global_phase=.31
+    base=np.exp(.31j)*np.array([[np.cos(.2),-np.sin(.2)],[np.sin(.2),np.cos(.2)]])
+    for state in (0,1):
+        want=np.eye(4,dtype=complex)
+        indices=[state,2+state]
+        want[np.ix_(indices,indices)]=base
+        got=Operator(q.from_qiskit(raw).control(control_state=state).to_qiskit()).data
+        np.testing.assert_allclose(got,want,atol=1e-9,rtol=0)
