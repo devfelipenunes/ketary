@@ -10,8 +10,10 @@ from ._classical import ShotResult
 from ._verification import Evidence
 from ._statistical import StatisticalContract
 from ._plan import QueryPlan
+from ._reports import ComparisonReport, DiagnosticReport, StatisticalReport
+from ._ergonomics import SweepPlan
 
 __all__ = [
-    "Circuit", "Result", "CheckResult", "Contract", "VerificationReport", "Evidence", "StatisticalContract", "QueryPlan", "ShotResult", "TraceStep", "TraceComparison", "ResourceReport",
+    "Circuit", "Result", "CheckResult", "Contract", "VerificationReport", "Evidence", "ComparisonReport", "DiagnosticReport", "StatisticalReport", "SweepPlan", "StatisticalContract", "QueryPlan", "ShotResult", "TraceStep", "TraceComparison", "ResourceReport",
     "ResourceLimit", "UnsupportedOperation", "from_qiskit", "bell", "ghz", "constant_oracle", "parity_oracle", "deutsch_jozsa", "bernstein_vazirani", "qft", "grover", "superdense", "phase_estimation", "simon", "recover_simon", "teleportation",
 ]

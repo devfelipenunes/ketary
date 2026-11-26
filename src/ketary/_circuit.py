@@ -100,11 +100,91 @@ class Circuit:
     def parameters(self):
         return tuple(self._qc.parameters)
 
-    def bind(self,bindings):
+    def bind(self,bindings=None,**values):
         """Return an independent fully bound circuit; source is unchanged."""
         if self.num_clbits:
             raise UnsupportedOperation('symbolic classical binding is outside this subset')
+        if bindings is not None and values:
+            raise ValueError("choose a parameter mapping or named values")
+        if bindings is None:
+            params={p.name:p for p in self.parameters}
+            if len(params)!=len(self.parameters) or set(values)!=set(params):
+                raise ValueError("named binding must cover each unique parameter")
+            bindings={params[name]:value for name,value in values.items()}
         return self.from_parameterized(self._qc,bindings)
+
+    def sweep(self,**values):
+        """Construct a bounded zipped parameter plan without execution."""
+        from ._ergonomics import SweepPlan
+        return SweepPlan(self,values)
+
+    def register(self,name,wires):
+        """Name a logical selection; no allocation or native register mutation."""
+        from ._ergonomics import _selection,_name
+        name=_name(name)
+        selected=_selection(self,wires)
+        names=getattr(self,"_named_registers",{})
+        if name in names:
+            raise ValueError("duplicate register name")
+        if len(names)>=32:
+            from ._validation import ResourceLimit
+            raise ResourceLimit("at most 32 named selections")
+        self._named_registers={**names,name:selected}
+        return selected
+
+    @property
+    def registers(self):
+        return dict(getattr(self,"_named_registers",{}))
+
+    def checkpoint(self,name):
+        """Record an append-only prefix index, not an operation or measurement."""
+        from ._ergonomics import _name
+        self._require_bound()
+        name=_name(name)
+        points=getattr(self,"_named_checkpoints",{})
+        if name in points:
+            raise ValueError("duplicate checkpoint name")
+        if len(points)>=32:
+            from ._validation import ResourceLimit
+            raise ResourceLimit("at most 32 named checkpoints")
+        self._named_checkpoints={**points,name:len(self._qc.data)}
+        return self
+
+    @property
+    def checkpoints(self):
+        return dict(getattr(self,"_named_checkpoints",{}))
+
+    def _checkpoint_index(self,index):
+        if isinstance(index,str):
+            points=self.checkpoints
+            if index not in points:
+                raise ValueError("unknown checkpoint name")
+            return points[index]
+        return _int(index)
+
+    def contract(self,*,probabilities=None,expectations=None,normalized=False,atol=1e-9):
+        from ._contracts import Contract
+        return Contract(self.num_qubits,probabilities=probabilities,expectations=expectations,normalized=normalized,atol=atol)
+
+    def apply(self,block,*,wires=None):
+        """Append a bound circuit atomically, preserving native global phase."""
+        candidate=self.compose(block,wires=wires)
+        if candidate._qc.global_phase!=self._qc.global_phase:
+            self._named_checkpoints={}
+        self._qc=candidate._qc
+        return self
+
+    def compute_action_uncompute(self,compute,action,*,compute_wires,action_wires):
+        """Explicit U, V, U^-1 sequence; no claim that ancillas are cleared."""
+        # Materialize once, validate both mappings before committing.
+        from ._ergonomics import _selection
+        cw=_selection(self,compute_wires)
+        aw=_selection(self,action_wires)
+        candidate=self.compose(compute,wires=cw).compose(action,wires=aw).compose(compute.inverse(),wires=cw)
+        if candidate._qc.global_phase!=self._qc.global_phase:
+            self._named_checkpoints={}
+        self._qc=candidate._qc
+        return self
 
     def _require_bound(self):
         if self.num_clbits:
@@ -181,37 +261,48 @@ class Circuit:
 
     # Fluent aliases; the existing gates namespace remains compatible.
     def h(self,q):
-        return self.gates.h(q)
+        from ._ergonomics import _single
+        return _single(self,"h",q)
 
     def x(self,q):
-        return self.gates.x(q)
+        from ._ergonomics import _single
+        return _single(self,"x",q)
 
     def y(self,q):
-        return self.gates.y(q)
+        from ._ergonomics import _single
+        return _single(self,"y",q)
 
     def z(self,q):
-        return self.gates.z(q)
+        from ._ergonomics import _single
+        return _single(self,"z",q)
 
     def s(self,q):
-        return self.gates.s(q)
+        from ._ergonomics import _single
+        return _single(self,"s",q)
 
     def sdg(self,q):
-        return self.gates.sdg(q)
+        from ._ergonomics import _single
+        return _single(self,"sdg",q)
 
     def t(self,q):
-        return self.gates.t(q)
+        from ._ergonomics import _single
+        return _single(self,"t",q)
 
     def tdg(self,q):
-        return self.gates.tdg(q)
+        from ._ergonomics import _single
+        return _single(self,"tdg",q)
 
     def rx(self,theta,q):
-        return self.gates.rx(theta,q)
+        from ._ergonomics import _single
+        return _single(self,"rx",q,theta)
 
     def ry(self,theta,q):
-        return self.gates.ry(theta,q)
+        from ._ergonomics import _single
+        return _single(self,"ry",q,theta)
 
     def rz(self,theta,q):
-        return self.gates.rz(theta,q)
+        from ._ergonomics import _single
+        return _single(self,"rz",q,theta)
 
     def cx(self,c,t):
         return self.gates.cx(c,t)
@@ -226,10 +317,12 @@ class Circuit:
         return self.gates.ccx(c1,c2,t)
 
     def p(self,theta,q):
-        return self.gates.p(theta,q)
+        from ._ergonomics import _single
+        return _single(self,"p",q,theta)
 
     def u(self,theta,phi,lam,q):
-        return self.gates.u(theta,phi,lam,q)
+        from ._ergonomics import _single
+        return _single(self,"u",q,theta,phi,lam)
 
     def cp(self,theta,a,b):
         return self.gates.cp(theta,a,b)
@@ -247,10 +340,12 @@ class Circuit:
         return self.gates.crz(theta,a,b)
 
     def sx(self,q):
-        return self.gates.sx(q)
+        from ._ergonomics import _single
+        return _single(self,"sx",q)
 
     def sxdg(self,q):
-        return self.gates.sxdg(q)
+        from ._ergonomics import _single
+        return _single(self,"sxdg",q)
 
     def cy(self,a,b):
         return self.gates.cy(a,b)
@@ -275,12 +370,17 @@ class Circuit:
         if self.num_clbits:
             c=self.classical(self.num_qubits,self.num_clbits)
             c._qc=self._qc.copy()
-            return c
+            return self._copy_annotations(c)
         if getattr(self,"_symbolic",False):
             c=self.symbolic(self.num_qubits)
             c._qc=self._qc.copy()
-            return c
-        return self._from_native(self._qc.copy(),owned=True)
+            return self._copy_annotations(c)
+        return self._copy_annotations(self._from_native(self._qc.copy(),owned=True))
+
+    def _copy_annotations(self,c):
+        c._named_registers=self.registers
+        c._named_checkpoints=self.checkpoints
+        return c
 
     def h_many(self,wires):
         """Apply H on distinct wires after validating the entire batch."""

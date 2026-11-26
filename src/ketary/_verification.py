@@ -116,6 +116,28 @@ class Evidence:
         object.__setattr__(obj,"_payload",_json(envelope))
         return obj
 
+    @classmethod
+    def from_dict(cls,data):
+        if not isinstance(data,dict):
+            raise TypeError("expected evidence dictionary")
+        # Bound already materialized data before encoding nested input.
+        # Only the exact schema of scalar fields and circuit JSON is accepted.
+        _keys(data,("data","sha256"))
+        d=data["data"]
+        _keys(d,("schema_version","kind","observed","reference","input","ignore_global_phase","atol","recorded_distance","producer"))
+        _keys(d["producer"],("ketary","qiskit","numpy","python"))
+        if any(type(d[key]) is not str or len(d[key])>1024*1024 for key in ("observed","reference")):
+            raise ResourceLimit("invalid circuit payload")
+        if any(type(d[key]) is not str or len(d[key])>128 for key in ("kind","input")) or any(type(v) is not str or len(v)>100 for v in d["producer"].values()):
+            raise ValueError("invalid evidence fields")
+        if type(data["sha256"]) is not str or len(data["sha256"])!=64 or type(d["schema_version"]) is not int or type(d["ignore_global_phase"]) is not bool:
+            raise ValueError("invalid evidence envelope")
+        for key in ("atol","recorded_distance"):
+            if type(d[key]) not in (int,float):
+                raise ValueError("invalid numeric evidence field")
+            _tol(d[key])
+        return cls.from_json(_json(data))
+
     def to_json(self):
         return self._payload
 

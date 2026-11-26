@@ -49,3 +49,13 @@ assert_type(r.math.observable_variance({'XX':.5,'ZZ':.5}),float)
 
 assert_type(c.plan(bits=['00']),q.QueryPlan)
 assert_type(q.StatisticalContract(2,probabilities={'00':.5}),q.StatisticalContract)
+
+comparison=c.test.compare(q.bell())
+assert_type(comparison,q.ComparisonReport)
+assert_type(comparison.evidence,q.Evidence | None)
+assert_type(c.h([0,1]).apply(q.bell(),wires=[0,1]),q.Circuit)
+assert_type(c.register("input",[0,1]),tuple[int,...])
+assert_type(r.math.expectation({0:"X",1:"Z"}),float)
+assert_type(r.test.expectations({"XX":1}),q.VerificationReport)
+assert_type(c.debug.verify_checkpoints({"bell":c.contract(expectations={"XX":1})}),q.DiagnosticReport)
+assert_type(q.Circuit.symbolic(1).ry(angle,0).sweep(angle=[0,.5]).run(),tuple[q.Result,...])
