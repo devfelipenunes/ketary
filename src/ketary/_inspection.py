@@ -1,7 +1,7 @@
 """Bounded structured read models over authoritative Qiskit / Result."""
 from itertools import islice
 from collections.abc import Mapping
-from ._validation import _int, _tol, ResourceLimit
+from ._validation import _int, _tol, _real, ResourceLimit
 
 def inspect_circuit(circuit, *, start=0, limit=32):
     start=_int(start); limit=_int(limit,1)
@@ -49,7 +49,15 @@ def verify_result(result, *, probabilities, expectations, normalized, atol):
     if probabilities is not None:
         if not isinstance(probabilities,Mapping):
             raise TypeError("expected probability mapping")
-        p=[(label,probabilities[label]) for label in _labels(probabilities)]
+        # Preflight all predicates before evaluating even the first check.
+        # Retain the existing insertion order and legacy report schema.
+        for label in _labels(probabilities):
+            if len(label)!=result.num_qubits or set(label)-set("01"):
+                raise ValueError("invalid bit string")
+            value=_real(probabilities[label])
+            if not 0<=value<=1:
+                raise ValueError("invalid probability")
+            p.append((label,value))
     e=_expectation_predicates(expectations,result.num_qubits,ordered=True)
     if len(p)+len(e)+int(normalized)>32:
         raise ResourceLimit("aggregate check cap exceeded")
