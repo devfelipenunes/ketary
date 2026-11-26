@@ -44,6 +44,7 @@
     "Circuit.tdg",
     "Circuit.test",
     "Circuit.u",
+    "Circuit.wires",
     "Circuit.x",
     "Circuit.y",
     "Circuit.z",
@@ -88,7 +89,11 @@
     "_Report.render",
     "_Report.require",
     "_Report.status",
-    "bell"
+    "all_pairs",
+    "bell",
+    "chain",
+    "ring",
+    "star"
   ],
   "Advanced": [
     "CheckResult.to_dict",

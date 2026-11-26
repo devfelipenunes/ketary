@@ -42,6 +42,35 @@ def _single(c,name,wire,*params):
     return c
 
 
+def _rotation(c,name,theta,wire):
+    # Scalars retain the established broadcast path. A sequence of angles
+    # requires exactly one value per selected wire; never Cartesian expansion.
+    if isinstance(theta,(str,bytes,Mapping,set,frozenset)):
+        raise ValueError("expected a scalar angle or an ordered angle sequence")
+    try:
+        angles=iter(theta)
+    except TypeError:
+        return _single(c,name,wire,theta)
+    selected=_selection(c,wire)
+    values=tuple(islice(angles,len(selected)+1))
+    if len(values)!=len(selected):
+        raise ValueError("angle and wire sequences must have equal length")
+    values=tuple(c._gate_angle(v) for v in values)
+    if c.num_clbits or getattr(c,"_symbolic",False):
+        candidate=c.copy()
+        for w,v in zip(selected,values):
+            getattr(candidate.gates,name)(v,w)
+        c._qc=candidate._qc
+        return c
+    from ._circuit import Circuit
+    from ._adapter import _append_bound_block
+    staged=Circuit(len(selected))
+    for w,v in enumerate(values):
+        getattr(staged.gates,name)(v,w)
+    _append_bound_block(c._qc,staged._qc,selected)
+    return c
+
+
 class SweepPlan:
     """Frozen bound circuit payloads, zipped rows, never an implicit simulation."""
     def __init__(self,circuit,values):
