@@ -330,7 +330,10 @@ class Circuit:
                 bound=self._qc.assign_parameters(values,inplace=False)
             except (ZeroDivisionError,OverflowError) as exc:
                 raise ValueError("parameter expression must evaluate to a finite real number") from exc
-            _validate_bound_values(bound,indices)
+            if indices is None:
+                _validate_bound_values(bound)
+            else:
+                _validate_bound_values(bound,indices)
             c=Circuit.__new__(Circuit)
             c._qc=bound
             payloads.append(c)
