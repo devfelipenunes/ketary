@@ -91,6 +91,21 @@ class _Math:
     def probabilities(self):
         return {format(i,f"0{self._r._n}b"):float(p) for i,p in enumerate(np.abs(self._r._data)**2)}
 
+    def marginal_probabilities(self,wires):
+        """Z-basis probabilities; output labels follow the given wire order.
+
+        For wires=[2,0], label "10" denotes q2=1 and q0=0.
+        """
+        wires=tuple(_int(i) for i in wires)
+        n=self._r._n
+        if not wires or len(set(wires))!=len(wires) or any(i>=n for i in wires):
+            raise ValueError("invalid marginal wires")
+        p=(np.abs(self._r._data)**2).reshape((2,)*n)
+        axes=[n-1-i for i in wires]
+        rest=[i for i in range(n) if i not in axes]
+        marginal=p.transpose(axes+rest).reshape(1<<len(wires),-1).sum(axis=1)
+        return {format(i,f"0{len(wires)}b"):float(v) for i,v in enumerate(marginal)}
+
     def fidelity(self, target):
         other = target if isinstance(target,Result) else Result(target)
         if other._data.shape != self._r._data.shape:

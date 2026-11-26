@@ -63,6 +63,17 @@ print(diagnosis.step_index, diagnosis.check.status)
 
 Comparison is explicit, by equal gate indices on equal-width, equal-length circuits. The caller must establish meaningful alignment. A mismatch identifies the first observed state divergence, not necessarily its root cause. Matching traces do not prove operator equivalence. The comparison guards the combined snapshot payload and the per-trace step limit before evolving either circuit.
 
+## Deutsch-Jozsa
+
+```python
+oracle = q.parity_oracle("101")
+circuit = q.deutsch_jozsa(oracle)
+result = circuit.run()
+print(result.math.marginal_probabilities([2, 1, 0]))
+```
+
+The explicit oracle acts on n input wires and target wire n. The caller promises a reversible bit-flip oracle for a constant or balanced Boolean function. Ketary does not verify that promise or infer a general oracle from a Python callable. Provided constant and parity factories satisfy it. A zero input-register outcome indicates constant under that promise; nonzero indicates balanced. Marginal labels follow the supplied wire order, and all queries reuse the same state snapshot.
+
 ## Validation
 
 Run all tests, including upstream Qiskit probes. Missing Qiskit is a failure, not a passing skip. Historical local PoC results are not evidence of this branch's CI.
