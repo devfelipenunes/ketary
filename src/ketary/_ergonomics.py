@@ -242,11 +242,34 @@ def _sweep_rows(circuit,rows):
     return plan
 
 
+def _append_pauli_rotation(native,active,theta):
+    """Append one validated nonidentity rotation without intermediate circuits."""
+    from math import pi
+    if len(active)==1:
+        wire,axis=active[0]
+        getattr(native,"r"+axis.lower())(theta,wire)
+        return
+    if len(active)==2 and active[0][1]==active[1][1]:
+        (a,axis),(b,_)=active
+        getattr(native,"r"+axis.lower()*2)(theta,a,b)
+        return
+    for wire,axis in active:
+        if axis=="X":native.h(wire)
+        elif axis=="Y":native.rx(pi/2,wire)
+    target=active[-1][0]
+    for wire,_ in active[:-1]:native.cx(wire,target)
+    native.rz(theta,target)
+    for wire,_ in reversed(active[:-1]):native.cx(wire,target)
+    for wire,axis in reversed(active):
+        if axis=="X":native.h(wire)
+        elif axis=="Y":native.rx(-pi/2,wire)
+
+
 def _evolve(c,observable,time):
     """Exact commuting Pauli evolution; stage a single ordinary circuit."""
     from ._observable import Observable
     from ._circuit import Circuit
-    from math import fsum,pi
+    from math import fsum
     symbolic=getattr(c,"_symbolic",False)
     if c.num_clbits or not symbolic:
         c._require_bound()
@@ -306,24 +329,7 @@ def _evolve(c,observable,time):
             for wire in sorted(current):
                 native.cx(wire,pivot)
     for active,theta in expanded_rows():
-        if len(active)==1:
-            wire,axis=active[0]
-            getattr(native,"r"+axis.lower())(theta,wire)
-            continue
-        if len(active)==2 and active[0][1]==active[1][1]:
-            (a,axis),(b,_)=active
-            getattr(native,"r"+axis.lower()*2)(theta,a,b)
-            continue
-        for wire,axis in active:
-            if axis=="X":native.h(wire)
-            elif axis=="Y":native.rx(pi/2,wire)
-        target=active[-1][0]
-        for wire,_ in active[:-1]:native.cx(wire,target)
-        native.rz(theta,target)
-        for wire,_ in reversed(active[:-1]):native.cx(wire,target)
-        for wire,axis in reversed(active):
-            if axis=="X":native.h(wire)
-            elif axis=="Y":native.rx(-pi/2,wire)
+        _append_pauli_rotation(native,active,theta)
     # Existing application transaction preserves phase/checkpoint semantics.
     return c.apply(block)
 
@@ -459,8 +465,18 @@ def _evolve_product(c,observable,*,time,steps,order):
     block=Circuit(n)
     sequence=terms if order==1 else terms+terms[::-1]
     dt=t/(steps*order)
+    # The full term list and conservative expansion were preflighted.
+    # Stage the same ordered one-term rotations directly in one private
+    # step block. Reuse native emission, not the public evolve/compose path.
     for p,v in sequence:
-        block.evolve(Observable({p:v}),time=dt)
+        if dt==0:
+            continue
+        angle=block._gate_angle(2*(dt*v))
+        active=tuple((i,axis) for i,axis in enumerate(reversed(p)) if axis!="I")
+        if not active:
+            block._qc.global_phase+=-angle/2
+        elif angle!=0:
+            _append_pauli_rotation(block._qc,active,angle)
     return c.apply(block,times=steps)
 
 

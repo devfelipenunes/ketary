@@ -5,6 +5,7 @@ on:
       - 'src/ketary/**'
       - 'research/aligned_rotation_costs.py'
       - 'research/epic_runtime_profile.py'
+      - 'research/epic_product_profile.py'
       - '.github/workflows/aligned-costs.yml'
   workflow_dispatch:
 permissions:
@@ -41,6 +42,8 @@ jobs:
       - run: |
           python -m research.epic_runtime_profile --seed "$SEED" --reps 9 > epic-runtime.json
           cat epic-runtime.json
+          python -m research.epic_product_profile --seed "$SEED" > epic-product.json
+          cat epic-product.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -48,6 +51,7 @@ jobs:
           path: |
             costs.json
             epic-runtime.json
+            epic-product.json
             environment.txt
             host.txt
             revision.txt
