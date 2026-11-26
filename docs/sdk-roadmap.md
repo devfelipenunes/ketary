@@ -1,0 +1,101 @@
+# Developer SDK roadmap (experimental)
+
+No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
+
+| Stage | Delivered in proposed SDK PRs | Remaining |
+|---|---|---|
+| SDK01 | strict numeric expectation checks, bounded inputs and edge tests | continuous regression testing |
+| SDK02 | direct gates, copy, atomic H batch; retain .gates/analyze compatibility | owner API review |
+| SDK03 | inspect/evidence/verify, immutable Contract and VerificationReport | owner review of public report schema |
+| SDK04 | explicit basis, array or Result initial state | shape preflight and bounded resource regression tests |
+| SDK05 | 29 fixed gate types plus bounded MCX; central registry | broader multi-control synthesis and backend boundary |
+| SDK06 | reduced density, purity, weighted Pauli expectation, Dirac, conditional probability, Schmidt, pure-state trace distance, Pauli and weighted-observable variance, top-k | general mixed-state metrics deliberately excluded |
+| SDK07 | incremental aligned comparison, selected checkpoint, explicit cross-length alignment | automatic alignment deliberately excluded |
+| SDK08 | native binding, explicit symbolic Circuit and full binding, copy, compose | partial binding and symbolic transforms deliberately excluded |
+| SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover, superdense, phase-gate QPE, Simon oracle iteration and GF(2) recovery, teleportation | generic QPE and larger algorithms as later work |
+| SDK10 | SVG histogram, ordered circuit schematic and Bloch vector schematic, executed how-to/notebook, paired density and Pauli query benchmarks | dedicated machine benchmark and richer layout/interactive graphics |
+| SDK11 | terminal marginal sampling; explicit one-register dynamic Circuit, measure/reset, conditional X/Z, native shot results and teleportation | multi-register and general control flow deliberately excluded |
+| SDK12 | existing package CI and release checklist | final owner review, dedicated host benchmark, redistribution review and release authorization |
+
+## Contracts and scope
+
+- Direct gate calls mutate and return the same Circuit; `.gates` remains compatible.
+- `copy`, transforms and binding return independent circuits. `from_parameterized`
+  binds a trusted native Qiskit template completely before validating it.
+- `run(initial_state=...)` is explicit. Default is all-zero; basis labels
+  use highest wire first. Result does not hold a reference to the builder.
+- `inspect` never runs; `evidence` and `verify` reuse a snapshot. A selected
+  property check is not a proof of the entire operator.
+- Density output is dense and bounded; selected wires follow caller order.
+  Weighted Pauli coefficients are real, finite and limited to 256 terms.
+- `sample(wires=...)` samples ideal terminal marginal probabilities without
+  collapse. It is not a measurement instruction or a classical-register result.
+- QFT uses the positive Fourier exponent; `swaps=False` omits final
+  bit reversal; inverse inverts the exact chosen circuit. Grover is a small
+  reference implementation for 2/3-bit marked labels, not a general oracle.
+- Superdense is coherent encode/decode, not a model of a distributed channel.
+- No release is authorized; all current code remains experimental.
+
+## Release checklist
+
+- [ ] Required tests, upstream probes, strict consumer, build/install and audit green.
+- [ ] Review exact API, docs, error contracts and supported gate/replay semantics.
+- [ ] Run controlled benchmark on dedicated machine; record raw timings and RSS.
+- [ ] Review dependency vulnerability/third-party license inventories and distribution obligations.
+- [ ] Decide compatibility and changelog; explicitly approve publication separately.
+
+Do not conflate terminal samples with mid-circuit measurement. The explicit dynamic mode below returns a separate ShotResult.
+
+## Classical execution RFC (SDK11)
+
+Keep the existing Result as a pure-state snapshot. A distinct execution result for
+classical registers must specify shots, register ordering, conditional control,
+reset and collapse semantics, random seed and simulator capability. No conversion
+from arbitrary classical outcomes into a pure Result. First validate terminal
+measurements and register mapping against the chosen native backend; only then
+consider dynamic circuits and mixed/noisy execution. Current marginal sampling
+does not implement this model. The experimental implementation below is validated separately from the pure-state core; review is required before release.
+
+## Developer visualization
+
+`result.visualize.histogram(k=8)` returns bounded SVG text (no new dependency).
+`result.visualize.bloch(wire=0)` returns the three Bloch coordinates, not a
+sphere image. The notebook `examples/quantum_engineering.ipynb` demonstrates
+construction, contracts, mathematical queries, diagnosis and search; its cells
+are exercised by pytest. Query benchmarks compare equal outputs separately
+from construction and execution. Existing process RSS measurements remain
+statevector scenarios, not a bound on every query.
+
+MCX supports 1–7 closed controls (CX/CCX canonical for 1/2), distinct wires; replay accepts bounded variable width. `phase_estimation(phase, precision)` estimates a known phase-gate eigenvalue on |1>, not arbitrary unitary. `simon(secret)` constructs one iteration with a known two-to-one oracle, yielding orthogonal samples; `recover_simon(samples,n)` performs bounded GF(2) elimination; insufficient rank returns None, full rank rejects the promise.
+
+### Symbolic lifecycle
+
+`Circuit.symbolic(n)` opts in to native Qiskit `ParameterExpression` angles. `Circuit.parameter(name)` creates a native parameter. `bind({parameter: real_value})` covers exactly the free parameters and returns an independent normal Circuit. Default builders reject symbolic angles; unbound execution, replay, inspect, optimization, operator checks and trace fail explicitly. No second IR; no implicit binding or partial binding.
+
+### Dynamic execution candidate
+
+Install the optional `ketary[dynamic]` extra (Qiskit Aer 0.18.4), leaving
+core dependencies unchanged. `Circuit.classical(n, num_clbits)` owns a native
+QuantumCircuit with one classical register; gates, measure, reset and bit-conditioned
+X/Z mutate. `run_shots(shots=...,seed=...)` uses native Aer, no second simulator.
+ShotResult contains immutable sorted counts and empirical frequencies; labels
+are highest classical bit first. No pure-state conversion or replay/transform
+of dynamic circuits. Bound 12 wires/bits, 1024 top-level operations and 10000 shots;
+payload budget is not a total process RSS bound. No hardware, arbitrary control
+flow, noisy execution, classical expressions or external dynamic imports.
+Teleportation prepares RZ(phi)RY(theta)|0>, measures both Bell wires, applies
+actual feedforward, measures output; verify=True first reverses preparation on
+output. CI tests multiple phases and amplitudes, reset and seeded counts.
+The optional dependency has its own inventory and vulnerability scan; passing
+metadata inventory is not license approval. See IBM Qiskit dynamic circuit docs
+(https://quantum.cloud.ibm.com/docs/en/qiskit/classical-feedforward-and-control-flow).
+
+### Hardening
+
+The core and dynamic CI suites report branch coverage separately. Dynamic CI executes all core/probe tests plus native shot/teleportation tests. No coverage exclusion or oracle relaxation. SVG schematics are bounded to 12 wires/64 gates and display ordered operands by position (0 = first operand), not device routing. Bloch SVG is a 2D projection with exact coordinates labeled. Symbolic and dynamic circuits retain native text drawing; unitary SVG rejects those modes explicitly. Iterables in marginal/entropy queries are bounded before materialization.
+
+Explicit `debug.compare_checkpoints(reference, pairs)` accepts 1–32 monotonic pairs of indices, including circuits with different lengths. It checks zero-input states, not operators or inferred causal alignment. Prefix evolution is explicit and bounded to eight qubits and 256 steps per index.
+
+### Completion boundary
+
+The SDK candidate covers all twelve roadmap areas within its documented bounded scope. This is not a release approval. Remaining work is validation and owner acceptance, not an obligation to add arbitrary quantum algorithms or backend integrations. Weighted-observable variance uses a native dense matrix with an eight-wire cap and an explicit payload budget. `append` and `compose` bound wire iterables before mutation or composition. `run` rejects array shape mismatches before converting to a Result snapshot. Input conversion and native allocations are not a hard RSS bound.

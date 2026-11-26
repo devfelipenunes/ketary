@@ -5,11 +5,10 @@ inverse pairs on identically ordered wires are removed.
 """
 from ._adapter import _validate
 
-_FIXED_INVERSES={
-    "h":"h","x":"x","y":"y","z":"z","cx":"cx","cz":"cz",
-    "swap":"swap","ccx":"ccx","s":"sdg","sdg":"s","t":"tdg","tdg":"t",
-}
-_ROTATIONS={"rx","ry","rz"}
+from ._gate_specs import SPECS
+_FIXED_INVERSES={name:spec[4] for name,spec in SPECS.items() if spec[4] not in (None,"negative")}
+_FIXED_INVERSES["mcx"]="mcx"
+_ROTATIONS={name for name,spec in SPECS.items() if spec[4]=="negative"}
 
 def _inverse_pair(a,b):
     if a.qubits!=b.qubits:

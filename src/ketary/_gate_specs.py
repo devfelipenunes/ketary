@@ -1,0 +1,37 @@
+"""Single logical gate registry; no eager Qiskit import."""
+# name: (native class, wire count, real parameter count, closed controls, inverse)
+SPECS = {
+    "h": ("HGate", 1, 0, 0, "h"),
+    "x": ("XGate", 1, 0, 0, "x"),
+    "y": ("YGate", 1, 0, 0, "y"),
+    "z": ("ZGate", 1, 0, 0, "z"),
+    "s": ("SGate", 1, 0, 0, "sdg"),
+    "sdg": ("SdgGate", 1, 0, 0, "s"),
+    "t": ("TGate", 1, 0, 0, "tdg"),
+    "tdg": ("TdgGate", 1, 0, 0, "t"),
+    "rx": ("RXGate", 1, 1, 0, "negative"),
+    "ry": ("RYGate", 1, 1, 0, "negative"),
+    "rz": ("RZGate", 1, 1, 0, "negative"),
+    "cx": ("CXGate", 2, 0, 1, "cx"),
+    "cz": ("CZGate", 2, 0, 1, "cz"),
+    "swap": ("SwapGate", 2, 0, 0, "swap"),
+    "ccx": ("CCXGate", 3, 0, 2, "ccx"),
+    "p": ("PhaseGate", 1, 1, 0, "negative"),
+    "u": ("UGate", 1, 3, 0, None),
+    "cp": ("CPhaseGate", 2, 1, 1, "negative"),
+    "ch": ("CHGate", 2, 0, 1, "ch"),
+    "crx": ("CRXGate", 2, 1, 1, "negative"),
+    "cry": ("CRYGate", 2, 1, 1, "negative"),
+    "crz": ("CRZGate", 2, 1, 1, "negative"),
+    "sx": ("SXGate", 1, 0, 0, "sxdg"),
+    "sxdg": ("SXdgGate", 1, 0, 0, "sx"),
+    "cy": ("CYGate", 2, 0, 1, "cy"),
+    "cswap": ("CSwapGate", 3, 0, 1, "cswap"),
+    "rxx": ("RXXGate", 2, 1, 0, "negative"),
+    "ryy": ("RYYGate", 2, 1, 0, "negative"),
+    "rzz": ("RZZGate", 2, 1, 0, "negative"),
+}
+
+# Variable-width MCX has 3..7 controls (4..8 total wires).
+MCX_MIN_WIRES=4
+MCX_MAX_WIRES=8

@@ -1,20 +1,20 @@
 # API reference (experimental L0)
 
-The public import is `import ketary as q`. All factories return Circuit.
+The public import is `import ketary as q`. Circuit factories return Circuit; recover_simon returns a classical label or None.
 
 | Surface | Methods and behavior |
 |---|---|
-| Factories | Circuit(n), bell(), ghz(n), constant_oracle(n,value=0), parity_oracle(mask,offset=0), deutsch_jozsa(oracle), from_qiskit(qc) |
-| Circuit.gates | h,x,y,z,s,sdg,t,tdg(q); rx,ry,rz(theta,q); cx,cz,swap(a,b); ccx(c1,c2,t). Mutate and return Circuit. |
+| Factories | Circuit(n), bell(), ghz(n), constant_oracle, parity_oracle, deutsch_jozsa, bernstein_vazirani, qft, grover, superdense, phase_estimation, simon, teleportation, from_qiskit(qc). recover_simon is a classical helper. |
+| Circuit / Circuit.gates | h,x,y,z,s,sdg,t,tdg,sx,sxdg(q); rx,ry,rz,p(theta,q); u(theta,phi,lam,q); cx,cy,cz,ch,swap(a,b); cp,crx,cry,crz,rxx,ryy,rzz(theta,a,b); ccx,cswap(a,b,c); mcx(controls,target). Mutate and return Circuit. Direct h_many(wires) also mutates. |
 | Circuit | num_qubits, append(gate,wires) mutates; compose(other,wires=None), inverse(), decompose(reps=1), optimize(), transpile(basis_gates,seed=42), to_qiskit(), to_json(), Circuit.from_json(payload) do not mutate source. Decompose only lowers SWAP. |
-| Execution | run(mode="statevector",max_bytes=64 MiB), analyze() experimental alias |
-| Result | num_qubits, sample(shots,seed=None,max_outcomes=65536) |
-| Result.math | statevector(max_bytes=64 MiB), amplitude(bits), probability(bits), probabilities(max_outcomes=65536), marginal_probabilities(wires,max_outcomes=65536), explain_probability(bits), table(bits=None,max_rows=16), norm(), fidelity(target), entropy(partition,max_rank=256,max_bytes=64 MiB), expectation(pauli) |
+| Execution | run(mode="statevector",max_bytes=64 MiB,initial_state=None), analyze() compatibility alias; classical run_shots is separate. |
+| Result | num_qubits, sample(shots,seed=None,max_outcomes=65536,wires=None), evidence(bits,paulis), verify(...), visualize |
+| Result.math | statevector(max_bytes=64 MiB), amplitude(bits), probability(bits), probabilities(max_outcomes=65536), marginal_probabilities(wires,max_outcomes=65536), explain_probability(bits), table(bits=None,max_rows=16), norm(), fidelity(target), entropy(partition,max_rank=256,max_bytes=64 MiB), expectation(pauli), density_matrix(wires), purity(wires), observable(terms), conditional_probability(event,given), schmidt(wires), trace_distance(target), variance(pauli), top_probabilities(k), dirac() |
 | Result.test | normalized(atol), probability(bits,expected,atol), fidelity(target,minimum), entangled(partition,atol,max_rank=256,max_bytes=64 MiB), distribution(target,atol), expectation(pauli,expected,atol), state(target,ignore_global_phase,atol) |
 | Circuit.test | equivalent(other,ignore_global_phase=False,atol=1e-9,max_bytes=16 MiB) |
-| Circuit.debug | trace(max_bytes=64 MiB,max_steps=256), compare(reference,ignore_global_phase=True,atol=1e-9,max_bytes=64 MiB,max_steps=256) |
+| Circuit.debug | trace(max_bytes=64 MiB,max_steps=256), compare(reference,...), checkpoint(index,...), compare_checkpoints(reference,pairs,...) |
 | Circuit.resources | summary(): immutable ResourceReport |
-| Circuit.visualize | text(max_qubits=32,max_gates=512): native text drawing |
+| Circuit.visualize | text(max_qubits=32,max_gates=512): native text drawing; svg(max_qubits=12,max_gates=64) for bound unitary circuits |
 
 Keyword-only arguments follow the implementation signatures; byte sizes above are descriptive, not Python expressions. CheckResult.status is PASS, FAIL or UNSUPPORTED; require() raises on non-PASS, and bool(check) raises TypeError. Invalid inputs raise errors; ResourceLimit and UnsupportedOperation inherit ValueError.
 
@@ -22,8 +22,8 @@ Keyword-only arguments follow the implementation signatures; byte sizes above ar
 
 - Bit labels and Pauli labels are ordered highest wire to lowest wire; marginal labels use the caller's wire order.
 - Numeric angles are finite real radians. Native import is limited to supported canonical standard gates, no classical bits, parameters, layout or metadata. Native Python objects are trusted input, not a sandbox.
-- Dense statevector payload is 16 * 2**n bytes. Trace covers at most 8 qubits and defaults to 256 steps. Comparison counts both traces. Operator comparison covers at most 8 qubits and budgets two matrices (32 * 4**n bytes).
-- Dictionary materialization has an explicit default cap of 65,536 potential outcomes. Sampling uses the smaller of shots and state dimension for this conservative bound. Callers may explicitly increase the cap. None of these estimates bounds total RSS or every temporary allocation.
+- Dense statevector payload is 16 * 2**n bytes. Trace covers at most 8 qubits and defaults to 256 steps. Equal-index comparison retains the conservative historical two-trace budget, but streams current checkpoints. Explicit alignment compares at most 32 supplied checkpoint pairs. Operator comparison covers at most 8 qubits and budgets two matrices (32 * 4**n bytes).
+- Dictionary materialization has an explicit default cap of 65,536 potential outcomes. Full sampling uses the smaller of shots and state dimension for this conservative bound; marginal sampling first bounds the selected probability dictionary. Callers may explicitly increase the cap. None of these estimates bounds total RSS or every temporary allocation.
 - Result retains accepted amplitudes within the normalization tolerance. Norm and amplitudes report stored values; Born probabilities, Pauli expectation, sampling, distribution distance, entropy and fidelity normalize their calculations by the state norm. State residuals compare stored amplitudes. No physical measurements or hardware support.
 - JSON replay: schema 1, 1 MiB, 22 qubits, 10,000 gates, strict keys. Producer metadata is informational; no cross-version deterministic guarantee.
 
@@ -35,3 +35,20 @@ Additional guards: exporting a dense snapshot copy is bounded by its payload; en
 Experimental logical transpilation delegates to Qiskit at optimization level 0 with only a supported basis and seed. No target, coupling map or backend; rejects layout/unsupported output and verifies strict full-operator equivalence up to 8 qubits. This can be expensive and is not a QPU optimization guarantee.
 
 For distribution boundaries and licensing review see [third-party review](third-party-review.md). The package is not published.
+
+## Experimental developer extensions
+
+See [SDK roadmap](sdk-roadmap.md) for direct gate aliases, the expanded gate registry, initial states, selective inspection, verification, density matrices, parameter binding and algorithm contracts. Existing `.gates` remains supported.
+
+- `Result.visualize.histogram(k=8)` returns SVG text; bars are actual probabilities, with omitted mass shown. `bloch(wire=0)` returns reduced-state coordinates.
+- `Contract(n, probabilities=..., expectations=..., normalized=..., atol=...)` is immutable; `verify(result)` returns a typed report without simulation.
+
+### Advanced experimental extensions
+
+- `Circuit.symbolic(n)`, `Circuit.parameter(name)`, `parameters`, `bind(mapping)`: explicit native symbolic construction and complete binding, with unbound operations rejected.
+- `mcx(controls,target)`: 1–7 closed controls; CX/CCX canonical for one/two controls.
+- `phase_estimation(phase,precision=3)`, `simon(secret)`, `teleportation(theta,phi,verify=False)`: bounded teaching circuits, not general algorithm solvers.
+- `Circuit.classical(n,num_clbits)`, `measure(wire,bit)`, `reset(wire)`, `if_x/if_z(wire,bit,value=1)`, `run_shots(shots=1024,seed=None,max_bytes=...)`: local native Aer optional extra. One register, no unitary run, replay, trace or transform. `ShotResult.counts` defensive dict, `probabilities()` empirical frequencies.
+- `Circuit.visualize.svg()` and `Result.visualize.bloch_svg(wire=0)` return bounded SVG schematics. The former supports bound unitary circuits only.
+
+- `Result.math.observable_variance(terms,max_bytes=...)`: real weighted Pauli sum, dense native matrix, eight-wire cap; variance is the squared norm of the centered operator applied to the normalized snapshot. Not a general mixed-state calculation.

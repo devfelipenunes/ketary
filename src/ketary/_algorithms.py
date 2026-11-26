@@ -62,3 +62,168 @@ def deutsch_jozsa(oracle):
     for i in range(n):
         c.gates.h(i)
     return c
+
+
+def bernstein_vazirani(mask):
+    """Recover a hidden nonzero parity mask using an explicit oracle."""
+    return deutsch_jozsa(parity_oracle(mask))
+
+
+def qft(n, *, inverse=False, swaps=True):
+    """Exact logical QFT with positive Fourier sign, highest-wire-first labels."""
+    from math import pi
+    n=_int(n,1)
+    if n>22:
+        from ._validation import ResourceLimit
+        raise ResourceLimit("QFT construction limited to 22 qubits")
+    if type(inverse) is not bool or type(swaps) is not bool:
+        raise ValueError("inverse and swaps must be boolean")
+    c=Circuit(n)
+    for target in reversed(range(n)):
+        c.h(target)
+        for control in reversed(range(target)):
+            c.cp(pi/(2**(target-control)),control,target)
+    if swaps:
+        for i in range(n//2):
+            c.swap(i,n-1-i)
+    return c.inverse() if inverse else c
+
+
+def grover(marked, *, iterations=None):
+    """Small pedagogical single-marked-basis search (2 or 3 input qubits)."""
+    from math import floor,pi,asin,sqrt
+    if type(marked) is not str or len(marked) not in (2,3) or set(marked)-{"0","1"}:
+        raise ValueError("expected a 2- or 3-bit marked label")
+    n=len(marked)
+    count=floor(pi/(4*asin(1/sqrt(2**n)))) if iterations is None else _int(iterations)
+    if count>64:
+        from ._validation import ResourceLimit
+        raise ResourceLimit("Grover iteration limit exceeded")
+    c=Circuit(n).h_many(range(n))
+    def phase_flip(bits):
+        zeros=[i for i,b in enumerate(reversed(bits)) if b=="0"]
+        for i in zeros: c.x(i)
+        if n==2:
+            c.cz(0,1)
+        else:
+            c.h(2).ccx(0,1,2).h(2)
+        for i in zeros: c.x(i)
+    for _ in range(count):
+        phase_flip(marked)
+        c.h_many(range(n))
+        phase_flip("0"*n)
+        c.h_many(range(n))
+        # H(I-2|0><0|)H differs from standard diffusion by global -1.
+        c._qc.global_phase += pi
+    return c
+
+
+def superdense(bits):
+    """Ideal coherent superdense encoding and decoding; no communication model."""
+    if type(bits) is not str or len(bits)!=2 or set(bits)-{"0","1"}:
+        raise ValueError("expected two bits")
+    c=bell()
+    # Z encodes the low-order output bit, X the high-order output bit.
+    if bits[0]=="1": c.x(0)
+    if bits[1]=="1": c.z(0)
+    return c.cx(0,1).h(0)
+
+
+def phase_estimation(phase, precision=3):
+    """QPE for known phase gate P(2*pi*phase), eigenstate |1>.
+
+    This pedagogical circuit is not a generic controlled-unitary synthesis API.
+    Counting wires 0..precision-1; eigenstate wire precision.
+    """
+    from math import pi
+    from ._validation import _real,ResourceLimit
+    phase=_real(phase)
+    precision=_int(precision,1)
+    if not 0<=phase<1:
+        raise ValueError("phase must be in [0,1)")
+    if precision>12:
+        raise ResourceLimit("phase estimation precision limited to 12 bits")
+    c=Circuit(precision+1).x(precision).h_many(range(precision))
+    for wire in range(precision):
+        c.cp(2*pi*((phase*(1<<wire))%1),wire,precision)
+    return c.compose(qft(precision,inverse=True),wires=range(precision))
+
+
+def simon(secret):
+    """One coherent Simon iteration for a constructed XOR-periodic oracle.
+
+    For nonzero binary s, f(x)=x XOR (x[pivot]*s). The function is exactly
+    two-to-one with period s. The caller samples the input wires and solves
+    the resulting GF(2) equations; this does not pretend one sample finds s.
+    """
+    from ._validation import ResourceLimit
+    if type(secret) is not str or not secret or set(secret)-{"0","1"} or "1" not in secret:
+        raise ValueError("expected nonzero binary secret")
+    n=len(secret)
+    if n>10:
+        raise ResourceLimit("Simon example limited to ten input wires")
+    active=[i for i,b in enumerate(reversed(secret)) if b=="1"]
+    pivot=active[0]
+    c=Circuit(2*n).h_many(range(n))
+    for i in range(n):
+        if i!=pivot:
+            c.cx(i,n+i)
+            if i in active:
+                c.cx(pivot,n+i)
+    return c.h_many(range(n))
+
+
+def teleportation(theta,phi,*,verify=False):
+    """Ideal three-wire teleportation with actual measurement and feedforward.
+
+    Prepare RZ(phi) RY(theta)|0> on wire 0. Output wire 2 is measured in
+    Z, or after inverse preparation if verify=True. Three classical bits:
+    c2=output, c1/c0=Bell measurement outcomes.
+    """
+    if type(verify) is not bool:
+        raise ValueError("verify must be bool")
+    from ._validation import _angle
+    theta,phi=_angle(theta),_angle(phi)
+    c=Circuit.classical(3,3).ry(theta,0).rz(phi,0).h(1).cx(1,2)
+    c.cx(0,1).h(0).measure(0,0).measure(1,1)
+    c.if_x(2,1).if_z(2,0)
+    if verify:
+        c.rz(-phi,2).ry(-theta,2)
+    return c.measure(2,2)
+
+
+def recover_simon(samples,n):
+    """Recover the unique nonzero binary secret from orthogonal sample labels.
+
+    Returns None for rank below n-1; full rank violates Simon's promise.
+    This is bounded classical GF(2) elimination, not circuit execution.
+    """
+    from itertools import islice
+    from ._validation import ResourceLimit
+    n=_int(n,1)
+    if n>10:
+        raise ResourceLimit("Simon recovery limited to ten input bits")
+    rows={}
+    for k,label in enumerate(islice(iter(samples),4097)):
+        if k==4096:
+            raise ResourceLimit("Simon sample limit exceeded")
+        if type(label) is not str or len(label)!=n or set(label)-{"0","1"}:
+            raise ValueError("invalid Simon sample label")
+        value=int(label,2)
+        while value:
+            pivot=value.bit_length()-1
+            if pivot in rows:
+                value^=rows[pivot]
+            else:
+                rows[pivot]=value
+                break
+    if len(rows)==n:
+        raise ValueError("samples violate the nonzero-secret promise")
+    if len(rows)<n-1:
+        return None
+    free=next(i for i in range(n) if i not in rows)
+    answer=1<<free
+    for pivot in sorted(rows):
+        if (rows[pivot]&answer).bit_count()%2:
+            answer|=1<<pivot
+    return format(answer,f"0{n}b")

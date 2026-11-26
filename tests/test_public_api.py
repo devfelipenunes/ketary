@@ -5,8 +5,8 @@ import ketary as q
 
 def test_public_exports():
     assert set(q.__all__) == {
-        "Circuit", "Result", "CheckResult", "TraceStep", "TraceComparison", "ResourceReport",
-        "ResourceLimit", "UnsupportedOperation", "from_qiskit", "bell", "ghz", "constant_oracle", "parity_oracle", "deutsch_jozsa",
+        "Circuit", "Result", "CheckResult", "Contract", "VerificationReport", "ShotResult", "TraceStep", "TraceComparison", "ResourceReport",
+        "ResourceLimit", "UnsupportedOperation", "from_qiskit", "bell", "ghz", "constant_oracle", "parity_oracle", "deutsch_jozsa", "bernstein_vazirani", "qft", "grover", "superdense", "phase_estimation", "simon", "recover_simon", "teleportation",
     }
     assert type(q.bell()) is q.Circuit
     assert type(q.ghz(3)) is q.Circuit

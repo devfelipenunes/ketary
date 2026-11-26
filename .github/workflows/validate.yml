@@ -140,3 +140,39 @@ jobs:
             distribution-manifest.json
             build-license-inventory.json
             build-audited-requirements.txt
+
+  dynamic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: '.python-version'
+      - name: Install and verify optional dynamic extra
+        run: |
+          python -m pip install -c constraints/linux-py312.txt -r requirements.txt
+          python -m pip install -c constraints/linux-py312.txt -e '.[dynamic]'
+          python -m pip check
+          python tools/audit_dependencies.py --scope dynamic
+          python -m pip freeze > dynamic-environment.txt
+          python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes tests_dynamic
+          python -m coverage report -m
+          python -m coverage json -o dynamic-coverage.json
+      - name: Audit dynamic dependencies
+        run: |
+          python -m venv audit-venv
+          audit-venv/bin/python -m pip install pip-audit
+          audit-venv/bin/python -m pip_audit --no-deps --disable-pip -r dynamic-audited-requirements.txt -f json -o dynamic-vulnerability-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dynamic-validation
+          path: |
+            dynamic-environment.txt
+            dynamic-coverage.json
+            dynamic-license-inventory.json
+            dynamic-audited-requirements.txt
+            dynamic-vulnerability-report.json

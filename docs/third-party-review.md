@@ -41,3 +41,7 @@ verify rights to any contributed material, review bundled binary notices if
 redistributing dependencies, verify project name availability and trademark
 risk, and obtain explicit owner approval. The attempted PyPI name lookup
 was inconclusive; do not infer availability. No upload or reservation.
+
+## Dynamic extra
+
+The optional `qiskit-aer==0.18.4` distribution is installed separately, not vendored. The dynamic CI job generates a dedicated dependency and license inventory and scans resolved versions. Its successful vulnerability scan does not replace manual review of upstream license texts, notices and redistribution obligations. The pure-state package keeps the original runtime dependency boundary. No legal clearance or publishing approval is implied.

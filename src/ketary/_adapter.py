@@ -9,33 +9,42 @@ def _sdk():
     from qiskit.quantum_info import Statevector
     return QuantumCircuit, Statevector
 
+from ._gate_specs import SPECS
+
 @lru_cache(maxsize=1)
 def _gate_classes():
     from qiskit.circuit import Gate
-    from qiskit.circuit.library import (
-        HGate, XGate, YGate, ZGate, SGate, SdgGate, TGate, TdgGate,
-        RXGate, RYGate, RZGate, CXGate, CZGate, SwapGate, CCXGate,
-    )
-    return (Gate, (HGate,XGate,YGate,ZGate,SGate,SdgGate,TGate,TdgGate,
-                   CXGate,CZGate,SwapGate,CCXGate),
-            (RXGate,RYGate,RZGate), {CXGate:1,CZGate:1,CCXGate:3})
+    from qiskit.circuit import library
+    return Gate,{getattr(library,spec[0]):(name,spec) for name,spec in SPECS.items()}
 
-def _validate_gate(gate):
-    Gate,fixed,rotations,controls=_gate_classes()
-    if not isinstance(gate,Gate) or gate.base_class not in fixed+rotations:
+def _validate_gate(gate,*,allow_parameters=False):
+    Gate,classes=_gate_classes()
+    from qiskit.circuit.library import MCXGate
+    from ._gate_specs import MCX_MIN_WIRES,MCX_MAX_WIRES
+    if isinstance(gate,Gate) and gate.base_class is MCXGate:
+        if (gate.name!="mcx" or not MCX_MIN_WIRES<=gate.num_qubits<=MCX_MAX_WIRES
+            or gate.params or gate.num_ctrl_qubits!=gate.num_qubits-1
+            or gate.ctrl_state!=(1<<gate.num_ctrl_qubits)-1):
+            raise UnsupportedOperation("MCX requires 3..7 distinct closed controls")
+        return
+    if not isinstance(gate,Gate) or gate.base_class not in classes:
         raise UnsupportedOperation("only supported standard unitary gates can be appended/imported")
-    cls=gate.base_class
-    # Replay and cancellation depend on the canonical name as well as type.
-    if gate.name!=cls.__name__.removesuffix("Gate").lower():
-        raise UnsupportedOperation("renamed standard gates are outside the L0 whitelist")
-    if cls in rotations:
-        if len(gate.params)!=1:
-            raise UnsupportedOperation("invalid rotation parameters")
-        _angle(gate.params[0])
-    elif gate.params:
-        raise UnsupportedOperation("unexpected gate parameters")
-    if cls in controls and gate.ctrl_state!=controls[cls]:
-        raise UnsupportedOperation("open-control gates are outside the L0 whitelist")
+    name,(_,wires,params,controls,_)=classes[gate.base_class]
+    if gate.name!=name or gate.num_qubits!=wires:
+        raise UnsupportedOperation("noncanonical gate name or width")
+    if len(gate.params)!=params:
+        raise UnsupportedOperation("invalid gate parameter count")
+    for value in gate.params:
+        _gate_angle(value,allow_parameters=allow_parameters)
+    if controls and gate.ctrl_state!=(1<<controls)-1:
+        raise UnsupportedOperation("open controls are outside the logical whitelist")
+
+def _gate_angle(value,*,allow_parameters=False):
+    if allow_parameters:
+        from qiskit.circuit import ParameterExpression
+        if isinstance(value,ParameterExpression) and value.parameters:
+            return value
+    return _angle(value)
 
 def _validate(qc):
     QC,_=_sdk()

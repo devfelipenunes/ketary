@@ -11,11 +11,8 @@ _SCHEMA=1
 _MAX_BYTES=1024*1024
 _MAX_QUBITS=22
 _MAX_GATES=10000
-_ARITY={
-    "h":1,"x":1,"y":1,"z":1,"s":1,"sdg":1,"t":1,"tdg":1,
-    "rx":1,"ry":1,"rz":1,"cx":2,"cz":2,"swap":2,"ccx":3,
-}
-_ROTATIONS={"rx","ry","rz"}
+from ._gate_specs import SPECS,MCX_MIN_WIRES,MCX_MAX_WIRES
+_ARITY={name:spec[1] for name,spec in SPECS.items()}
 
 def _keys(value,expected):
     if type(value) is not dict or set(value)!=set(expected):
@@ -45,7 +42,7 @@ def _encode(circuit):
     operations=[]
     for item in qc.data:
         op=item.operation
-        if op.name not in _ARITY:
+        if op.name not in _ARITY and op.name!='mcx':
             raise ValueError("unsupported replay gate")
         operations.append({
             "gate":op.name,
@@ -93,18 +90,22 @@ def _decode(payload):
     for item in ops:
         _keys(item,("gate","wires","params"))
         name,wires,params=item["gate"],item["wires"],item["params"]
-        if type(name) is not str or name not in _ARITY:
+        if type(name) is not str or (name not in _ARITY and name!='mcx'):
             raise ValueError("unsupported replay gate")
-        if (type(wires) is not list or len(wires)!=_ARITY[name]
+        if (type(wires) is not list or (not MCX_MIN_WIRES<=len(wires)<=MCX_MAX_WIRES if name=="mcx" else len(wires)!=_ARITY[name])
             or any(type(w) is not int or w<0 or w>=n for w in wires)
             or len(set(wires))!=len(wires)):
             raise ValueError("invalid replay wires")
-        if type(params) is not list or len(params)!=(1 if name in _ROTATIONS else 0):
+        if type(params) is not list or len(params)!=(0 if name=='mcx' else SPECS[name][2]):
             raise ValueError("invalid replay parameter count")
         validated.append((name,tuple(_angle(p) for p in params),tuple(wires)))
     QC,_=_sdk()
     qc=QC(n,global_phase=phase)
     for name,params,wires in validated:
         # Only statically allowlisted standard gate names reach this call.
-        getattr(qc,name)(*params,*wires)
+        if name=="mcx":
+            from qiskit.circuit.library import MCXGate
+            qc.append(MCXGate(len(wires)-1),list(wires))
+        else:
+            getattr(qc,name)(*params,*wires)
     return qc
