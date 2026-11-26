@@ -45,3 +45,16 @@ restored.test.equivalent(optimized).require()
 
 Use only supported standard gates with bound real angles. The returned
 optimized and restored circuits are independent.
+
+## Inspect a bounded basis table
+
+```python
+import ketary as q
+
+r = q.bell().run()
+text = r.math.table(["00", "11"])
+assert "00 |" in text and "11 |" in text
+print(text)
+```
+
+Default tables show the first 16 basis indices (not the most probable outcomes). Supply explicit labels for a targeted view. The table reports raw amplitudes and normalized probabilities, rounded for display only.
