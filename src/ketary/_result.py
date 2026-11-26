@@ -215,6 +215,8 @@ class _Math:
             if len(labels)>cap:
                 raise ResourceLimit("basis table exceeds row limit")
             omitted=0
+            if any(not isinstance(label,str) or len(label)!=self._r._n or any(b not in "01" for b in label) for label in labels):
+                raise ValueError("invalid bit string")
         rows=["basis | amplitude | probability"]
         for label in labels:
             a=self.amplitude(label)

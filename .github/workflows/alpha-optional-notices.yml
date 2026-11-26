@@ -1,0 +1,38 @@
+name: Alpha optional notice qualification
+on:
+  pull_request:
+    paths:
+      - 'research/alpha_optional_notice_review.py'
+      - '.github/workflows/alpha-optional-notices.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/alpha_optional_notice_review.py'
+      - '.github/workflows/alpha-optional-notices.yml'
+permissions:
+  contents: read
+jobs:
+  notice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version-file: '.python-version'
+      - run: |
+          mkdir -p wheel-review
+          cat > wheel-review/requirements.txt <<'EOF'
+          antlr4-python3-runtime==4.13.2 --hash=sha256:fe3835eb8d33daece0e799090eda89719dbccee7aa39ef94eed3818cafa5a7e8
+          nanobind-backend==1.0.0 --hash=sha256:6aa9864050cc5fd1ff59d1f9b79740efa278515eed27af848efae07125c029b8
+          EOF
+          python -m pip download --require-hashes --only-binary=:all: --no-deps --platform manylinux_2_28_x86_64 --implementation cp --python-version 3.12 --abi cp312 -r wheel-review/requirements.txt --dest wheel-review
+          python -m research.alpha_optional_notice_review wheel-review > optional-notice-review.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: alpha-optional-notices
+          path: optional-notice-review.json
