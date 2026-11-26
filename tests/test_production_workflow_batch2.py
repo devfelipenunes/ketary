@@ -189,8 +189,9 @@ def test_fermionic_hopping_excitation_transport():
     v=expm(-1j*t*adjacency)[:,0];expected=np.zeros(8,complex);expected[[1,2,4]]=v
     np.testing.assert_allclose(r.math.statevector(),expected,atol=1e-9,rtol=0)
 
-def test_two_site_hubbard_number_conservation():
-    n=4;t=.32;U=1.7;hop=.8
+@pytest.mark.parametrize("t,U,hop",[(.32,1.7,.8),(-.32,1.7,.8),(.17,.9,1.1)])
+def test_two_site_hubbard_number_conservation(t,U,hop):
+    n=4
     number=lambda w:(q.I(3)-q.Z(w))*.5
     Hq=-hop*.5*(q.X(0)@q.X(1)+q.Y(0)@q.Y(1)+q.X(2)@q.X(3)+q.Y(2)@q.Y(3))+U*((number(0)@number(2))+(number(1)@number(3)))
     # Number operators overlap only in identities; the disjoint tensor is valid.
@@ -200,8 +201,11 @@ def test_two_site_hubbard_number_conservation():
         M[i,i]=U*(bits[0]*bits[2]+bits[1]*bits[3])
         for a,b in [(0,1),(2,3)]:
             if bits[a]!=bits[b]:M[i^((1<<a)|(1<<b)),i]=-hop
-    r=q.Circuit(n).evolve_exact(Hq,time=t).run(initial_state="0101")
-    expected=expm(-1j*t*M)[:,5]
+    c=q.Circuit(n).evolve_exact(Hq,time=t)
+    exact=expm(-1j*t*M)
+    np.testing.assert_allclose(Operator(c.to_qiskit()).data,exact,atol=1e-9,rtol=0)
+    r=c.run(initial_state="0101")
+    expected=exact[:,5]
     np.testing.assert_allclose(r.math.statevector(),expected,atol=1e-9,rtol=0)
     assert sum(r.math.probability(format(i,"04b")) for i in range(16) if i.bit_count()!=2)<1e-9
 
@@ -237,3 +241,12 @@ def test_depolarizing_fixed_point():
     expected=(1-4*p/3)*rho+(2*p/3)*I
     np.testing.assert_allclose(c.run_channel(channel).data,expected,atol=1e-9,rtol=0)
     np.testing.assert_allclose(q.Circuit(1).run_channel(channel,DensityMatrix(I/2)).data,I/2,atol=1e-9)
+
+def test_dense_hamiltonian_bad_native_output_fails_atomically(monkeypatch):
+    import qiskit
+    source=q.Circuit(4).h(0)
+    before=Operator(source.to_qiskit()).data.copy()
+    monkeypatch.setattr(qiskit,"transpile",lambda *args,**kwargs:qiskit.QuantumCircuit(4))
+    with pytest.raises(q.UnsupportedOperation,match="strict synthesized operator residual"):
+        source.evolve_exact(.7*q.X(0)+.3*q.Z(1),time=.4)
+    np.testing.assert_array_equal(Operator(source.to_qiskit()).data,before)

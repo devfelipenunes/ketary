@@ -18,3 +18,16 @@ new global tasks. The 100-distinct-program ledger requires semantic deduplicatio
 against earlier 37-task corpus, recovery routes, previous 12 programs and
 existing examples. Never count randomized seeds or prompt-only tasks as
 additional program intents.
+
+## Strict synthesis regression candidate
+
+Prior default native synthesis failed the four-wire Hubbard operator at residual
+8.892498603556574e-6 (phase-aligned residual unchanged). Candidate fallback is
+restricted to one 3–5-wire HamiltonianGate and one zero-ancilla native Isometry
+synthesis (https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.circuit.library.Isometry).
+It corrects global phase explicitly, then independently rechecks the complete
+operator at the existing 1e-9 component tolerance, canonical gate basis and
+10,000-output-instruction cap. No new public API, approximation contract or
+backend. Negative test replaces both native transpile calls with a wrong result
+and checks builder atomicity. Three Hubbard parameter cases use a dense SciPy
+oracle; they are one application intent, not three. Candidate only until CI.

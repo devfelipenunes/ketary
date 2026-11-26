@@ -66,15 +66,38 @@ def _synthesize_native(template,*,seed):
     if any(item.operation.name not in ("u","cx") for item in raw.data):
         raise UnsupportedOperation("synthesis emitted noncanonical gates")
     if not float(abs(Operator(raw).data-reference.data).max())<=1e-9:
-        # Distinguish a phase-only discrepancy from an actual operator mismatch.
-        # The strict acceptance criterion is unchanged; this is diagnostic only.
-        from cmath import exp
-        from numpy import angle, vdot
+        # The default native synthesis can approximate near-special Weyl
+        # classes. For a single bounded Hamiltonian, qualify one alternative
+        # native decomposition. Never accept a merely phase-equivalent result.
+        from cmath import exp, phase as complex_phase
+        from qiskit.circuit.library import HamiltonianGate, Isometry
         actual=Operator(raw).data
-        overlap=vdot(actual,reference.data)
-        phase=float(angle(overlap))
-        aligned_residual=float(abs(actual*exp(1j*phase)-reference.data).max())
         residual=float(abs(actual-reference.data).max())
+        phase=complex_phase(sum(complex(a).conjugate()*complex(b)
+                                for a,b in zip(actual.flat,reference.data.flat)))
+        aligned_residual=float(abs(actual*exp(1j*phase)-reference.data).max())
+        if (3<=source.num_qubits<=5 and len(source.data)==1
+                and isinstance(source.data[0].operation,HamiltonianGate)):
+            alternative=QuantumCircuit(source.num_qubits)
+            alternative.append(Isometry(reference.data,0,0,epsilon=1e-12),
+                               range(source.num_qubits))
+            try:
+                candidate=transpile(alternative,basis_gates=["u","cx"],
+                                    optimization_level=0,seed_transpiler=seed,
+                                    qubits_initially_zero=False)
+            except TranspilerError as exc:
+                raise UnsupportedOperation("alternative Hamiltonian synthesis failed") from exc
+            if len(candidate.data)>10000:
+                raise ResourceLimit("alternative synthesis exceeds 10000 output instructions")
+            if (candidate.num_qubits!=source.num_qubits or candidate.num_clbits
+                    or any(item.operation.name not in ("u","cx") for item in candidate.data)):
+                raise UnsupportedOperation("alternative synthesis emitted noncanonical gates")
+            candidate_matrix=Operator(candidate).data
+            candidate_phase=complex_phase(sum(complex(a).conjugate()*complex(b)
+                for a,b in zip(candidate_matrix.flat,reference.data.flat)))
+            candidate.global_phase+=candidate_phase
+            if float(abs(Operator(candidate).data-reference.data).max())<=1e-9:
+                return Circuit._from_native(candidate,owned=True)
         raise UnsupportedOperation(
             "strict synthesized operator residual exceeds tolerance "
             f"(residual={residual:.17g}, phase_aligned_residual={aligned_residual:.17g}, "
