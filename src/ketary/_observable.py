@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from itertools import islice
 from numbers import Real
+from math import fsum
 from ._validation import _int,_real,ResourceLimit
 
 _MAX_WIDTH=62
@@ -54,8 +55,8 @@ class Observable:
             except (ValueError,TypeError,OverflowError) as exc:
                 raise ValueError("native coefficients must be finite numeric values") from exc
             real,imag=_real(coefficient.real),_real(coefficient.imag)
-            prev=terms.get(label,0j)
-            terms[label]=complex(_real(prev.real+real),_real(prev.imag+imag))
+            terms.setdefault(label,[]).append(complex(real,imag))
+        terms={label:_sum_complex(values) for label,values in terms.items()}
         if any(value.imag!=0 for value in terms.values()):
             raise ValueError("native observable must have real aggregate coefficients")
         cleaned={label:value.real for label,value in terms.items() if value.real}
@@ -199,6 +200,16 @@ def I(wire=0):
     return _local("I",wire)
 
 
+def _sum_complex(values):
+    """Compensated aggregation of finite rounded contributions, no truncation."""
+    try:
+        real=fsum(z.real for z in values)
+        imag=fsum(z.imag for z in values)
+    except (OverflowError,ValueError) as exc:
+        raise ValueError("Pauli coefficient sum exceeds finite range") from exc
+    return complex(_real(real),_real(imag))
+
+
 def _pauli_product(left,right,*,mode="product"):
     if not isinstance(right,Observable):
         raise TypeError("expected Observable")
@@ -228,8 +239,9 @@ def _pauli_product(left,right,*,mode="product"):
             if not phase:
                 continue
             key="".join(label)
-            value=out.get(key,0j)+phase*x*y
-            out[key]=complex(_real(value.real),_real(value.imag))
+            value=phase*x*y
+            out.setdefault(key,[]).append(complex(_real(value.real),_real(value.imag)))
+    out={label:_sum_complex(values) for label,values in out.items()}
     out={p:v for p,v in out.items() if v} or {"I"*n:0j}
     if len(out)>256:
         raise ResourceLimit("Pauli product exceeds 256 output terms")

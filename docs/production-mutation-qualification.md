@@ -1,3 +1,5 @@
 # Declared production mutation qualification
 
 Eight deliberate source mutations target Y parity, density conjugation, global phase, derivative scale, commutator sign, anticommutator scale, controlled phase and classical register ordering. Each uses an isolated temporary copy with validated import origin, a passing non-skipped baseline, cache invalidation, and bounded subprocess execution. Only failing executed tests count as kills; collection errors, infrastructure and baseline failures are not evidence. A surviving mutant is a real test gap and the run fails; preserve it and improve its independent oracle. This is a finite targeted mutant set, not a score across all possible source mutations. No runtime changes or release.
+
+Second wave: nine previously declared mutants plus ten candidates covering compensated real/imaginary summation, Hermiticity, Pauli phase signs, lost product contributions, complex expectation, channel omission/preflight and controlled frequency. Report all 19 outcomes; no claims until actual CI. The source-mutant count is derived from the manifest rather than a stale literal.
