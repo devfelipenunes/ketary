@@ -19,3 +19,12 @@ separate Statevector execution per shift; shared regression native route
 uses explicit per-occurrence shifts. Differences in orchestration are
 reported, not attributed to simulator superiority. The fixtures are
 small and deliberately transparent, not production datasets.
+
+Classification decisions are now explicit: angle score >=0.8, targets
+cos(x+0.41)>=0.8 on the disjoint held-out points; parity score >=0.5
+on fixed evaluation pairs, no fitted parity classifier. Accuracy and
+predicted/target binary labels are recorded alongside continuous scores.
+Both target classes occur in the fixed evaluation fixtures. This is a
+synthetic task, not evidence of real-world generalization. The angle
+optimizer still minimizes a continuous surrogate, not classification
+cross-entropy. Builder-only token counts exclude shared orchestration.
