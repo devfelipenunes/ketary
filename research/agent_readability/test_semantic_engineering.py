@@ -102,3 +102,28 @@ def test_repair_abstains_and_already_equivalent():
     assert suggest_repair(q.Circuit(2).x(0).z(1),q.bell())["status"]=="NO_REPAIR"
     with pytest.raises(ValueError):
         suggest_repair(q.bell(),q.bell(),max_candidates=0)
+
+
+def test_source_provenance_is_not_origin_proof():
+    c=q.Circuit(2).h(0).cx(0,1)
+    src="import ketary as q\nc=q.Circuit(2).h(0).cx(0,1)"
+    assert semantic_inspect(c,source=src)["provenance"]["status"]=="MATCH"
+    assert semantic_inspect(c,source=src.replace("cx(0,1)","cx(1,0)"))["provenance"]["status"]=="UNSUPPORTED"
+    assert semantic_inspect(c,source="arbitrary()")["provenance"]["status"]=="UNSUPPORTED"
+
+
+def test_read_only_tool_registry():
+    from read_tools import ReadTools
+    c=q.bell()
+    tools=ReadTools({"bell":c,"error":q.bell().z(0)})
+    manifest=tools.manifest()
+    c.z(0)
+    assert tools.verify("bell",{"00":.5},{"XX":1})["status"]=="PASS"
+    assert tools.verify("error",{},{"XX":1})["status"]=="FAIL"
+    assert tools.compare("error","bell",["XX"])["status"]=="FAIL"
+    assert tools.inspect("bell")["circuit"]["gate_count"]==2
+    assert tools.manifest()==manifest
+    with pytest.raises(ValueError):
+        tools.inspect("../unregistered")
+    with pytest.raises(ValueError):
+        tools.verify("bell",{}, {})
