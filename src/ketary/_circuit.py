@@ -49,15 +49,45 @@ class Circuit:
         return bit
 
     def measure(self,wire,bit):
-        wire=self.gates._wire(wire)
-        bit=self._classical_bit(bit)
-        self._qc.measure(wire,bit)
+        """Measure scalar wire/bit or aligned distinct ordered sequences."""
+        if hasattr(wire,"__index__"):
+            wire=self.gates._wire(wire)
+            bit=self._classical_bit(bit)
+            self._qc.measure(wire,bit)
+            return self
+        from ._ergonomics import _selection
+        from collections.abc import Mapping
+        from itertools import islice
+        if not self.num_clbits:
+            raise UnsupportedOperation("use Circuit.classical for measurement/control")
+        wires=_selection(self,wire)
+        if isinstance(bit,(str,bytes,Mapping,set,frozenset)):
+            raise ValueError("expected an ordered iterable of classical bits")
+        try:
+            bits=tuple(self._classical_bit(b) for b in islice(iter(bit),len(wires)+1))
+        except TypeError as exc:
+            raise ValueError("expected an ordered iterable of classical bits") from exc
+        if len(bits)!=len(wires) or len(set(bits))!=len(bits):
+            raise ValueError("expected equal-length wire and distinct bit sequences")
+        candidate=self._qc.copy()
+        for w,b in zip(wires,bits):
+            candidate.measure(w,b)
+        self._qc=candidate
         return self
 
     def reset(self,wire):
+        """Reset one wire or an ordered selection of distinct wires."""
         if not self.num_clbits:
             raise UnsupportedOperation("use Circuit.classical for reset")
-        self._qc.reset(self.gates._wire(wire))
+        if hasattr(wire,"__index__"):
+            self._qc.reset(self.gates._wire(wire))
+            return self
+        from ._ergonomics import _selection
+        wires=_selection(self,wire)
+        candidate=self._qc.copy()
+        for w in wires:
+            candidate.reset(w)
+        self._qc=candidate
         return self
 
     def _conditional(self,gate,wire,bit,value):
