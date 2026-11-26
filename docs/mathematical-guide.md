@@ -31,3 +31,29 @@ A statevector Result describes ideal pure evolution. Its terminal samples
 are not intermediate measurements. A ShotResult records empirical counts
 from the optional local dynamic mode; sampling variation must be handled
 statistically. See [verification guide](verification-guide.md).
+
+
+## Formula contracts and independent reference oracles
+
+For a normalized pure state psi, a real Pauli sum H, and a unitary U:
+
+- Born rule: p(x) = |psi[x]|^2, sum_x p(x) = 1.
+- Expectation: E(H) = psi^dagger H psi; real for Hermitian H.
+- Variance: Var(H) = ||(H - E(H) I) psi||^2; nonnegative.
+- Reduced state: rho_A[a,b] = sum_e psi[a,e] conjugate(psi[b,e]).
+  The first supplied subsystem wire is the most significant output axis.
+- Purity: Tr(rho_A^2); Schmidt coefficients squared are eigenvalues
+  of rho_A; entropy = -sum_i lambda_i log2(lambda_i), with 0 log2 0 = 0.
+- Exact commuting evolution: U(t) = exp(-i t H), with identity terms
+  contributing global phase. Noncommuting sums are not silently approximated.
+- Expectation Jacobian for supported one-angle gates: for parameter x,
+  dE/dx = sum_j (d theta_j/dx) [E(theta_j+pi/2)-E(theta_j-pi/2)]/2,
+  shifting only occurrence j; other angles fixed. Global phase contributes
+  zero to expectation derivatives. This is not a statevector derivative.
+- Strict operator equality is distinct from equality up to global phase,
+  state fidelity, matching probabilities and selected predicate agreement.
+
+Independent dense oracles and analytic derivatives are tested in
+tests/test_production_math_oracles.py. Numerical tolerances are absolute
+for the fixtures; they are not a universal forward-error bound. See
+[production qualification](production-qualification.md) for evidence gates.

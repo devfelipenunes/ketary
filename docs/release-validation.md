@@ -54,3 +54,5 @@ For verification engineering, additionally run `python research/public_defect_ca
 ## Pre-alpha stabilization
 
 The installed-wheel smoke now covers the complete phase-diagnosis and evidence reproduction workflow, plus a separate clean wheel installation with the dynamic extra. Stub signature parity is checked against runtime callables. Diagnostic timing includes fluent construction and dense/streamed variance with matched outputs. A separate authorized dedicated host is still required before public distribution; CI results do not satisfy that condition.
+
+For production-oriented acceptance, also see [production qualification](production-qualification.md). The independent formula suite is required as part of the normal tests; preserve warning/skip and JUnit evidence. This does not authorize distribution.

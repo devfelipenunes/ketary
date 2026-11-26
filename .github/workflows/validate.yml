@@ -30,7 +30,7 @@ jobs:
         run: python -m mypy --strict --follow-imports=silent --ignore-missing-imports tests/typing/consumer.py
       - name: Required tests and upstream probes
         run: |
-          python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes
+          python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes --junitxml=core-test-results.xml
           python -m coverage report -m
           python -m coverage json -o coverage.json
       - name: Verification calibration against native Qiskit
@@ -50,6 +50,7 @@ jobs:
           name: coverage-report
           path: |
             coverage.json
+            core-test-results.xml
             verification-comparison.json
             public-defects.json
             dx-comparison.json
@@ -195,7 +196,7 @@ jobs:
           python -m pip check
           python tools/audit_dependencies.py --scope dynamic
           python -m pip freeze > dynamic-environment.txt
-          python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes tests_dynamic
+          python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes tests_dynamic --junitxml=dynamic-test-results.xml
           python -m coverage report -m
           python -m coverage json -o dynamic-coverage.json
       - name: Audit dynamic dependencies
@@ -210,6 +211,7 @@ jobs:
           path: |
             dynamic-environment.txt
             dynamic-coverage.json
+            dynamic-test-results.xml
             dynamic-license-inventory.json
             dynamic-audited-requirements.txt
             dynamic-vulnerability-report.json
