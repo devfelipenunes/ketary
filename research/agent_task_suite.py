@@ -10,7 +10,8 @@ import numpy as np
 import ketary as q
 from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
-from qiskit.quantum_info import Operator, Statevector, Pauli
+from qiskit.circuit.library import real_amplitudes, DiagonalGate
+from qiskit.quantum_info import Operator, Statevector, Pauli, SparsePauliOp
 from circuit_writing_study import metrics
 
 TASKS=[
@@ -78,6 +79,38 @@ c.cx(1,0)
 c.rz(.2,0)
 out=Statevector(np.array([1,0,0,1j])/np.sqrt(2)).evolve(c).data""",
 """out=q.Circuit(2).h(1).cx(1,0).rz(.2,0).run(initial_state=np.array([1,0,0,1j])/np.sqrt(2)).math.statevector()"""),
+
+("variational_energy","Build a two-repetition four-wire real-amplitudes linear ansatz; bind 12 angles .1 through 1.2, return expectation of Z on wire 2.", "numeric",
+"""c=real_amplitudes(4,entanglement="linear",reps=2).assign_parameters(np.arange(1,13)/10)
+out=float(Statevector.from_instruction(c).expectation_value(Pauli("IZII")).real)""",
+"""out=q.ansatz(4,reps=2).bind(np.arange(1,13)/10).run().math.expectation(q.Z(2))"""),
+("weighted_maxcut","Construct weighted MaxCut cost for edges (0,1), (0,2), (2,3) with weights 2,1,3, and return its full matrix.", "numeric",
+"""out=SparsePauliOp.from_list([("IIII",3),("IIZZ",-1),("IZIZ",-.5),("ZZII",-1.5)]).to_matrix()""",
+"""out=q.maxcut_hamiltonian(4,[(0,1),(0,2),(2,3)],weights=[2,1,3]).to_qiskit().to_matrix()"""),
+("multi_marked_oracle","Construct a four-wire phase oracle marking 0001, 1010 and 1111 with -1, identity elsewhere, strict global phase.", "operator",
+"""diagonal=np.ones(16)
+diagonal[[1,10,15]]=-1
+c=QuantumCircuit(4)
+c.append(DiagonalGate(diagonal),range(4))
+out=c""",
+"""out=q.phase_oracle(["0001","1010","1111"])"""),
+("multiple_inputs","Apply H on wire 0 and CX(0,1) to four ordered computational basis inputs 00,11,01,10; return the four full complex vectors.", "numeric",
+"""c=QuantumCircuit(2)
+c.h(0)
+c.cx(0,1)
+out=tuple(Statevector.from_label(label).evolve(c).data for label in ["00","11","01","10"])""",
+"""out=tuple(r.math.statevector() for r in q.bell().run_many(["00","11","01","10"]))"""),
+("parameter_rows","For RY(a,0) then RX(b,1) then CX(0,1), return probability 11 for three ordered parameter rows (.2,.3),(.4,.5),(.6,.7).", "numeric",
+"""a,b=Parameter("a"),Parameter("b")
+c=QuantumCircuit(2)
+c.ry(a,0)
+c.rx(b,1)
+c.cx(0,1)
+out=tuple(float(Statevector.from_instruction(c.assign_parameters(row)).probabilities()[3]) for row in [[.2,.3],[.4,.5],[.6,.7]])""",
+"""a,b=q.Circuit.parameter("a"),q.Circuit.parameter("b")
+c=q.Circuit.symbolic(2).ry(a,0).rx(b,1).cx(0,1)
+out=tuple(r.math.probability("11") for r in c.sweep_rows([[.2,.3],[.4,.5],[.6,.7]]).run())"""),
+
 ]
 
 
@@ -101,7 +134,8 @@ def run():
     result=[]
     for key,prompt,oracle,native,sdk in TASKS:
         env={"q":q,"np":np,"QuantumCircuit":QuantumCircuit,"Parameter":Parameter,
-             "Statevector":Statevector,"Pauli":Pauli}
+             "Statevector":Statevector,"Pauli":Pauli,"SparsePauliOp":SparsePauliOp,
+             "real_amplitudes":real_amplitudes,"DiagonalGate":DiagonalGate}
         a,b=env.copy(),env.copy()
         exec(compile(native,key+":native","exec"),a)
         exec(compile(sdk,key+":ketary","exec"),b)

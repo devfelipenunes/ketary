@@ -238,3 +238,74 @@ one scalar real or explicitly symbolic angle for the whole batch.
 No Cartesian product, scheduling, hidden execution, or implicit controls.
 Bound mode appends directly through the native transaction; symbolic
 and classical mode stage on a native copy.
+
+
+## Native variational ansatz and parameter vectors
+
+```python
+weights = q.Circuit.parameter_vector("w", 4)
+layer = q.Circuit.symbolic(4).ry(weights, range(4))
+template = q.ansatz(4, rotations=("ry", "rz"), reps=2, prefix="a")
+bound = template.bind([0.1] * len(template.parameters))
+energy = bound.run().math.expectation(q.Z(0))
+```
+
+The ansatz delegates directly to Qiskit n_local. Rotation blocks are ordered
+rx/ry/rz, CX entanglement is linear/reverse_linear/circular/full with native
+ordering, and a final rotation layer is included. Limits: 2..62 wires,
+1..64 repetitions, 4096 parameters and 10000 estimated instructions.
+Independent templates with distinct parameters must use distinct prefixes
+when combined in one symbolic target. Vectors are immutable tuples of native
+Parameter objects. Ordered bind consumes exactly one finite value per native
+parameter in Circuit.parameters order; mappings and named binding remain
+supported. Binding returns a new bound circuit; no hidden execution or
+classical optimizer. This is an experimental convenience for a subset of
+n_local, not all Qiskit variational capabilities.
+
+
+## Hamiltonian and oracle composition
+
+```python
+H = q.maxcut_hamiltonian(4, q.ring(range(4)))
+energy = q.ghz(4).run().math.expectation(H)
+oracle = q.phase_oracle(["001", "110"])
+search = q.amplitude_amplification(oracle, iterations=1)
+result = search.run()
+```
+
+MaxCut constructs the weighted cut-value observable, with positive or
+negative finite real weights aligned to distinct undirected edges; it does
+not optimize a graph or perform measurement. At most 62 wires and 255
+edges. `Observable.from_qiskit(SparsePauliOp)` accepts canonical native Pauli
+labels, combines duplicates (including complex cancellations) and requires
+exactly real aggregate coefficients. It accepts <=4096 input and <=256
+nonzero output terms, with no tolerance truncation.
+Phase-oracle labels use native highest-wire-first basis ordering, 2..8
+bits and at most 256 distinct marked labels. Amplitude amplification is
+the explicit uniform-input Grover iterate for a caller-promised phase
+oracle, with 0..64 iterations and bounded expansion; no automatic oracle
+verification, choice of iteration count or optimizer. No hidden execution.
+
+
+## Explicit experiment batches
+
+```python
+theta = q.Circuit.parameter("theta")
+template = q.Circuit.symbolic(2).ry(theta, 0).cx(0,1)
+plan = template.sweep_rows([[0.0], [0.5], [1.0]])
+for binding, result in zip(plan.bindings, plan.run()):
+    print(binding, result.math.probabilities(bits=["00", "11"]))
+
+outputs = q.bell().run_many(["00", "01", "10", "11"])
+```
+
+Rows align to `template.parameters` (native parameter order), at most 32
+rows and parameters, 12 wires, 256 operations. The existing frozen sweep
+plan owns bound replay payloads; no execution during planning. The same
+bound circuit can explicitly execute 1..32 ordered independent inputs
+via `run_many`; all inputs and conservative aggregate state payload
+(2*m+1 snapshots) preflight before evolution, with no parallelism or
+backend selection. Selected probabilities use distinct ordered full-width
+basis labels and return only those labels, without full dictionary
+enumeration or conditional renormalization. The old no-argument
+probability call is unchanged. No hidden runs.

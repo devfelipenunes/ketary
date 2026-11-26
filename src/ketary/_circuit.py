@@ -125,6 +125,29 @@ class Circuit:
         from qiskit.circuit import Parameter
         return Parameter(name)
 
+    @staticmethod
+    def parameter_vector(name,size):
+        """Independent native parameter identities in declared vector order."""
+        from qiskit.circuit import ParameterVector
+        from ._validation import ResourceLimit
+        if type(name) is not str or not name or len(name)>112:
+            raise ValueError("expected a nonempty parameter prefix up to 112 characters")
+        size=_int(size,1)
+        if size>4096:
+            raise ResourceLimit("parameter vector limited to 4096 elements")
+        return tuple(ParameterVector(name,size))
+
+    @classmethod
+    def _native_ansatz(cls,n,rotations,entanglement,reps,prefix):
+        from qiskit.circuit.library import n_local
+        native=n_local(n,rotation_blocks=list(rotations),entanglement_blocks="cx",
+                       entanglement=entanglement,reps=reps,parameter_prefix=prefix)
+        _validate(native,allow_parameters=True)
+        c=cls.__new__(cls)
+        c._qc=native
+        c._symbolic=True
+        return c
+
     @property
     def parameters(self):
         return tuple(self._qc.parameters)
@@ -140,12 +163,31 @@ class Circuit:
             if len(params)!=len(self.parameters) or set(values)!=set(params):
                 raise ValueError("named binding must cover each unique parameter")
             bindings={params[name]:value for name,value in values.items()}
+        else:
+            from collections.abc import Mapping
+            from itertools import islice
+            if not isinstance(bindings,Mapping):
+                if isinstance(bindings,(str,bytes,set,frozenset)):
+                    raise TypeError("expected mapping or ordered numeric values")
+                params=self.parameters
+                try:
+                    vals=tuple(islice(iter(bindings),len(params)+1))
+                except TypeError as exc:
+                    raise TypeError("expected mapping or ordered numeric values") from exc
+                if len(vals)!=len(params):
+                    raise ValueError("ordered binding must cover exactly the native parameter order")
+                bindings=dict(zip(params,vals,strict=True))
         return self.from_parameterized(self._qc,bindings)
 
     def sweep(self,**values):
         """Construct a bounded zipped parameter plan without execution."""
         from ._ergonomics import SweepPlan
         return SweepPlan(self,values)
+
+    def sweep_rows(self,rows):
+        """Freeze complete numeric parameter rows in native order."""
+        from ._ergonomics import _sweep_rows
+        return _sweep_rows(self,rows)
 
     def register(self,name,wires):
         """Name a logical selection; no allocation or native register mutation."""
@@ -625,6 +667,28 @@ class Circuit:
         _limit(self.num_qubits,budget=max_bytes)
         from ._execution import execute_ideal
         return execute_ideal(self._qc,initial_state,max_bytes)
+
+    def run_many(self,initial_states,*,max_bytes=64*1024**2):
+        """Independent ideal evolutions, in caller order; preflight all inputs."""
+        from collections.abc import Mapping
+        from itertools import islice
+        from ._validation import ResourceLimit
+        from ._execution import prepare_initial,execute_ideal
+        self._require_bound()
+        if isinstance(initial_states,(str,bytes,set,frozenset,Mapping)):
+            raise ValueError("expected ordered initial states")
+        try:
+            states=tuple(islice(iter(initial_states),33))
+        except TypeError as exc:
+            raise ValueError("expected ordered initial states") from exc
+        if not 1<=len(states)<=32:
+            raise ResourceLimit("run_many requires 1..32 inputs")
+        # Conservative payload: input snapshots + retained results + working
+        # state. Not a process RSS guarantee. Validate before input copying.
+        _limit(self.num_qubits,2*len(states)+1,budget=max_bytes)
+        prepared=tuple(prepare_initial(self.num_qubits,state) for state in states)
+        return tuple(execute_ideal(self._qc,state,max_bytes) for state in prepared)
+
 
 class _Gates:
     def __init__(self,c):

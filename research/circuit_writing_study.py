@@ -27,18 +27,12 @@ c.h(range(4))
 c.cz([0,1,2,3],[1,2,3,0])""",
 """c=q.Circuit(4).h(range(4)).cz(pairs=q.ring(range(4)))"""),
 ("real_amplitudes",
-"""c=real_amplitudes(4,entanglement='linear',reps=2).assign_parameters(angles)""",
-"""c=q.Circuit(4)
-for row in (angles[:4],angles[4:8]):
-    c.ry(row,c.wires).cx(pairs=q.chain(c.wires))
-c.ry(angles[8:],c.wires)"""),
-("efficient_su2",
-"""c=efficient_su2(4,entanglement='linear',reps=1).assign_parameters(su2_angles)""",
-"""c=q.Circuit(4)
-c.ry(su2_angles[:4],c.wires).rz(su2_angles[4:8],c.wires)
-c.cx(pairs=q.chain(c.wires))
-c.ry(su2_angles[8:12],c.wires).rz(su2_angles[12:],c.wires)"""),
-("qaoa_cost_mixer",
+     "c=real_amplitudes(4,entanglement='linear',reps=2).assign_parameters(angles)",
+     "c=q.ansatz(4,reps=2).bind(angles)"),
+    ("efficient_su2",
+     "c=efficient_su2(4,entanglement='linear',reps=1).assign_parameters(su2_angles)",
+     "c=q.ansatz(4,rotations=('ry','rz')).bind(su2_angles)"),
+    ("qaoa_cost_mixer",
 """c=QuantumCircuit(4)
 c.h(range(4))
 for gamma,beta in [(0.2,0.3),(0.4,0.5)]:

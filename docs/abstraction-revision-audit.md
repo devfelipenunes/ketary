@@ -36,9 +36,9 @@ is a control. No hardware timing threshold or dedicated-host claim.
 
 ## Human/agent task protocol
 
-Eight new authored held-out tasks cover ordered repeated pairs, nested
+Thirteen new authored held-out tasks cover ordered repeated pairs, nested
 reusable layers, aligned angles, shared symbolic parameters, uncompute,
-dynamic measurement order, grouped math, and complex initial states.
+dynamic measurement order, grouped math, complex initial states, native variational energy, weighted MaxCut, phase oracles, multiple inputs and parameter rows.
 The fixture prints prompts separately from trusted reference snippets.
 The script executes only repository-authored solutions. It compares
 complete strict complex operators, exact dynamic sequences, or selected
