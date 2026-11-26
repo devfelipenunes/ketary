@@ -338,3 +338,24 @@ CRX, CRY and CRZ now use a four-point expectation shift with explicit shared 128
 `template.quantum_geometric_tensor({theta: .3})` explicitly runs bounded ideal state shifts and returns immutable complex rows/columns in native parameter order. Use the real part as the pure-state metric; no automatic inversion or optimizer. Rank-deficient metrics are valid. See mathematical/resource guides.
 
 `template.expectation_hessian(bindings, [H])` returns immutable observable-by-parameter-by-parameter rows in native parameter order. Exact ideal shift rules and second-order chain rule; no automatic optimizer or finite-difference step. Resource caps are explicit.
+
+
+### Explicit conditional reusable blocks (advanced)
+
+`if_apply` conditionally appends a bound gate-only `Circuit` onto an existing
+classical circuit, using an ordered wire mapping and one previously measured
+(or explicitly initialized) classical bit. `if_x` and `if_z` remain canonical
+for single corrections. The new method avoids manually assembling native
+control-flow objects for reusable multi-gate corrections. No implicit run.
+
+```python
+import ketary as q
+correction = q.Circuit(2).x(0).cx(0,1)
+c = q.Circuit.classical(3,3).x(0).measure(0,0)
+c.if_apply(correction, bit=0, wires=[2,1]).measure([1,2],[1,2])
+shots = c.run_shots(shots=64,seed=7)
+assert shots.counts == {"111": 64}
+```
+
+Conditions are classical bit equality (zero or one), not quantum controls.
+The full expanded dynamic budget is checked before the mutation commits.

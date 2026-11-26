@@ -100,6 +100,31 @@ class Circuit:
             getattr(self._qc,gate)(wire)
         return self
 
+    def if_apply(self,block,*,bit,wires=None,value=1):
+        """Conditionally apply an explicitly mapped bound unitary block."""
+        from ._classical import _validate_dynamic
+        from ._validation import ResourceLimit
+        bit=self._classical_bit(bit)
+        value=_int(value)
+        if value not in (0,1):
+            raise ValueError("condition must be zero or one")
+        if not isinstance(block,Circuit):
+            raise TypeError("expected Circuit")
+        block._require_bound()
+        if len(block._qc.data)>1023:
+            raise ResourceLimit("conditional block exceeds expanded instruction budget")
+        indices=self._mapping_wires(block,wires)
+        _validate_dynamic(self._qc)
+        # Freeze native source and stage the new branch before replacing the
+        # builder. Full expanded validation includes the old and new branches.
+        source=block.to_qiskit()
+        candidate=self._qc.copy()
+        with candidate.if_test((candidate.clbits[bit],value)):
+            candidate.compose(source,qubits=indices,inplace=True)
+        _validate_dynamic(candidate)
+        self._qc=candidate
+        return self
+
     def if_x(self,wire,bit,*,value=1):
         return self._conditional("x",wire,bit,value)
 

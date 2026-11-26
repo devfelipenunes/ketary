@@ -112,3 +112,6 @@ Original term count, byte/work preflight, label and finite coefficient checks
 remain unchanged, including identity-only inputs. Identity-only variance is
 exactly zero after validation. This avoids cancellation from large scalar
 energy offsets; not a guarantee for all ill-conditioned nonidentity sums.
+
+
+Conditional `if_apply(block, bit=..., wires=..., value=1)` is a staged bound-unitary block append, not coherent control. The existing dynamic import limits apply to the entire candidate, including all expanded branches. Source and target remain unchanged on failure; no conditional measurement/reset, unbound block or implicit execution. The input block is copied; the caller cannot mutate the committed branch by changing the source later.
