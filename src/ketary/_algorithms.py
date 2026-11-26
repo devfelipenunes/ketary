@@ -3,6 +3,20 @@ from __future__ import annotations
 from ._circuit import Circuit
 from ._validation import _int
 
+def basis(label):
+    """Prepare a computational basis label (highest wire first), as a unitary X block."""
+    from ._validation import ResourceLimit
+    if type(label) is not str or not label:
+        raise ValueError("expected a nonempty binary label")
+    if len(label)>62:
+        raise ResourceLimit("basis preparation supports at most 62 wires")
+    if set(label)-{"0","1"}:
+        raise ValueError("expected a binary label")
+    c=Circuit(len(label))
+    active=[i for i,b in enumerate(reversed(label)) if b=="1"]
+    return c.x(active) if active else c
+
+
 def bell():
     return Circuit(2).gates.h(0).gates.cx(0,1)
 

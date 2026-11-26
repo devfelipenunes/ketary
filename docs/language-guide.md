@@ -96,13 +96,12 @@ reused parameter is shared, not cloned into independent layer parameters.
 Use distinct explicitly named parameters when independent weights are
 needed. Same-name distinct native parameters fail before mutation. Unbound
 blocks require an explicitly symbolic target; ordinary bound circuits and
-classical circuits do not accept them. All native symbolic composition is
-staged on an independent copy; source blocks remain unchanged. `compose`,
+classical circuits do not accept them. Preflighted symbolic unitary composition uses suffix/phase rollback; source blocks remain unchanged. `compose`,
 execution and logical serialization still require fully bound parameters.
 Existing expansion bounds and wire ordering apply unchanged.
 
 Bind by native mapping or unique names, never both; use the native mapping if a parameter name conflicts with the bindings argument. Sweep columns are zipped,
-not Cartesian; all rows are bound and serialized at planning time, without
+not Cartesian; all rows are bound into independent native circuits at planning time, without
 simulation. Results are ideal snapshots, and bindings are available in row order.
 Decoders reuse a snapshot or ShotResult; a unique modal outcome is not proof
 of the algorithm promise, a tie is inconclusive. Teleportation decoder reads
@@ -236,8 +235,7 @@ pairs are allowed and applied in caller order. At most 10,000 pairs
 per call; validate all before mutation. Parameterized pair gates accept
 one scalar real or explicitly symbolic angle for the whole batch.
 No Cartesian product, scheduling, hidden execution, or implicit controls.
-Bound mode appends directly through the native transaction; symbolic
-and classical mode stage on a native copy.
+Unitary modes append through the native transaction; classical mode stages on a native copy.
 
 
 ## Native variational ansatz and parameter vectors
@@ -322,3 +320,15 @@ suffix rollback for unitary gate batches (including symbolic) or staged classica
 ```python
 c=q.Circuit(4).cp([.1,.2,.3],pairs=[(2,3),(1,3),(0,3)])
 ```
+
+## Basis preparation and explicit expectation derivatives
+
+```python
+c = q.basis("0101")
+c.run().test.probability("0101", 1).require()
+t = q.Circuit.parameter("t")
+template = q.Circuit.symbolic(1).ry(t, 0).ry(2*t, 0)
+J = template.expectation_jacobian({t: .3}, [q.Z(0), q.X(0)])
+```
+
+Basis preparation is an ordinary X-only unitary block (highest wire first), not reset or arbitrary amplitude initialization. The Jacobian explicitly simulates supported one-angle gate occurrences, applies the chain rule for shared parameters and returns immutable rows in observable order and columns in native parameter order. A global phase derivative is zero for expectations, not for states. No automatic optimizer, state derivative or arbitrary generator support. Unsupported symbolic gates fail before execution; see resource contracts.
