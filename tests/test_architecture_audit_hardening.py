@@ -53,9 +53,12 @@ def test_native_append_rollback_on_partial_failure(monkeypatch):
     with pytest.raises(RuntimeError):
         c.apply(block)
     assert c.to_json()==before and c.checkpoints=={"ready":2}
+    # Gate batches now use native broadcast rather than compose. Inject at
+    # the actual append boundary without relaxing the rollback oracle.
+    monkeypatch.setattr(QuantumCircuit,"h",fail)
     with pytest.raises(RuntimeError):
         c.h([0,1])
-    assert c.to_json()==before
+    assert c.to_json()==before and c.checkpoints=={"ready":2}
 
 def test_symbolic_and_classical_batch_preserve_existing_paths():
     p=q.Circuit.parameter("theta")
