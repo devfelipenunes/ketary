@@ -66,7 +66,20 @@ def _synthesize_native(template,*,seed):
     if any(item.operation.name not in ("u","cx") for item in raw.data):
         raise UnsupportedOperation("synthesis emitted noncanonical gates")
     if not float(abs(Operator(raw).data-reference.data).max())<=1e-9:
-        raise UnsupportedOperation("strict synthesized operator residual exceeds tolerance")
+        # Distinguish a phase-only discrepancy from an actual operator mismatch.
+        # The strict acceptance criterion is unchanged; this is diagnostic only.
+        from cmath import exp
+        from numpy import angle, vdot
+        actual=Operator(raw).data
+        overlap=vdot(actual,reference.data)
+        phase=float(angle(overlap))
+        aligned_residual=float(abs(actual*exp(1j*phase)-reference.data).max())
+        residual=float(abs(actual-reference.data).max())
+        raise UnsupportedOperation(
+            "strict synthesized operator residual exceeds tolerance "
+            f"(residual={residual:.17g}, phase_aligned_residual={aligned_residual:.17g}, "
+            f"phase={phase:.17g}, wires={source.num_qubits}, seed={seed}, gates={len(raw.data)})"
+        )
     return result
 
 
