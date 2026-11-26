@@ -52,6 +52,17 @@ a.run().test.expectation("ZZ", 1).require()
 
 Checks return PASS, FAIL or UNSUPPORTED; `require()` raises on either non-pass result. State comparison may ignore global phase; complete operator comparison preserves it by default. Operator checks are limited to eight qubits and an explicit two-matrix payload budget. Invalid arguments raise errors. No implicit circuit execution occurs in operator checks or Result checks.
 
+## Trace diagnosis
+
+```python
+reference = q.bell().gates.x(0)
+observed = q.bell().gates.z(0)
+diagnosis = observed.debug.compare(reference)
+print(diagnosis.step_index, diagnosis.check.status)
+```
+
+Comparison is explicit, by equal gate indices on equal-width, equal-length circuits. The caller must establish meaningful alignment. A mismatch identifies the first observed state divergence, not necessarily its root cause. Matching traces do not prove operator equivalence. The comparison guards the combined snapshot payload and the per-trace step limit before evolving either circuit.
+
 ## Validation
 
 Run all tests, including upstream Qiskit probes. Missing Qiskit is a failure, not a passing skip. Historical local PoC results are not evidence of this branch's CI.
