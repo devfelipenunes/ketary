@@ -12,6 +12,10 @@ on:
       - 'tests/test_production_pauli_robustness.py'
       - 'tests/test_production_channels_complex.py'
       - 'tests/test_production_nested_dynamic.py'
+      - 'tests/test_production_qgt.py'
+      - 'tests/test_production_hessian.py'
+      - 'tests/test_production_native_faults.py'
+      - 'tests/test_production_mutation_evidence.py'
   workflow_dispatch:
 permissions:
   contents: read
