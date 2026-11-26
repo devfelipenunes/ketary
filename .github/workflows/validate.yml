@@ -109,6 +109,7 @@ jobs:
           python -m research.alpha_qpe_power_profile --reps 9 > alpha-qpe-power-profile.json
           python -m research.closure_physical_dynamics > closure-physical-dynamics.json
           python -m research.closure_reversible_logic > closure-reversible-logic.json
+          python -m research.alpha_toy_h2 --reps 3 > alpha-toy-h2.json
           python -m research.priority_architecture_audit > closure-architecture.json
           python -m research.architecture_inventory > architecture-inventory.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -138,6 +139,7 @@ jobs:
             alpha-qpe-power-profile.json
             closure-physical-dynamics.json
             closure-reversible-logic.json
+            alpha-toy-h2.json
             closure-architecture.json
             architecture-inventory.json
             environment.txt

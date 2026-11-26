@@ -251,6 +251,14 @@
       "symbol": "test_phase_error_repetition",
       "scope": "local dynamic syndrome + analytic Bloch expectation",
       "status": "inventoried-authored"
+    },
+    {
+      "id": "toy-h2-variational",
+      "family": "variational",
+      "path": "research/alpha_toy_h2.py",
+      "symbol": "evaluate",
+      "scope": "documented illustrative two-qubit Hamiltonian, full eigensystem and matched optimizer",
+      "status": "inventoried-authored"
     }
   ]
 }
