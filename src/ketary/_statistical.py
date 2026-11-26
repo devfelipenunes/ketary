@@ -45,9 +45,9 @@ class StatisticalContract:
             return {"status":"UNSUPPORTED","reason":"not all classical bits were measured"}
         counts=result.counts
         shots=_int(result.shots,1)
-        if len(result._counts)!=len(counts) or sum(counts.values())!=shots or any(
+        if len(result._counts)!=len(counts) or any(
             type(k) is not str or len(k)!=self.num_clbits or set(k)-set("01")
-            or type(v) is not int or v<0 for k,v in counts.items()):
+            or type(v) is not int or v<0 for k,v in counts.items()) or sum(counts.values())!=shots:
             raise ValueError("invalid shot counts")
         radius=math.sqrt(math.log(2*len(self.probabilities)/(1-self.confidence))/(2*shots))
         rows={}
