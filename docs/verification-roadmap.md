@@ -14,7 +14,7 @@ AI/MCP, hardware, formal-proof claim or public release.
 | R07 | Immutable hashed JSON witness, explicit reproduction, version metadata | Hash not authentication; only input counterexamples |
 | R08 | Explicit index-to-Contract checkpoints | Zero-input, stops at first nonpass, no persistent annotations |
 | R09 | Bounded product-state counterexample search | No exhaustive or entangled input search |
-| R10 | Bounded greedy observed-gate deletion preserving a witness | Not globally minimal, not root cause, may remove correct operations |
+| R10 | Bounded restart-on-deletion minimization preserving a witness | Not globally minimal, not root cause, may remove correct operations |
 | R11 | Simultaneous Hoeffding intervals, PASS/FAIL/INCONCLUSIVE | IID shots, fixed hypotheses, specified outcome marginals only |
 | R12 | Immutable explicit query plan, one run and payload estimate | Not a compiler/sweep optimizer, no implicit caching |
 | R13 | Incremental checkpoint cursor and streamed Pauli variance | Work/payload caps; no speedup assertion |
@@ -34,7 +34,9 @@ separate opt-in method, not used to assert strict-phase Ketary equivalence.
 `Evidence.from_json` parses bounded versioned data, never executes it.
 `reproduce` explicitly reruns two circuits; producer match is reported,
 not assumed. Greedy minimization preserves the same input and tolerance
-against a fixed reference; it is not program repair. The serialized content
+against a fixed reference; it is not program repair. A complete unchanged
+pass establishes single-gate deletion local minimality only. On budget
+exhaustion no minimality claim is made. The serialized content
 hash detects accidental changes, not malicious rewriting.
 
 Shot intervals use radius sqrt(log(2k/alpha)/(2N)); a union bound covers the

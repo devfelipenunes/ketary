@@ -36,6 +36,12 @@ Use `debug.verify_checkpoints({index: contract})` for selected zero-input
 prefixes; a divergence is not proof of root cause. Evidence JSON has a
 content hash, not an authentication signature. Reproduction runs explicitly;
 greedy minimization preserves a fixed witness, not a globally minimal cause.
+After each accepted deletion the scan restarts. If the attempt budget is not
+exhausted, every single remaining gate deletion has been tested against the
+same fixed input, phase policy, tolerance and reference. A single-deletion
+local minimum need not be globally minimal. The reference is executed once;
+there are two baseline ideal evolutions and at most one per deletion attempt.
+The 128-attempt cap, payload preflight and report schema are unchanged.
 See [roadmap contracts](verification-roadmap.md) for exact boundaries.
 
 ## Canonical usage
