@@ -90,3 +90,39 @@ class QuestProbe:
         if status:
             raise RuntimeError(f"QuEST bridge error {status}")
         return output,times
+
+    def execute_batch(self,program,state,angle_rows):
+        """Explicit research batch, no retained register or caller-owned aliases."""
+        n,rows,angles,phase=program
+        if type(n) is not int or not 1<=n<=22 or len(rows)>100000:
+            raise ValueError("invalid width or gate count")
+        rows=np.asarray(rows)
+        if rows.dtype!=np.int32 or rows.shape!=(len(angles),3) or not rows.flags.c_contiguous:
+            raise ValueError("invalid topology")
+        if len(angle_rows)>256 or len(angle_rows)*len(rows)*8>64*1024**2 or len(angle_rows)*(1<<n)*16>128*1024**2:
+            raise ValueError("batch payload exceeds bounds")
+        angle_rows=np.asarray(angle_rows,dtype=np.float64,order="C")
+        if angle_rows.ndim!=2 or angle_rows.shape[1]!=len(rows) or not 1<=len(angle_rows)<=256:
+            raise ValueError("invalid angle rows")
+        count=len(angle_rows)
+        if count*(1<<n)*16>128*1024**2:
+            raise ValueError("batch state payload exceeds 128 MiB")
+        if not np.isfinite(angle_rows).all() or not np.isfinite(phase):
+            raise ValueError("nonfinite angles or phase")
+        state=np.asarray(state,dtype=np.complex128,order="C")
+        if state.shape!=(1<<n,) or not np.isfinite(state).all() or not np.isclose(
+                np.vdot(state,state).real,1,rtol=0,atol=1e-9):
+            raise ValueError("expected normalized complex state")
+        output=np.empty((count,1<<n),dtype=np.complex128)
+        times=np.empty(5,dtype=np.float64)
+        with _LOCK:
+            if self._closed:
+                raise RuntimeError("QuEST environment closed")
+            fn=self._lib.ketary_quest_batch
+            fn.argtypes=[ct.c_int,ct.c_int,ct.c_int,_I,_D,_D,ct.c_double,_D,_D]
+            fn.restype=ct.c_int
+            status=fn(n,len(rows),count,rows,angle_rows.reshape(-1),
+                      state.view(np.float64),phase,output.view(np.float64).reshape(-1),times)
+        if status:
+            raise RuntimeError(f"QuEST batch bridge error {status}")
+        return output,times
