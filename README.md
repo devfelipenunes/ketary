@@ -78,6 +78,7 @@ Native interoperability is explicit. Existing aliases continue to work.
 - [Architecture and decision records](docs/architecture.md)
 - [Architecture progression and scalability](docs/architecture-roadmap.md)
 - [Complete surface map](docs/api-surface.md)
+- [Technical consolidation roadmap](docs/technical-consolidation.md)
 - [Known limitations](docs/known-limitations.md)
 - [Compatibility policy](docs/compatibility.md)
 
