@@ -20,26 +20,38 @@ def _selection(c,wires):
         raise ValueError("expected nonempty distinct wires, at most 4096")
     return selected
 
+def _native_batch(c,append):
+    """Run a preflighted, phase-neutral native append as a suffix transaction.
+
+    Symbolic and classical modes retain independent staging: a failed native
+    parameter insertion must not leak a parameter-table or classical change.
+    The bound path only uses standard native gate methods.
+    """
+    if c.num_clbits or getattr(c,"_symbolic",False):
+        candidate=c._qc.copy()
+        append(candidate)
+        c._qc=candidate
+        return c
+    start=len(c._qc.data)
+    phase=c._qc.global_phase
+    try:
+        append(c._qc)
+    except Exception:
+        del c._qc.data[start:]
+        c._qc.global_phase=phase
+        raise
+    return c
+
+
 def _single(c,name,wire,*params):
     # Preserve the common scalar path and existing validation, including bool.
     if type(wire) is int or hasattr(wire,"__index__"):
         return getattr(c.gates,name)(*params,wire)
     selected=_selection(c,wire)
-    if c.num_clbits or getattr(c,"_symbolic",False):
-        # Preserve parameter conflict and dynamic-mode semantics until their
-        # dedicated staging contracts have been validated.
-        candidate=c.copy()
-        for w in selected:
-            getattr(candidate.gates,name)(*params,w)
-        c._qc=candidate._qc
-        return c
-    from ._circuit import Circuit
-    from ._adapter import _append_bound_block
-    staged=Circuit(len(selected))
-    for w in range(len(selected)):
-        getattr(staged.gates,name)(*params,w)
-    _append_bound_block(c._qc,staged._qc,selected)
-    return c
+    # All supported single-wire methods take real/explicit symbolic angles
+    # followed by a wire. Native broadcast preserves supplied wire order.
+    values=tuple(c._gate_angle(p) for p in params)
+    return _native_batch(c,lambda native:getattr(native,name)(*values,list(selected)))
 
 
 def _rotation(c,name,theta,wire):
@@ -56,19 +68,11 @@ def _rotation(c,name,theta,wire):
     if len(values)!=len(selected):
         raise ValueError("angle and wire sequences must have equal length")
     values=tuple(c._gate_angle(v) for v in values)
-    if c.num_clbits or getattr(c,"_symbolic",False):
-        candidate=c.copy()
-        for w,v in zip(selected,values):
-            getattr(candidate.gates,name)(v,w)
-        c._qc=candidate._qc
-        return c
-    from ._circuit import Circuit
-    from ._adapter import _append_bound_block
-    staged=Circuit(len(selected))
-    for w,v in enumerate(values):
-        getattr(staged.gates,name)(v,w)
-    _append_bound_block(c._qc,staged._qc,selected)
-    return c
+    def append(native):
+        gate=getattr(native,name)
+        for w,v in zip(selected,values,strict=True):
+            gate(v,w)
+    return _native_batch(c,append)
 
 
 class SweepPlan:
