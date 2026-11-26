@@ -98,7 +98,7 @@ def experiment(kind,seed):
     rng=np.random.default_rng(seed)
     p,r=q.Circuit.parameter_vector("a",2)
     placements=((3,0),(2,1))
-    edges=((0,1),(1,2),(2,3))
+    edges=((0,1,.8),(1,2,-.3),(2,3,1.1))
     h=q.Z(0)+.7*(q.Z(1)@q.Z(2))+.31*q.X(3)
     # Independently construct the native observable matrix using wire indexing.
     I=np.eye(2);Z=np.diag([1.,-1.]);X=np.array([[0.,1.],[1.,0.]])
@@ -107,7 +107,7 @@ def experiment(kind,seed):
         c=q.Circuit.symbolic(4)
         if kind=="qaoa":
             c.h(range(4))
-            cost=sum((q.Z(a)@q.Z(b) for a,b in edges),q.I()*0)
+            cost=sum((w*(q.Z(a)@q.Z(b)) for a,b,w in edges),q.I()*0)
             c.evolve(cost,time=p).rx(2*r,range(4))
         else:
             layer=q.Circuit.symbolic(2).ry(p,0).ry(r,1).cx(0,1)
@@ -118,7 +118,7 @@ def experiment(kind,seed):
         c=QuantumCircuit(4)
         if kind=="qaoa":
             c.h(range(4))
-            for a,b in edges:c.rzz(2*p,a,b)
+            for a,b,w in edges:c.rzz(2*w*p,a,b)
             c.rx(2*r,range(4))
         else:
             layer=QuantumCircuit(2);layer.ry(p,0);layer.ry(r,1);layer.cx(0,1)
