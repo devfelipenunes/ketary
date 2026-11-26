@@ -75,8 +75,14 @@ def _validate_bound_values(qc):
     if qc.parameters:
         raise UnsupportedOperation("bind all symbolic parameters before this operation")
     for item in qc.data:
-        for value in item.operation.params:
-            _angle(value)
+        for value in item.params:
+            # CircuitInstruction exposes native parameters without constructing
+            # a Python Gate. Exact floats are the ordinary native numeric case.
+            if type(value) is float:
+                if not math.isfinite(value):
+                    raise ValueError("rotation angle must be finite")
+            else:
+                _angle(value)
     if not math.isfinite(float(qc.global_phase)):
         raise ValueError("invalid global phase")
 
