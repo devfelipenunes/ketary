@@ -109,7 +109,6 @@
     "Circuit.decompose",
     "Circuit.diff",
     "Circuit.evolve",
-    "Circuit.expectation_jacobian",
     "Circuit.from_json",
     "Circuit.if_x",
     "Circuit.if_z",
@@ -251,7 +250,6 @@
     "_Visualize.text",
     "amplitude_amplification",
     "ansatz",
-    "basis",
     "bernstein_vazirani",
     "constant_oracle",
     "decode_bernstein_vazirani",
@@ -268,7 +266,9 @@
     "recover_simon",
     "simon",
     "superdense",
-    "teleportation"
+    "teleportation",
+    "basis",
+    "Circuit.expectation_jacobian"
   ],
   "Native": [
     "Circuit.append",
