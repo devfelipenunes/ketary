@@ -84,3 +84,8 @@ or exposed, no implicit circuit execution or persistent result cache.
 Numerical finite/imaginary checks and normalization/clipping policy are
 shared with the single-label path. Existing bounds, compensated sum,
 label order and public signatures are unchanged.
+
+Derivative planners share a private call-local shifted-native-copy helper;
+all shifts retain the existing per-method preflight, full native validation
+and independent ownership. No additional state payload, caching, native
+execution or change to shift count, gate budget or formula.
