@@ -67,8 +67,8 @@ def test_unambiguous_binary_discrimination():
     U=np.column_stack([columns,u[:,2:]])
     strict(U.conj().T@U,np.eye(4))
     c=q.Circuit.from_unitary(U)
-    for label,expected in (("00",[1-s,0,s,0]),("0+",[0,1-s,s,0])):
-        strict(abs(c.run(initial_state=label).math.statevector())**2,expected)
+    for initial,expected in ((np.array([1,0,0,0],complex),[1-s,0,s,0]),(np.array([1,1,0,0],complex)/np.sqrt(2),[0,1-s,s,0])):
+        strict(abs(c.run(initial_state=initial).math.statevector())**2,expected)
 
 @pytest.mark.parametrize("fidelity",[.6,.8,.95])
 def test_bell_pair_bit_error_purification(fidelity):
