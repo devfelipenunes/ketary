@@ -67,3 +67,17 @@ QGT: Q_ij = <d_i psi | (I-|psi><psi|) | d_j psi> for normalized pure state. For 
 Expectation Hessian: let gate angles theta_j(x) have qualified two/four-point exact ideal expectation rules D_j. Then H_pq = sum_j (D_j f) d_pq theta_j + sum_jk (D_j D_k f) d_p theta_j d_q theta_k. Applying shift operators twice also gives the diagonal second derivative, with duplicate offsets combined. Both angle derivatives are computed from native expressions, including a zero first derivative with nonzero second derivative. Symbolic global phase drops out of expectations. Floating-point arithmetic and bounded qualified gates only; not a formal certificate or arbitrary generator.
 
 Local channel application embeds K_r on the ordered selected wires, leaving other bits untouched. The complete state evolves by sum_r K_r rho K_r^dagger. The input native Kraus map is validated before execution; composition of maps may be constructed explicitly through native Kraus composition, subject to existing final input caps.
+
+## Shared-parameter conditioning and composition
+
+For two disjoint RY(a+b) blocks and RY(epsilon*b) on a third wire,
+with any scalar parameter-dependent global phase, the ideal QGT is
+[[1/2,1/2],[1/2,1/2+epsilon^2/4]]. Its determinant is epsilon^2/8.
+At epsilon=0 the difference direction (1,-1) is null; small epsilon
+makes the metric nearly singular. For H=(Z0+Z2)/2, E=cos(a+b),
+Jacobian=-sin(a+b)*(1,1), Hessian=-cos(a+b)*ones(2,2). For K=Z1,
+E=cos(epsilon*b), with nonzero derivative only in the b direction.
+The integration fixtures cross-check the complete state, native operator,
+ordered group expectations, Jacobian, Hessian, QGT and Contract, without
+assuming a numerical rank below floating-point resolution. These are
+analytic product-state references, not a general optimizer guarantee.
