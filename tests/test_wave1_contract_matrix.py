@@ -11,7 +11,8 @@ from qiskit.circuit import Parameter
     ("wrong_native",TypeError),
 ])
 def test_public_boundary(kind,error,monkeypatch):
-    c=q.Circuit(2).h(0).checkpoint("prefix").register("pair",[1,0])
+    c=q.Circuit(2).h(0).checkpoint("prefix")
+    assert c.register("pair",[1,0])==(1,0)
     before=c.to_qiskit()
     def forbidden(*a,**k):
         pytest.fail("invalid operation reached native mutation")
