@@ -224,7 +224,12 @@ class _Cursor:
         while self.index<index:
             item=self.qc.data[self.index]
             self.wires=tuple(self.qc.find_bit(w).index for w in item.qubits)
-            self.operation=item.operation.name
-            self.state=self.state.evolve(item.operation,qargs=list(self.wires))
+            operation=item.operation
+            self.operation=operation.name
+            self.state=self.state.evolve(operation,qargs=list(self.wires))
             self.index+=1
-        return TraceStep(self.operation,self.wires,Result(self.state.data))
+        # The pinned native evolution is out-of-place. Freeze an exclusively
+        # owned fresh array; subsequent evolve borrows it read-only. Repeated
+        # checkpoints and aliasing/native views fall back to a defensive copy.
+        snapshot=Result._from_evolution(self.state.data)
+        return TraceStep(self.operation,self.wires,snapshot)
