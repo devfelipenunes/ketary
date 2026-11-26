@@ -17,6 +17,7 @@ on:
       - 'tests/test_production_hessian.py'
       - 'tests/test_production_native_faults.py'
       - 'tests/test_production_mutation_evidence.py'
+      - 'tests/test_production_semantic_mutants.py'
   workflow_dispatch:
 permissions:
   contents: read
