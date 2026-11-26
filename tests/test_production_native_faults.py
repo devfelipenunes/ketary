@@ -95,8 +95,10 @@ def test_dynamic_full_register_condition(monkeypatch):
     assert c.to_qiskit()==raw
     raw=QuantumCircuit(1,1);raw.measure(0,0)
     with raw.if_test((raw.clbits[0],1)):
-        with raw.if_test((raw.clbits[0],1)):raw.x(0)
-    with pytest.raises(q.UnsupportedOperation):q.Circuit.from_dynamic(raw)
+        with raw.if_test((raw.clbits[0],1)):
+            with raw.if_test((raw.clbits[0],1)):
+                with raw.if_test((raw.clbits[0],1)):raw.x(0)
+    with pytest.raises(q.ResourceLimit,match="depth"):q.Circuit.from_dynamic(raw)
 
 @pytest.mark.parametrize("mode",["logical","synthesized","target"])
 def test_transpiler_failure_is_explicit(monkeypatch,mode):

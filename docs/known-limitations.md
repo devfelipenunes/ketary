@@ -35,3 +35,5 @@ Explicit from_dynamic supports a bounded native subset with multiple classical r
 Explicit prepare_state/from_unitary and evolve_exact are bounded to five wires, with checked unitary lowering. Preparation guarantees the requested output only on the zero input; the complete synthesized unitary is independently checked against the native preparation definition. Hardware target handoff remains local-only qualified. Native metadata/barriers are rejected rather than discarded.
 
 Explicit native Kraus channel execution after ideal evolution (<=4 wires, 16 Kraus matrices) and complex Pauli expectation are separate bounded paths. General channel composition/noisy mid-circuit measurements are not implied. Existing pure Result and real Observable contracts remain intact.
+
+Native dynamic conditions may nest to three levels with gate-only leaves and top-level measurement/reset; loops, variables, stretches and conditional measurement/reset remain unsupported. Count budget includes both alternatives at every level. No hardware qualification.
