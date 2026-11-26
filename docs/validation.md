@@ -61,3 +61,5 @@ Technical validation: correct subset, tests, bounded memory, provisional
 performance targets and reviewed contracts. Human usability, dependency
 license review, vulnerability findings and owner review are separate.
 The owner authorizes reviewed merges after CI. No package publication is authorized. Experimental L0 architecture is implemented; production and public release gates remain separate.
+
+See [reproducibility protocol](benchmarking.md) for the expanded workloads and controlled-machine acceptance procedure. Shared CI evidence does not complete the controlled-machine requirement.

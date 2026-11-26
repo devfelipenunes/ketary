@@ -24,6 +24,17 @@ def workload(n, count):
         ops.append((name,wires))
     return ops
 
+def mixed_workload(n,count):
+    rng=random.Random(112026+n+count)
+    ops=[]
+    arity={"h":1,"x":1,"y":1,"z":1,"s":1,"t":1,"rx":1,"ry":1,"rz":1,"cx":2,"cz":2,"swap":2,"ccx":3}
+    for _ in range(count):
+        name=rng.choice(tuple(arity))
+        wires=tuple(rng.sample(range(n),arity[name]))
+        args=(rng.uniform(-3,3),*wires) if name in ("rx","ry","rz") else wires
+        ops.append((name,args))
+    return ops
+
 def build(n, ops, variant):
     c=QuantumCircuit(n) if variant=="native" else q.Circuit(n)
     gates=c if variant=="native" else c.gates
@@ -72,7 +83,7 @@ def rss_worker(variant):
     return {"variant":variant,"n":n,"gates":len(ops),"before":before,"after":after,"payload_bytes":state.nbytes}
 
 def main(reps):
-    data={"python":sys.version,"platform":platform.platform(),"qiskit":qiskit.__version__,"numpy":np.__version__,"cpu":platform.processor(),"repetitions":reps,"cases":[],"rss":[]}
+    data={"commit":os.environ.get("GITHUB_SHA","local-unrecorded"),"threads":{k:os.environ.get(k) for k in ("OMP_NUM_THREADS","OPENBLAS_NUM_THREADS","MKL_NUM_THREADS")},"affinity":sorted(os.sched_getaffinity(0)) if hasattr(os,"sched_getaffinity") else None,"cpu_count":os.cpu_count(),"python":sys.version,"platform":platform.platform(),"qiskit":qiskit.__version__,"numpy":np.__version__,"cpu":platform.processor(),"repetitions":reps,"cases":[],"rss":[]}
     for n,count in [(8,1000),(8,10000)]:
         ops=workload(n,count)
         native=build(n,ops,"native"); sdk=build(n,ops,"sdk")
@@ -109,6 +120,18 @@ def main(reps):
     for expected,observed in zip(native_trace(),sdk_trace(),strict=True):
         np.testing.assert_allclose(expected,observed,atol=1e-9,rtol=0)
     data["cases"].append({"operation":"trace","n":n,"gates":len(ops),**paired(native_trace,sdk_trace,reps)})
+    for n,count in [(8,1000),(8,10000)]:
+        ops=mixed_workload(n,count)
+        a=build(n,ops,"native"); b=build(n,ops,"sdk")
+        assert a==b.to_qiskit()
+        data["cases"].append({"operation":"mixed_build","n":n,"gates":count,**paired(lambda:build(n,ops,"native"),lambda:build(n,ops,"sdk"),reps)})
+        assert a.compose(a)==b.compose(b).to_qiskit()
+        data["cases"].append({"operation":"mixed_compose","n":n,"gates":count,**paired(lambda:a.compose(a),lambda:b.compose(b),reps)})
+    for n,count in [(8,128),(12,128)]:
+        ops=mixed_workload(n,count)
+        a=build(n,ops,"native"); b=build(n,ops,"sdk")
+        np.testing.assert_allclose(execute(a,"native"),execute(b,"sdk"),atol=1e-9,rtol=0)
+        data["cases"].append({"operation":"mixed_statevector","n":n,"gates":count,**paired(lambda:execute(a,"native"),lambda:execute(b,"sdk"),reps)})
     variants=["native","sdk"]*3; random.Random(42).shuffle(variants)
     for variant in variants:
         raw=subprocess.check_output([sys.executable,__file__,"--rss-worker",variant],text=True)

@@ -1,0 +1,19 @@
+# Observed Linux CPython 3.12 CI resolution, run 45738240604.
+# Validation constraints, not runtime pins or a hash-locked supply chain.
+coverage==7.17.5
+dill==0.4.1
+iniconfig==2.3.1
+librt==0.17.0
+mypy==1.20.2
+mypy_extensions==1.2.0
+numpy==2.5.5
+packaging==26.4
+pathspec==1.1.1
+pluggy==1.7.0
+Pygments==2.21.0
+pytest==9.2.0
+qiskit==2.6.2
+rustworkx==0.18.1
+scipy==1.18.1
+stevedore==5.10.0
+typing_extensions==4.16.0
