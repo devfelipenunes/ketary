@@ -1,6 +1,6 @@
 # Module boundaries and architectural debt
 
-Baseline: CORE01–CORE10, commit 3e1b0102bcc563c8bab0d4d9741163c5077507fc.
+Baseline: CORE01–CORE10 and #42; updated for private execution consolidation.
 Static audit of all Python modules under src/ketary. This is an import and
 responsibility audit, not a performance or concurrency proof.
 
@@ -12,14 +12,14 @@ responsibility audit, not a performance or concurrency proof.
 | Construction | _circuit, _algorithms, _ergonomics | native circuit builder, factories, ordered selection, binding/sweep |
 | Math and predicates | _result, _observable, _contracts, _statistical | snapshots, real Pauli sums, numerical/statistical predicates |
 | Verification | _checks, _trace, _verification | operators, explicit traces, comparison and evidence |
-| Native integration | _adapter, _classical, _external, _transpilation | validation, optional dynamic/external execution, logical transpile |
+| Native integration | _adapter, _execution, _classical, _external, _transpilation | validation, optional dynamic/external execution, logical transpile |
 | Logical artifacts | _replay, _inspection, _plan | strict replay, bounded read models, explicit query plan |
 | Transformation | _optimization, _gate_specs | conservative cancellation, allowlisted gate metadata |
 | Presentation | _reports, _resources, _visualization | verdict/export, logical resource accounting, text/SVG |
 | Shared foundation | _validation | scalar validation and resource guards |
 
 This classification assigns responsibilities; modules can contain multiple
-concerns. All 24 Python modules including the facade are accounted for.
+concerns. All 25 Python modules including the facade are accounted for.
 The stub and typing marker are not runtime Python modules.
 
 ## Actual direct imports (including local imports)
@@ -27,7 +27,7 @@ The stub and typing marker are not runtime Python modules.
 | Dependency | Direct source modules |
 |---|---|
 | qiskit | _adapter, _checks, _circuit, _classical, _observable, _replay, _result, _transpilation, _verification |
-| numpy | _checks, _circuit, _result, _trace, _validation, _verification |
+| numpy | _checks, _execution, _result, _trace, _validation, _verification |
 | qiskit_aer | _classical only |
 | mqt | _external only |
 
@@ -62,6 +62,9 @@ backend substitution.
 - A core-only subprocess blocks Aer and MQT imports, constructs an Observable
   and verifies a Bell snapshot. This checks optional dependency isolation
   along that workflow, not every execution path.
+- Eager internal import graph must be acyclic; _validation and _gate_specs
+  cannot eagerly import internal modules. Function-local imports are excluded
+  from this cycle check, not claimed to be acyclic.
 - Existing signature, compatibility, native-oracle and packaging tests remain
   required. No new runtime dependencies.
 
@@ -78,7 +81,8 @@ A05 — verify cost and phase/order semantics against the existing suite after
 any refactor; compare equivalent workloads. No architectural rewrite merely
 to resemble a hexagon.
 
-A01 and the boundary tests are the scope of this documentation PR.
-A02–A05 are optional engineering follow-ups, not promises or implemented
-features. Independent human validation and dedicated-host performance remain
+A01 is implemented. A02 is partially addressed by extracting ideal execution
+and reusing the trace cursor; A03 adds eager-import cycle and foundation guards.
+A04 remains conditional; A05 uses the existing validation and benchmark protocol.
+See [architecture progression](architecture-roadmap.md) for exit criteria. Independent human validation and dedicated-host performance remain
 separate acceptance tasks.
