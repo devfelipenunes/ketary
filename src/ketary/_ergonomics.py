@@ -404,6 +404,81 @@ def _evolve_product(c,observable,*,time,steps,order):
     return c.apply(block,times=steps)
 
 
+def _quantum_geometric_tensor(c,bindings,*,max_bytes):
+    """Projected state derivatives for qualified one-angle generators."""
+    from math import pi,sqrt
+    import numpy as np
+    from ._validation import _real
+    from ._circuit import Circuit
+    if c.num_clbits:
+        raise UnsupportedOperation("QGT requires ideal unitary evolution")
+    if c.num_qubits>8 or len(c.parameters)>16 or len(c._qc.data)>256:
+        raise ResourceLimit("QGT supports <=8 wires, 16 parameters, 256 gates")
+    template=c.copy()
+    params=template.parameters
+    _limit(template.num_qubits,2*len(params)+8,budget=max_bytes)
+    if not isinstance(bindings,Mapping) or set(bindings)!=set(params):
+        raise ValueError("complete native parameter identity mapping required")
+    values={p:_real(bindings[p]) for p in params}
+    def numeric(expr):
+        try:
+            if getattr(expr,"parameters",()):
+                expr=expr.bind({p:values[p] for p in expr.parameters})
+            z=complex(expr)
+        except (TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
+            raise ValueError("invalid state derivative expression") from exc
+        if z.imag!=0:
+            raise ValueError("state derivative expression must be real")
+        return _real(z.real)
+    rotations={"rx","ry","rz","rxx","ryy","rzz","crx","cry","crz"}
+    phases={"p","cp"}
+    staged=[]
+    for i,item in enumerate(template._qc.data):
+        for j,angle in enumerate(item.params):
+            present=getattr(angle,"parameters",())
+            if not present:
+                continue
+            name=item.operation.name
+            if j!=0 or name not in rotations|phases:
+                raise UnsupportedOperation("generator not qualified for QGT state shift")
+            weights=tuple(numeric(angle.gradient(p)) if p in present else 0. for p in params)
+            if any(weights):
+                factor=.5 if name in phases else 1/(2*sqrt(2))
+                staged.append((i,weights,factor))
+                if len(staged)>32:
+                    raise ResourceLimit("QGT supports <=32 active occurrences")
+    bound=template.bind(values)
+    if not params:
+        return ()
+    # Validate all shift circuits before any simulation, including global phase binding.
+    pairs=[]
+    for index,weights,factor in staged:
+        pair=[]
+        for sign in (1,-1):
+            raw=bound._qc.copy()
+            item=raw.data[index]
+            gate=item.operation.to_mutable()
+            gate.params=[_real(float(gate.params[0])+sign*pi/2)]
+            raw.data[index]=item.replace(operation=gate)
+            pair.append(Circuit._from_native(raw,owned=True))
+        pairs.append((weights,factor,*pair))
+    psi=bound.run(max_bytes=max_bytes).math.statevector()
+    derivatives=np.zeros((psi.size,len(params)),dtype=complex)
+    with np.errstate(over="ignore",invalid="ignore"):
+        for weights,factor,plus,minus in pairs:
+            delta=factor*(plus.run(max_bytes=max_bytes).math.statevector()-minus.run(max_bytes=max_bytes).math.statevector())
+            for j,w in enumerate(weights):
+                if w:
+                    derivatives[:,j]+=w*delta
+        # The omitted derivative of native global phase lies along psi and vanishes.
+        # No dense 2**n by 2**n projector is allocated.
+        projected=derivatives-psi[:,None]*(psi.conj()@derivatives)[None,:]/np.vdot(psi,psi).real
+        Q=projected.conj().T@projected
+    if not np.isfinite(Q).all():
+        raise ArithmeticError("QGT is not finite")
+    return tuple(tuple(complex(z) for z in row) for row in Q)
+
+
 def _expectation_hessian(c,bindings,observables,*,max_bytes):
     """Bounded second-order chain rule with exact ideal occurrence shifts."""
     from math import pi,sqrt,fsum

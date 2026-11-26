@@ -335,4 +335,6 @@ Basis preparation is an ordinary X-only unitary block (highest wire first), not 
 
 CRX, CRY and CRZ now use a four-point expectation shift with explicit shared 128-circuit limit; U remains unsupported when parameterized. The mathematical guide gives the generator-frequency identity.
 
+`template.quantum_geometric_tensor({theta: .3})` explicitly runs bounded ideal state shifts and returns immutable complex rows/columns in native parameter order. Use the real part as the pure-state metric; no automatic inversion or optimizer. Rank-deficient metrics are valid. See mathematical/resource guides.
+
 `template.expectation_hessian(bindings, [H])` returns immutable observable-by-parameter-by-parameter rows in native parameter order. Exact ideal shift rules and second-order chain rule; no automatic optimizer or finite-difference step. Resource caps are explicit.
