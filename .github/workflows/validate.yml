@@ -1,6 +1,8 @@
 name: Validate experimental SDK
 on:
   pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,7 +18,9 @@ jobs:
         with:
           python-version-file: '.python-version'
       - name: Install experimental dependencies
-        run: python -m pip install -r requirements.txt
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install --no-deps -e .
       - name: Record environment
         run: |
           python --version
@@ -40,7 +44,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: '.python-version'
-      - run: python -m pip install -r requirements.txt
+      - run: |
+          python -m pip install -r requirements.txt
+          python -m pip install --no-deps -e .
       - name: Paired timing and isolated peak RSS
         run: |
           python -m pip freeze > environment.txt
@@ -81,3 +87,38 @@ jobs:
             license-inventory.json
             audited-requirements.txt
             vulnerability-report.json
+
+  packaging:
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: '.python-version'
+      - name: Build wheel and source distribution
+        run: |
+          python -m pip install build twine
+          python -m build
+          python -m twine check dist/*
+      - name: Install wheel in clean environment
+        run: |
+          python -m venv "$RUNNER_TEMP/ketary-wheel"
+          "$RUNNER_TEMP/ketary-wheel/bin/python" -m pip install dist/*.whl
+          "$RUNNER_TEMP/ketary-wheel/bin/python" -m pip check
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/ketary-wheel/bin/python" -c 'import ketary as q; from importlib.metadata import version; assert version("ketary") == "0.1.0.dev0"; assert q.bell().run().test.probability("00", 0.5).status == "PASS"; print(q.__file__)'
+      - name: Install source distribution in clean environment
+        run: |
+          python -m venv "$RUNNER_TEMP/ketary-sdist"
+          "$RUNNER_TEMP/ketary-sdist/bin/python" -m pip install dist/*.tar.gz
+          "$RUNNER_TEMP/ketary-sdist/bin/python" -m pip check
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/ketary-sdist/bin/python" -c 'import ketary as q; assert q.ghz(3).run().test.probability("111", 0.5).status == "PASS"; print(q.__file__)'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: experimental-distributions
+          path: dist/*

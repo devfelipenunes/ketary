@@ -2,14 +2,14 @@
 
 An experimental Python SDK for quantum programming, built on Qiskit.
 
-**Status: design spike.** The interface is not stable, the production gate is open, and no package release is available. This branch proposes Apache-2.0 licensing (see LICENSE); adoption is subject to PR review. Third-party licenses remain applicable. No PyPI release is authorized.
+**Status: design spike.** The interface is not stable, the production gate is open, and no package release is available. Ketary is licensed under Apache-2.0 (see LICENSE). Third-party licenses remain applicable. No PyPI release is authorized.
 
 ## Try the proof of concept
 
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements.txt
+python -m pip install -e '.[test]'
 python -m pytest -q -rs tests research/probes
 ```
 
@@ -55,7 +55,11 @@ Run `python -m examples.first_bell` and `python -m examples.diagnose_phase` from
 
 ## Workflow
 
-All changes go through branches and pull requests. Do not merge automatically. Review evidence and production readiness before expanding scope or publishing.
+All changes go through branches and pull requests. Merge reviewed changes only after required CI passes and within owner authorization. Do not bypass checks or publish packages without explicit authorization.
+
+## Local distribution builds
+
+Install `build` and run `python -m build` to produce a local wheel and source distribution. The version `0.1.0.dev0` is an internal development identifier, not a published release. CI installs both artifacts in clean environments outside the checkout. Use `pip install .` for a local installation with runtime dependencies only.
 
 ## Internal architecture (experimental)
 

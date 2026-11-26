@@ -15,10 +15,9 @@ new backend, or custom simulator is introduced.
 
 The package exports the same public objects. The previous private _limit
 binding is retained for existing internal tests, not part of the supported
-public API. No new gates, parameter support, packaging or release in this PR.
+public API. The package uses a src layout; new gates and parameter support are separate increments.
 Validate all existing tests, facade imports and paired benchmarks before
 accepting the modularization. The production gate and human usability
 evaluation remain separate requirements. Python 3.12.x only.
 
-Stacked draft PR: base is the PoC branch, not main. Review and merge the base
-first if explicitly approved; then retarget this PR to main and re-run CI.
+The PoC and modular refactor are merged into main. The package remains experimental.
