@@ -48,6 +48,10 @@ class _CircuitChecks:
 
 
     def metrics(self,other,*,ignore_global_phase=False,atol=1e-9,max_bytes=16*1024**2):
+        from ._reports import OperatorMetricsReport
+        return OperatorMetricsReport(self._metrics(other,ignore_global_phase=ignore_global_phase,atol=atol,max_bytes=max_bytes))
+
+    def _metrics(self,other,*,ignore_global_phase=False,atol=1e-9,max_bytes=16*1024**2):
         """Dense numerical metrics, not formal proof; common aligned phase."""
         from ._circuit import Circuit
         from qiskit.quantum_info import Operator
@@ -82,8 +86,9 @@ class _CircuitChecks:
 
     def compare(self,other,*,inputs=None,complete=True,ignore_global_phase=False,atol=1e-9,max_bytes=64*1024**2):
         from ._verification import compare
-        return compare(self._c,other,inputs=inputs,complete=complete,ignore_global_phase=ignore_global_phase,
-                       atol=atol,max_bytes=max_bytes)
+        from ._reports import ComparisonReport
+        return ComparisonReport(compare(self._c,other,inputs=inputs,complete=complete,ignore_global_phase=ignore_global_phase,
+                       atol=atol,max_bytes=max_bytes))
 
     def external_equivalence(self,other,*,deadline=10):
         from ._external import qcec_compare

@@ -227,3 +227,61 @@ def recover_simon(samples,n):
         if (rows[pivot]&answer).bit_count()%2:
             answer|=1<<pivot
     return format(answer,f"0{n}b")
+
+
+def _decode_peak(result,wires,atol):
+    from ._result import Result
+    from ._validation import _tol
+    if not isinstance(result,Result):
+        raise TypeError("expected ideal Result snapshot")
+    tolerance=_tol(atol)
+    distribution=result.math.marginal_probabilities(wires)
+    peak=max(distribution.values())
+    labels=tuple(label for label,p in distribution.items() if peak-p<=tolerance)
+    return {"status":"PASS" if len(labels)==1 else "INCONCLUSIVE",
+            "label":labels[0] if len(labels)==1 else None,
+            "peak_probability":peak,"tied_labels":list(labels),
+            "scope":"unique modal ideal outcome only; not proof of algorithm promise"}
+
+def decode_phase_estimation(result,*,precision,atol=1e-9):
+    """Decode the modal counting-register outcome for the provided QPE example."""
+    from ._result import Result
+    from ._validation import ResourceLimit
+    p=_int(precision,1)
+    if p>12:
+        raise ResourceLimit("phase estimation precision limited to 12 bits")
+    if not isinstance(result,Result):
+        raise TypeError("expected ideal Result snapshot")
+    if result.num_qubits!=p+1:
+        raise ValueError("expected precision counting wires plus one eigenstate wire")
+    report=_decode_peak(result,range(p-1,-1,-1),atol)
+    report["phase"]=None if report["label"] is None else int(report["label"],2)/(1<<p)
+    return report
+
+def decode_bernstein_vazirani(result,*,atol=1e-9):
+    """Decode the modal input label of the documented parity-oracle example."""
+    from ._result import Result
+    from ._validation import ResourceLimit
+    if not isinstance(result,Result):
+        raise TypeError("expected ideal Result snapshot")
+    n=result.num_qubits-1
+    if not 1<=n<=16:
+        raise ResourceLimit("decoder supports 1..16 input wires plus target")
+    return _decode_peak(result,range(n-1,-1,-1),atol)
+
+def decode_teleportation(result):
+    """Return empirical output-bit frequencies, not a fidelity estimate."""
+    from ._classical import ShotResult
+    if not isinstance(result,ShotResult):
+        raise TypeError("expected ShotResult")
+    if result.num_clbits!=3 or (2 not in result.measured_bits):
+        raise ValueError("expected the teleportation example's measured output bit 2")
+    shots=_int(result.shots,1)
+    counts=result.counts
+    if len(counts)!=len(result._counts) or sum(counts.values())!=shots or any(
+            type(k) is not str or len(k)!=3 or set(k)-set("01") or type(v) is not int or v<0
+            for k,v in counts.items()):
+        raise ValueError("invalid shot count schema")
+    output={bit:sum(v for k,v in counts.items() if k[0]==bit) for bit in ("0","1")}
+    return {"scope":"empirical output bit 2; not state fidelity or proof of teleportation",
+            "shots":shots,"counts":output,"probabilities":{k:v/shots for k,v in output.items()}}

@@ -21,3 +21,5 @@ approved. See docs/sdk-roadmap.md for limitations and release gates.
 - Experimental verification engineering: shared checks, operator metrics, witness search and replay, semantic diff, explicit checkpoints, statistical contracts, query plans, streamed observable variance and isolated external verifier comparison.
 
 - Pre-alpha stabilization: runtime/stub parity tests, consistent purity budget validation, onboarding and verification guides, clean-wheel example and dynamic-extra smoke tests, expanded matched benchmark and artifact metadata checks.
+
+- Experimental DX ergonomics: typed JSON-compatible reports, ordered batches, named logical selections/checkpoints, explicit block application and reversible composition, local Pauli maps, named binding and zipped sweeps, modal/empirical decoders, and paired semantic examples.

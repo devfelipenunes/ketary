@@ -27,6 +27,10 @@ class StatisticalContract:
             object.__setattr__(self,key,value)
 
     def verify(self,result):
+        from ._reports import StatisticalReport
+        return StatisticalReport(self._verify(result))
+
+    def _verify(self,result):
         """Hoeffding + union bound over prespecified marginal outcome events.
 
         PASS requires every simultaneous interval inside its tolerance band;

@@ -140,6 +140,8 @@ class _Math:
 
     def expectation(self,pauli):
         """Expectation of a Hermitian Pauli string, leftmost character is q[n-1]."""
+        from ._ergonomics import _pauli_label
+        pauli=_pauli_label(self._r._n,pauli)
         if not isinstance(pauli,str) or len(pauli)!=self._r._n or any(p not in "IXYZ" for p in pauli):
             raise ValueError("expected a full-width uppercase I/X/Y/Z Pauli label")
         from qiskit.quantum_info import Pauli, Statevector
@@ -412,6 +414,10 @@ class _Checks:
             raise ValueError("expected Pauli value must be in [-1,1]")
         a=self._r.math.expectation(pauli)
         return CheckResult("PASS" if abs(a-expected)<=t else "FAIL",a,expected,t,f"Pauli {pauli}")
+
+    def expectations(self,values,*,atol=1e-9):
+        from ._contracts import Contract
+        return Contract(self._r.num_qubits,expectations=values,atol=atol).verify(self._r)
 
     def state(self,target,*,ignore_global_phase=True,atol=1e-9):
         """Maximum amplitude residual after optional phase alignment."""

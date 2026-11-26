@@ -130,6 +130,11 @@ class _Debug:
 
     def compare_checkpoints(self,reference,pairs,*,ignore_global_phase=True,atol=1e-9,
                             max_bytes=64*1024**2,max_steps=256):
+        from ._reports import DiagnosticReport
+        return DiagnosticReport(self._compare_checkpoints(reference,pairs,ignore_global_phase=ignore_global_phase,atol=atol,max_bytes=max_bytes,max_steps=max_steps))
+
+    def _compare_checkpoints(self,reference,pairs,*,ignore_global_phase=True,atol=1e-9,
+                            max_bytes=64*1024**2,max_steps=256):
         """Compare explicitly supplied (observed, reference) checkpoint indices.
 
         Different circuit lengths are allowed. Alignment is caller-provided,
@@ -184,6 +189,10 @@ class _Debug:
 
 
     def verify_checkpoints(self,contracts,*,max_bytes=64*1024**2,max_steps=256):
+        from ._reports import DiagnosticReport
+        return DiagnosticReport(self._verify_checkpoints(contracts,max_bytes=max_bytes,max_steps=max_steps))
+
+    def _verify_checkpoints(self,contracts,*,max_bytes=64*1024**2,max_steps=256):
         """Verify named-by-index contracts on the zero-input trajectory."""
         from collections.abc import Mapping
         from ._contracts import Contract
@@ -197,7 +206,7 @@ class _Debug:
         steps=min(_int(max_steps),256)
         requested=[]
         for index,contract in contracts.items():
-            index=_int(index)
+            index=self._c._checkpoint_index(index)
             if index>len(qc.data):
                 raise ValueError("checkpoint outside circuit")
             if index>steps:
@@ -205,6 +214,8 @@ class _Debug:
             if not isinstance(contract,Contract) or contract.num_qubits!=qc.num_qubits:
                 raise ValueError("expected width-matched Contract")
             requested.append((index,contract))
+        if len({index for index,_ in requested})!=len(requested):
+            raise ValueError("duplicate resolved checkpoints")
         cursor=_Cursor(self._c)
         rows=[]
         for index,contract in sorted(requested):
