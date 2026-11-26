@@ -69,7 +69,7 @@ class _CircuitChecks:
         # An exactly zero residual has all singular values equal to zero;
         # do not run a cubic SVD merely to recover that known result.
         # Nonzero residuals retain the original spectral norm calculation.
-        if max_error==0.0:
+        if max_error==0.0 and not np.any(delta):
             spectral=frobenius=0.0
         else:
             spectral=float(np.linalg.norm(delta,ord=2))
