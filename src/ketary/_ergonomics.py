@@ -402,3 +402,124 @@ def _evolve_product(c,observable,*,time,steps,order):
     for p,v in sequence:
         block.evolve(Observable({p:v}),time=dt)
     return c.apply(block,times=steps)
+
+
+def _expectation_hessian(c,bindings,observables,*,max_bytes):
+    """Bounded second-order chain rule with exact ideal occurrence shifts."""
+    from math import pi,sqrt,fsum
+    from ._validation import _real
+    from ._circuit import Circuit
+    from ._observable import Observable
+    if c.num_clbits:
+        raise UnsupportedOperation("Hessian requires ideal unitary evolution")
+    if c.num_qubits>8 or len(c.parameters)>8 or len(c._qc.data)>256:
+        raise ResourceLimit("Hessian supports <=8 wires, 8 parameters, 256 gates")
+    _limit(c.num_qubits,3,budget=max_bytes)
+    template=c.copy()
+    params=template.parameters
+    if not isinstance(bindings,Mapping) or set(bindings)!=set(params):
+        raise ValueError("complete native parameter identity mapping required")
+    values={p:_real(bindings[p]) for p in params}
+    if isinstance(observables,(str,bytes,Mapping,set,frozenset)):
+        raise ValueError("expected ordered observables")
+    try:
+        obs=tuple(islice(iter(observables),9))
+    except TypeError as exc:
+        raise ValueError("expected ordered observables") from exc
+    if not 1<=len(obs)<=8:
+        raise ResourceLimit("Hessian requires 1..8 observables")
+    if any(not isinstance(H,Observable) or H.num_qubits>template.num_qubits for H in obs):
+        raise ValueError("expected compatible real Observable objects")
+    def numeric(expr):
+        try:
+            if getattr(expr,"parameters",()):
+                expr=expr.bind({p:values[p] for p in expr.parameters})
+            z=complex(expr)
+        except (TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
+            raise ValueError("invalid second derivative expression") from exc
+        if z.imag!=0:
+            raise ValueError("second derivative expression must be real")
+        return _real(z.real)
+    two=((1,.5),(-1,-.5))
+    correction=(1-sqrt(2))/4
+    four=two+((2,correction),(-2,-correction))
+    regular={"rx","ry","rz","rxx","ryy","rzz","p","cp"}
+    controlled={"crx","cry","crz"}
+    active=[]
+    for index,item in enumerate(template._qc.data):
+        for j,angle in enumerate(item.params):
+            present=getattr(angle,"parameters",())
+            if not present:
+                continue
+            name=item.operation.name
+            if j!=0 or name not in regular|controlled:
+                raise UnsupportedOperation("generator not qualified for Hessian")
+            gradients=tuple(angle.gradient(p) if p in present else 0. for p in params)
+            weights=tuple(numeric(g) for g in gradients)
+            second=tuple(tuple(numeric(g.gradient(p)) if p in getattr(g,"parameters",()) else 0. for p in params) for g in gradients)
+            if any(weights) or any(any(row) for row in second):
+                active.append((index,weights,second,four if name in controlled else two))
+                if len(active)>8:
+                    raise ResourceLimit("Hessian supports <=8 active occurrences")
+    bound=template.bind(values)._qc
+    # Canonical sparse shift keys in integer units of pi/2. These describe
+    # disposable experiments, not a second circuit model.
+    def key(i,shift,j=None,other=0):
+        offsets={i:shift}
+        if j is not None:
+            offsets[j]=offsets.get(j,0)+other
+        return tuple(sorted((k,v) for k,v in offsets.items() if v))
+    first={}
+    pairs={}
+    needed=set()
+    for i,weights,second,rule in active:
+        if any(any(row) for row in second):
+            first[i]=tuple((key(i,s),a) for s,a in rule)
+            needed.update(k for k,_ in first[i])
+    for pos,(i,wi,_,ri) in enumerate(active):
+        if not any(wi):
+            continue
+        for j,wj,_,rj in active[pos:]:
+            if not any(wj):
+                continue
+            terms={}
+            for s,a in ri:
+                for t,b in rj:
+                    k=key(i,s,j,t)
+                    terms.setdefault(k,[]).append(a*b)
+            pairs[i,j]=tuple((k,fsum(v)) for k,v in terms.items() if fsum(v))
+            needed.update(k for k,_ in pairs[i,j])
+    if len(needed)>256:
+        raise ResourceLimit("Hessian supports <=256 distinct shifted circuits")
+    # All native copies and numeric angles validated before any execution.
+    circuits={}
+    for k in sorted(needed):
+        raw=bound.copy()
+        for index,offset in k:
+            item=raw.data[index]
+            gate=item.operation.to_mutable()
+            gate.params=[_real(float(gate.params[0])+offset*pi/2)]
+            raw.data[index]=item.replace(operation=gate)
+        circuits[k]=Circuit._from_native(raw,owned=True)
+    evaluated={k:run.run(max_bytes=max_bytes).math.expectations(obs) for k,run in circuits.items()}
+    def shifted(terms,o):
+        return _real(fsum(_real(a*evaluated[k][o]) for k,a in terms))
+    output=[]
+    for o in range(len(obs)):
+        D={i:shifted(v,o) for i,v in first.items()}
+        DD={ij:shifted(v,o) for ij,v in pairs.items()}
+        rows=[[0. for _ in params] for _ in params]
+        for p in range(len(params)):
+            for q in range(p,len(params)):
+                contributions=[]
+                for pos,(i,wi,second,_) in enumerate(active):
+                    if i in D:
+                        contributions.append(_real(D[i]*second[p][q]))
+                    for j,wj,_,_ in active[pos:]:
+                        if (i,j) not in DD:
+                            continue
+                        weight=wi[p]*wj[q] if i==j else fsum((wi[p]*wj[q],wj[p]*wi[q]))
+                        contributions.append(_real(DD[i,j]*_real(weight)))
+                rows[p][q]=rows[q][p]=_real(fsum(contributions))
+        output.append(tuple(tuple(row) for row in rows))
+    return tuple(output)

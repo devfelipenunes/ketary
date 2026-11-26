@@ -311,6 +311,11 @@ class Circuit:
         from ._ergonomics import _expectation_jacobian
         return _expectation_jacobian(self,bindings,observables,max_bytes=max_bytes)
 
+    def expectation_hessian(self,bindings,observables,*,max_bytes=64*1024**2):
+        """Explicit ideal expectation Hessians in native parameter order."""
+        from ._ergonomics import _expectation_hessian
+        return _expectation_hessian(self,bindings,observables,max_bytes=max_bytes)
+
     def sweep(self,**values):
         """Construct a bounded zipped parameter plan without execution."""
         from ._ergonomics import SweepPlan

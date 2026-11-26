@@ -1671,6 +1671,11 @@
       "category": "Native",
       "group": "native",
       "lifecycle": "explicit_native"
+    },
+    "Circuit.expectation_hessian": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
     }
   }
 }

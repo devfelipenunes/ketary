@@ -19,10 +19,10 @@ All declared public stub entries are classified once; constructors and dunder pr
 - **_Math**: `amplitude`, `expectation`, `expectations`, `probabilities`, `probability`, `variance`
 - **_Report**: `render`, `require`, `status`
 
-## Advanced (180)
+## Advanced (181)
 
 - **CheckResult**: `to_dict`, `to_json`
-- **Circuit**: `bind`, `bind_partial`, `capabilities`, `checkpoint`, `checkpoints`, `classical`, `compose`, `compute_action_uncompute`, `control`, `debug`, `decompose`, `diff`, `evolve`, `evolve_exact`, `evolve_product`, `expectation_jacobian`, `from_json`, `from_unitary`, `if_x`, `if_z`, `inspect`, `inverse`, `measure`, `num_clbits`, `optimize`, `parameter`, `parameter_vector`, `parameters`, `plan`, `prepare_state`, `register`, `registers`, `reset`, `resources`, `run_many`, `run_shots`, `sweep`, `sweep_rows`, `symbolic`, `to_json`, `visualize`
+- **Circuit**: `bind`, `bind_partial`, `capabilities`, `checkpoint`, `checkpoints`, `classical`, `compose`, `compute_action_uncompute`, `control`, `debug`, `decompose`, `diff`, `evolve`, `evolve_exact`, `evolve_product`, `expectation_hessian`, `expectation_jacobian`, `from_json`, `from_unitary`, `if_x`, `if_z`, `inspect`, `inverse`, `measure`, `num_clbits`, `optimize`, `parameter`, `parameter_vector`, `parameters`, `plan`, `prepare_state`, `register`, `registers`, `reset`, `resources`, `run_many`, `run_shots`, `sweep`, `sweep_rows`, `symbolic`, `to_json`, `visualize`
 - **Contract**: `to_dict`
 - **Top-level**: `DiagnosticReport`, `ModalOutcomeReport`, `OperatorMetricsReport`, `PhaseEstimateReport`, `QueryPlan`, `ResourceLimit`, `ResourceReport`, `SemanticDiffReport`, `ShotResult`, `StatisticalContract`, `StatisticalReport`, `SweepPlan`, `TraceComparison`, `TraceStep`, `UnsupportedOperation`, `amplitude_amplification`, `ansatz`, `basis`, `bernstein_vazirani`, `constant_oracle`, `decode_bernstein_vazirani`, `decode_phase_estimation`, `decode_teleportation`, `deutsch_jozsa`, `ghz`, `grover`, `maxcut_hamiltonian`, `parity_oracle`, `phase_estimation`, `phase_oracle`, `qft`, `recover_simon`, `simon`, `superdense`, `teleportation`
 - **Evidence**: `from_dict`, `from_json`, `minimize`, `to_dict`, `to_json`
