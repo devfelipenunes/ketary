@@ -143,6 +143,7 @@
     "ModalOutcomeReport",
     "ModalOutcomeReport.label",
     "ModalOutcomeReport.peak_probability",
+    "Observable.on",
     "Observable.to_dict",
     "OperatorMetricsReport",
     "OperatorMetricsReport.operator_norm",
