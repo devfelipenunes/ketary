@@ -40,6 +40,18 @@ The result is a snapshot. The second operation does not change the earlier resul
 - Qubit zero is the least significant bit. Preserve global phase; state fidelity alone does not prove operator equivalence.
 - A memory guard estimates dense statevector payload, not total process memory.
 
+## Quantum checks
+
+```python
+a = q.bell()
+b = q.bell().gates.z(0)
+a.run().test.distribution(b.run()).require()  # equal Z-basis probabilities
+assert a.test.equivalent(b).status == "FAIL"  # different complete operators
+a.run().test.expectation("ZZ", 1).require()
+```
+
+Checks return PASS, FAIL or UNSUPPORTED; `require()` raises on either non-pass result. State comparison may ignore global phase; complete operator comparison preserves it by default. Operator checks are limited to eight qubits and an explicit two-matrix payload budget. Invalid arguments raise errors. No implicit circuit execution occurs in operator checks or Result checks.
+
 ## Validation
 
 Run all tests, including upstream Qiskit probes. Missing Qiskit is a failure, not a passing skip. Historical local PoC results are not evidence of this branch's CI.
