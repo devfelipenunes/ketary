@@ -12,23 +12,28 @@ from pathlib import Path
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 
-ROOTS = ("qiskit", "numpy", "pytest", "coverage", "mypy")
+ROOTS = ("qiskit", "numpy", "scipy", "packaging", "pytest", "coverage", "mypy")
 
 def inventory(roots=ROOTS):
-    pending = list(roots)
+    pending = [Requirement(root) for root in roots]
     seen = {}
+    active = {}
     while pending:
-        name = canonicalize_name(pending.pop())
-        if name in seen:
+        request = pending.pop()
+        name = canonicalize_name(request.name)
+        requested = {"", *(canonicalize_name(e) for e in request.extras)}
+        if name in active and requested <= active[name]:
             continue
+        extras = active.setdefault(name, set())
+        extras.update(requested)
         dist = metadata.distribution(name)
         m = dist.metadata
         requires = []
         for entry in dist.requires or []:
             req = Requirement(entry)
-            if req.marker is None or req.marker.evaluate({"extra": ""}):
+            if req.marker is None or any(req.marker.evaluate({"extra": e}) for e in extras):
                 requires.append(str(req))
-                pending.append(req.name)
+                pending.append(req)
         notices=[]
         for file in dist.files or []:
             parts=str(file).lower().split("/")
@@ -44,7 +49,8 @@ def inventory(roots=ROOTS):
             "license_classifiers": [c for c in m.get_all("Classifier", []) if c.startswith("License ::")],
             "license_files": m.get_all("License-File", []),
             "installed_notice_hashes": sorted(notices,key=lambda x:x["path"]),
-            "requires": sorted(requires),
+            "requires": sorted(set(requires)),
+            "active_extras": sorted(active[name]-{""}),
         }
     return {"python": platform.python_version(), "roots": roots,
             "dependencies": [seen[k] for k in sorted(seen)]}
@@ -53,7 +59,7 @@ if __name__ == "__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("--scope",choices=["validation","runtime","build","dynamic","external"],default="validation")
     args=parser.parse_args()
-    roots={"validation":ROOTS,"runtime":("qiskit","numpy"),"build":("build","twine","setuptools","wheel"),"dynamic":("qiskit","numpy","qiskit-aer"),"external":("qiskit","numpy","mqt.qcec")}[args.scope]
+    roots={"validation":ROOTS,"runtime":("qiskit","numpy"),"build":("build","twine","setuptools","wheel"),"dynamic":("qiskit","numpy","qiskit-aer"),"external":("qiskit","numpy","mqt.qcec[qiskit]")}[args.scope]
     data = inventory(roots)
     data["scope"]=args.scope
     prefix="" if args.scope=="validation" else args.scope+"-"
