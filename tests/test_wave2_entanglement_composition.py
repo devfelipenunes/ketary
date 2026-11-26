@@ -32,7 +32,7 @@ def test_graph_independent_reduced_state(n,edges):
 def test_conjugation_arbitrary_input(theta):
     u=q.Circuit(2).h(0).cx(0,1)
     v=q.Circuit(1).rz(theta,0)
-    c=q.Circuit(2).compute_action_uncompute(u,v,action_wires=[1])
+    c=q.Circuit(2).compute_action_uncompute(u,v,compute_wires=[0,1],action_wires=[1])
     H=np.array([[1,1],[1,-1]])/np.sqrt(2)
     CX=np.eye(4)[[0,3,2,1]]
     U=CX@np.kron(np.eye(2),H)
