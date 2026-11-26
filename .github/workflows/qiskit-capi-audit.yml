@@ -26,6 +26,7 @@ jobs:
       - run: |
           python -m pip install -c constraints/linux-py312.txt -r requirements.txt
           python -m pip install --no-deps -e .
+          python -m pip install 'setuptools>=77' wheel
           python -m pip install --no-build-isolation --no-deps ./research/qiskit_capi
           python -m pip freeze > environment.txt
           lscpu > host.txt
