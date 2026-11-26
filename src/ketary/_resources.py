@@ -1,5 +1,6 @@
 """Logical circuit resource summaries and opt-in textual visualization."""
 from dataclasses import dataclass
+from ._validation import _int, ResourceLimit
 
 @dataclass(frozen=True)
 class ResourceReport:
@@ -28,6 +29,8 @@ class _Visualize:
     def __init__(self,circuit):
         self._c=circuit
 
-    def text(self):
+    def text(self, *, max_qubits=32, max_gates=512):
         """Return the native text drawing without simulation or mutation."""
+        if self._c.num_qubits>_int(max_qubits,1) or len(self._c._qc.data)>_int(max_gates):
+            raise ResourceLimit("circuit drawing exceeds logical size limit")
         return str(self._c._qc.draw(output="text",fold=-1))
