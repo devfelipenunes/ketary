@@ -1,0 +1,3 @@
+# Controlled X synthesis — #189
+
+The installed single-control X-only fast path already checks the strict native operator. The research candidate cancels repeated X on the same target before using that path. A phase on the source is a relative phase on the selected control subspace; the independent permutation matrix checks every column. Compare against the existing direct route and the existing generic native checked synthesis, with the same bound source and random complex state. Measure build including strict qualification/export separately from execution; count canonical u/cx gates and depth. Three seeds, five paired repetitions, shared CI. No runtime promotion or API changes.

@@ -11,7 +11,7 @@ from importlib.metadata import version
 from itertools import islice
 import numpy as np
 from ._validation import _int,_tol,_limit,ResourceLimit
-from ._replay import _unique_pairs,_reject_constant,_keys
+from ._replay import _unique_pairs,_reject_constant,_keys,_validate_producer
 
 
 def _json(data):
@@ -108,9 +108,7 @@ class Evidence:
             raise ValueError("unsupported evidence schema")
         if envelope["sha256"]!=sha256(_json(d).encode()).hexdigest():
             raise ValueError("evidence content hash mismatch")
-        _keys(d["producer"],("ketary","qiskit","numpy","python"))
-        if any(type(v) is not str or not v or len(v)>100 for v in d["producer"].values()):
-            raise ValueError("invalid producer")
+        _validate_producer(d["producer"],("ketary","qiskit","numpy","python"))
         if type(d["ignore_global_phase"]) is not bool:
             raise ValueError("invalid phase policy")
         t=_tol(d["atol"])
@@ -133,10 +131,10 @@ class Evidence:
         _keys(data,("data","sha256"))
         d=data["data"]
         _keys(d,("schema_version","kind","observed","reference","input","ignore_global_phase","atol","recorded_distance","producer"))
-        _keys(d["producer"],("ketary","qiskit","numpy","python"))
+        _validate_producer(d["producer"],("ketary","qiskit","numpy","python"))
         if any(type(d[key]) is not str or len(d[key])>1024*1024 for key in ("observed","reference")):
             raise ResourceLimit("invalid circuit payload")
-        if any(type(d[key]) is not str or len(d[key])>128 for key in ("kind","input")) or any(type(v) is not str or len(v)>100 for v in d["producer"].values()):
+        if any(type(d[key]) is not str or len(d[key])>128 for key in ("kind","input")):
             raise ValueError("invalid evidence fields")
         if type(data["sha256"]) is not str or len(data["sha256"])!=64 or type(d["schema_version"]) is not int or type(d["ignore_global_phase"]) is not bool:
             raise ValueError("invalid evidence envelope")
