@@ -1,0 +1,212 @@
+[
+  {
+    "id": "W01",
+    "name": "Bell phase diagnosis",
+    "task": "Detect Z-induced Bell phase error although computational-basis probabilities agree.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W02",
+    "name": "Graph-state stabilizers",
+    "task": "Construct a four-node graph state and independently verify each generator.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W03",
+    "name": "Dicke preparation",
+    "task": "Prepare the normalized weight-two four-qubit state and verify support and relative phase.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W04",
+    "name": "Reversible addition",
+    "task": "Implement a two-bit reversible carry adder and exhaustively check truth table and clean ancillas.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W05",
+    "name": "Controlled global phase",
+    "task": "Control a two-qubit block with global phase and verify strict full operator, not only zero input.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W06",
+    "name": "Modular arithmetic",
+    "task": "Implement a small reversible modular increment and detect overflow or invalid mapping.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W07",
+    "name": "Bernstein–Vazirani",
+    "task": "Recover a hidden parity string from a native oracle.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W08",
+    "name": "Grover multiple marked states",
+    "task": "Design a phase oracle with two marked bitstrings; calculate expected success probability.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W09",
+    "name": "QPE rational eigenphase",
+    "task": "Estimate a known phase with finite ancillas; explain the bit order.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W10",
+    "name": "Fourier transform",
+    "task": "Verify QFT on a nonzero basis state and its inverse.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W11",
+    "name": "Weighted MaxCut",
+    "task": "Compare QAOA energy to exact enumeration on a weighted graph.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W12",
+    "name": "VQE",
+    "task": "Find a small molecular Hamiltonian ground energy with a reproducible parameter search.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W13",
+    "name": "Noncommuting dynamics",
+    "task": "Compare product formula and dense evolution for a two-site spin model.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W14",
+    "name": "Hamiltonian phase",
+    "task": "Include an identity term in evolution and verify strict phase.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W15",
+    "name": "Ramsey spectroscopy",
+    "task": "Estimate a phase from two different measurement bases.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W16",
+    "name": "Spin echo",
+    "task": "Demonstrate cancellation of static phase rotation by an echo sequence.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W17",
+    "name": "Teleportation",
+    "task": "Verify transfer of an arbitrary complex state via conditional corrections.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W18",
+    "name": "Entanglement swapping",
+    "task": "Obtain conditional Bell correlations after a joint measurement.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W19",
+    "name": "Repetition code",
+    "task": "Correct each single bit flip and diagnose an uncorrectable case.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W20",
+    "name": "Phase-flip code",
+    "task": "Encode, introduce phase error and verify syndrome and recovery.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W21",
+    "name": "Amplitude damping",
+    "task": "Evaluate the density matrix after a CPTP channel and check trace.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W22",
+    "name": "Dephasing",
+    "task": "Measure coherence decay in a Bell state.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W23",
+    "name": "Complex expectation",
+    "task": "Evaluate non-Hermitian Pauli expectation without discarding imaginary component.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W24",
+    "name": "Symbolic partial binding",
+    "task": "Reuse a parameterized block while retaining one unbound parameter.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W25",
+    "name": "Shared-parameter gradient",
+    "task": "Verify the derivative of a circuit with repeated nonlinear parameter expressions.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W26",
+    "name": "Hessian",
+    "task": "Calculate a mixed partial derivative and compare with an analytic reference.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W27",
+    "name": "Quantum metric",
+    "task": "Evaluate the gauge-invariant pure-state metric for a two-parameter state.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W28",
+    "name": "Checkpoint diagnosis",
+    "task": "Locate a deliberately inserted gate error with reusable contracts.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W29",
+    "name": "Dynamic registers",
+    "task": "Execute a conditional protocol with two classical registers and prove bit ordering.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  },
+  {
+    "id": "W30",
+    "name": "Target handoff",
+    "task": "Compile and execute a local simulated target circuit; distinguish hardware claims.",
+    "comparison": "Matched Ketary and Qiskit tasks; independent reference and negative sentinel required",
+    "state": "prompt_only"
+  }
+]
