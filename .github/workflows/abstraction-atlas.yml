@@ -4,6 +4,7 @@ on:
     paths:
       - 'research/abstraction*.py'
       - 'tests/test_abstraction_primitives.py'
+      - 'tests/test_abstraction_advanced.py'
       - '.github/workflows/abstraction-atlas.yml'
   workflow_dispatch:
 permissions:
@@ -39,7 +40,7 @@ jobs:
           lscpu > host.txt
           git rev-parse HEAD > revision.txt
       - name: Independent and native mathematical controls
-        run: python -m pytest -q tests/test_abstraction_primitives.py
+        run: python -m pytest -q tests/test_abstraction_primitives.py tests/test_abstraction_advanced.py
       - name: Matched source and timing atlas
         run: python -m research.abstraction_atlas --output atlas.json --seed "$SEED" --repetitions 7
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

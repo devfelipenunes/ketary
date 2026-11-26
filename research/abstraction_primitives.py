@@ -116,6 +116,16 @@ def pauli_rotation(label,theta):
     if not active:
         native.global_phase=-theta/2
         return q.from_qiskit(native)
+    # Prefer the existing exact native rotation when available. In particular,
+    # avoid expanding X mixers and ZZ costs into basis changes and CNOTs.
+    if len(active)==1:
+        i,axis=active[0]
+        getattr(native,"r"+axis.lower())(theta,i)
+        return q.from_qiskit(native)
+    if len(active)==2 and active[0][1]==active[1][1]:
+        i,axis=active[0];j,_=active[1]
+        getattr(native,"r"+axis.lower()*2)(theta,i,j)
+        return q.from_qiskit(native)
     for i,p in active:
         if p=="X":native.h(i)
         elif p=="Y":native.sdg(i);native.h(i)
@@ -161,10 +171,26 @@ def controlled(c,controls=1):
         raise q.ResourceLimit("controlled research width <=5, source <=16 gates")
     native=QuantumCircuit(n)
     native.append(c.to_qiskit().to_gate().control(k),range(n))
-    lowered=transpile(native,basis_gates=["h","p","cx","u"],optimization_level=0,
-                       seed_transpiler=1101,qubits_initially_zero=False)
-    if len(lowered.data)>4096:raise q.ResourceLimit("controlled lowering expansion")
-    out=q.from_qiskit(lowered)
+    # Research-only direct path for canonical controls. Global phase of U
+    # becomes a phase on the control, not a global phase of controlled-U.
+    out=None
+    if k==1:
+        direct=QuantumCircuit(n)
+        src=c.to_qiskit()
+        if float(src.global_phase)!=0:direct.p(float(src.global_phase),0)
+        try:
+            for item in src.data:
+                gate=item.operation.control(1)
+                direct.append(gate,[0]+[1+src.find_bit(w).index for w in item.qubits])
+            out=q.from_qiskit(direct)
+        except (q.UnsupportedOperation,ValueError):
+            # Explicit bounded synthesis for unsupported research candidates.
+            out=None
+    if out is None:
+        lowered=transpile(native,basis_gates=["h","p","cx","u"],optimization_level=0,
+                           seed_transpiler=1101,qubits_initially_zero=False)
+        if len(lowered.data)>4096:raise q.ResourceLimit("controlled lowering expansion")
+        out=q.from_qiskit(lowered)
     if not np.allclose(Operator(native).data,Operator(out.to_qiskit()).data,atol=1e-9,rtol=0):
         raise q.UnsupportedOperation("strict controlled oracle failed")
     return out
