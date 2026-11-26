@@ -131,7 +131,9 @@ class SweepPlan:
         params={p.name:p for p in circuit.parameters}
         if len(params)!=len(circuit.parameters):
             raise ValueError("sweep requires unique parameter names")
-        # Native assignment returns independent circuits; JSON remains an\n        # external replay format, not an in-memory execution transport.\n        payloads=tuple(circuit.bind({params[name]:v for name,v in row}) for row in rows)
+        # Native assignment returns independent circuits; JSON remains an
+        # external replay format, not an in-memory execution transport.
+        payloads=tuple(circuit.bind({params[name]:v for name,v in row}) for row in rows)
         self._rows=rows
         self._payloads=payloads
         self._width=circuit.num_qubits
