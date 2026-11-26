@@ -286,7 +286,7 @@ def _evolve(c,observable,time):
 
 
 def _expectation_jacobian(c,bindings,observables,*,max_bytes):
-    """Bounded occurrence-wise two-point shifts; not a state derivative."""
+    """Bounded occurrence-wise two/four-point shifts; not a state derivative."""
     from math import pi,fsum
     from ._validation import _real
     from ._circuit import Circuit
@@ -323,39 +323,52 @@ def _expectation_jacobian(c,bindings,observables,*,max_bytes):
             raise ValueError("derivative expression must be real")
         return _real(value.real)
     supported={"rx","ry","rz","rxx","ryy","rzz","p","cp"}
+    controlled={"crx","cry","crz"}
     staged=[]
+    shift_count=0
     for i,item in enumerate(template._qc.data):
         for j,angle in enumerate(item.params):
             present=getattr(angle,"parameters",())
             if not present:
                 continue
-            if item.operation.name not in supported or j!=0:
-                raise UnsupportedOperation("generator not qualified for two-point shift")
+            if item.operation.name not in supported|controlled or j!=0:
+                raise UnsupportedOperation("generator not qualified for expectation shift")
             weights=tuple(numeric(angle.gradient(p)) if p in present else 0. for p in params)
             if any(weights):
-                staged.append((i,weights))
-                if len(staged)>64:
-                    raise ResourceLimit("Jacobian supports at most 64 active occurrences")
+                four=item.operation.name in controlled
+                shift_count+=4 if four else 2
+                if shift_count>128:
+                    raise ResourceLimit("Jacobian supports at most 128 shifted circuits")
+                staged.append((i,weights,four))
     # Bind even for zero derivatives, including symbolic global phase.
     bound=template.bind(vals)._qc
     pairs=[]
     # Complete shifted circuit validation before starting any simulation.
-    for index,weights in staged:
+    for index,weights,four in staged:
         shifted_pair=[]
-        for sign in (1,-1):
+        shifts=(pi/2,-pi/2,pi,-pi) if four else (pi/2,-pi/2)
+        for shift in shifts:
             shifted=bound.copy()
             item=shifted.data[index]
             gate=item.operation.to_mutable()
-            gate.params=[_real(float(gate.params[0])+sign*pi/2)]
+            gate.params=[_real(float(gate.params[0])+shift)]
             shifted.data[index]=item.replace(operation=gate)
             shifted_pair.append(Circuit._from_native(shifted,owned=True))
         pairs.append((weights,*shifted_pair))
     contributions=[[[] for _ in params] for _ in obs]
-    for weights,plus,minus in pairs:
+    from math import sqrt
+    correction=(1-sqrt(2))/4
+    for weights,plus,minus,*extra in pairs:
         left=plus.run(max_bytes=max_bytes).math.expectations(obs)
         right=minus.run(max_bytes=max_bytes).math.expectations(obs)
-        for row,(a,b) in zip(contributions,zip(left,right,strict=True),strict=True):
+        if extra:
+            far_left,far_right=(r.run(max_bytes=max_bytes).math.expectations(obs) for r in extra)
+        else:
+            far_left=far_right=(0.,)*len(obs)
+        for row,(a,b,u,v) in zip(contributions,zip(left,right,far_left,far_right,strict=True),strict=True):
             diff=.5*(a-b)
+            if extra:
+                diff=fsum((diff,correction*(u-v)))
             for terms,weight in zip(row,weights,strict=True):
                 terms.append(_real(diff*weight))
     return tuple(tuple(_real(fsum(terms)) for terms in row) for row in contributions)

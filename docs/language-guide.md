@@ -332,3 +332,5 @@ J = template.expectation_jacobian({t: .3}, [q.Z(0), q.X(0)])
 ```
 
 Basis preparation is an ordinary X-only unitary block (highest wire first), not reset or arbitrary amplitude initialization. The Jacobian explicitly simulates supported one-angle gate occurrences, applies the chain rule for shared parameters and returns immutable rows in observable order and columns in native parameter order. A global phase derivative is zero for expectations, not for states. No automatic optimizer, state derivative or arbitrary generator support. Unsupported symbolic gates fail before execution; see resource contracts.
+
+CRX, CRY and CRZ now use a four-point expectation shift with explicit shared 128-circuit limit; U remains unsupported when parameterized. The mathematical guide gives the generator-frequency identity.
