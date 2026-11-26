@@ -1,7 +1,8 @@
 """Bounded generated algebra with independent dense oracle and deletion shrink.
 
 Refs #311 #90 #136. Seeds and minimal-with-respect-to-single-deletion
-counterexamples are reported. This is not exhaustive verification.
+counterexamples are reported for each algebra assertion. Runtime exceptions
+propagate unchanged; reduction does not minimize continuous angles. This is not exhaustive verification.
 """
 import numpy as np
 import pytest
@@ -79,18 +80,14 @@ def defect(n, rows):
     return not np.allclose(actual, dense(n, rows), atol=ATOL, rtol=0)
 
 
-@pytest.mark.parametrize("n", [2, 3])
-@pytest.mark.parametrize("seed", range(31101, 31117))
-def test_generated_unitary_algebra(n, seed):
-    rows, v, w = generated(seed, n)
-    if defect(n, rows):
-        pytest.fail(f"seed={seed}, width={n}, reduced={shrink(rows, lambda r: defect(n, r))!r}")
+def assert_algebra(n, rows, v, w):
+    assert not defect(n, rows), "full operator differs"
     u = dense(n, rows)
     c = build(n, rows)
     before = c.to_qiskit()
     np.testing.assert_allclose(Operator(build(n, rows, native=True)).data, u, atol=ATOL, rtol=0)
     np.testing.assert_allclose(u.conj().T @ u, np.eye(2**n), atol=ATOL, rtol=0)
-    combined = build(n, rows[:6]).compose(build(n, rows[6:]))
+    combined = build(n, rows[:len(rows)//2]).compose(build(n, rows[len(rows)//2:]))
     np.testing.assert_allclose(Operator(combined.to_qiskit()).data, u, atol=ATOL, rtol=0)
     first = c.run(initial_state=v)
     saved = first.math.statevector()
@@ -112,6 +109,30 @@ def test_generated_unitary_algebra(n, seed):
     assert c.to_qiskit() == before
 
 
+def failure_site(n, rows, v, w):
+    """Return the specific algebra assertion that failed, not another defect."""
+    try:
+        assert_algebra(n, rows, v, w)
+    except AssertionError as error:
+        tb = error.__traceback__
+        while tb is not None:
+            if tb.tb_frame.f_code is assert_algebra.__code__:
+                return tb.tb_lineno
+            tb = tb.tb_next
+        raise
+    return None
+
+
+@pytest.mark.parametrize("n", [2, 3])
+@pytest.mark.parametrize("seed", range(31101, 31117))
+def test_generated_unitary_algebra(n, seed):
+    rows, v, w = generated(seed, n)
+    site = failure_site(n, rows, v, w)
+    if site is not None:
+        reduced = shrink(rows, lambda r: failure_site(n, r, v, w) == site)
+        assert failure_site(n, reduced, v, w) == site
+        pytest.fail(f"seed={seed}, width={n}, assertion_line={site}, reduced={reduced!r}")
+
 def test_shrinker_retains_real_operator_defect():
     rows = [("h", 0, 1, 0.), ("cx", 0, 1, 0.), ("rz", 1, 0, .31)]
     def fails(items):
@@ -124,3 +145,16 @@ def test_shrinker_retains_real_operator_defect():
     assert not fails([])
     with pytest.raises(ValueError):
         shrink([], fails)
+
+
+def test_shrinking_keeps_the_same_assertion(monkeypatch):
+    rows, v, w = generated(31101, 2)
+    def injected(n, items, v, w):
+        assert len(items) > 0, "unrelated empty-circuit failure"
+        assert not any(row[0] == "cx" for row in items), "target defect"
+    monkeypatch.setitem(globals(), "assert_algebra", injected)
+    site = failure_site(2, rows, v, w)
+    assert site is not None
+    reduced = shrink(rows, lambda r: failure_site(2, r, v, w) == site)
+    assert len(reduced) == 1 and reduced[0][0] == "cx"
+    assert failure_site(2, [], v, w) != site
