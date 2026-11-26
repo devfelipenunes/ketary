@@ -8,8 +8,54 @@ from qiskit.quantum_info import Operator
 from ketary._ergonomics import SweepPlan
 from research.native_stage_profile import stats
 
+# Exact pre-PR public binding implementation, with absolute imports.
+Circuit=q.Circuit
+UnsupportedOperation=q.UnsupportedOperation
+def previous_bind(self,bindings=None,**values):
+    """Return an independent fully bound circuit; source is unchanged."""
+    if self.num_clbits:
+        raise UnsupportedOperation('symbolic classical binding is outside this subset')
+    if bindings is not None and values:
+        raise ValueError("choose a parameter mapping or named values")
+    if bindings is None:
+        params={p.name:p for p in self.parameters}
+        if len(params)!=len(self.parameters) or set(values)!=set(params):
+            raise ValueError("named binding must cover each unique parameter")
+        bindings={params[name]:value for name,value in values.items()}
+    else:
+        from collections.abc import Mapping
+        from itertools import islice
+        if not isinstance(bindings,Mapping):
+            if isinstance(bindings,(str,bytes,set,frozenset)):
+                raise TypeError("expected mapping or ordered numeric values")
+            params=self.parameters
+            try:
+                vals=tuple(islice(iter(bindings),len(params)+1))
+            except TypeError as exc:
+                raise TypeError("expected mapping or ordered numeric values") from exc
+            if len(vals)!=len(params):
+                raise ValueError("ordered binding must cover exactly the native parameter order")
+            bindings=dict(zip(params,vals,strict=True))
+    # Only internal circuits have the validated structure invariant.
+    # Native assignment preserves it; check evaluated numeric values,
+    # including expression overflow, without rechecking every gate kind.
+    from ketary._adapter import _validate_bound_values
+    from ketary._validation import _angle
+    if set(bindings)!=set(self._qc.parameters):
+        raise ValueError("bindings must cover exactly the template parameters")
+    numeric={key:_angle(value) for key,value in bindings.items()}
+    try:
+        bound=self._qc.assign_parameters(numeric,inplace=False,flat_input=True)
+    except (ZeroDivisionError,OverflowError) as exc:
+        raise ValueError("parameter expression must evaluate to a finite real number") from exc
+    _validate_bound_values(bound)
+    c=Circuit.__new__(Circuit)
+    c._qc=bound
+    return c
+
+
 def previous(self,circuit,rows,params):
-    self._payloads=tuple(circuit.bind({params[name]:v for name,v in row}) for row in rows)
+    self._payloads=tuple(previous_bind(circuit,{params[name]:v for name,v in row}) for row in rows)
     self._rows=rows
     self._width=circuit.num_qubits
 
@@ -34,9 +80,9 @@ def evaluate(n,layers,count,seed=1101,reps=7):
     with patch.object(SweepPlan,"_initialize_rows",previous):
         for fn in routes.values():verify(fn())
     samples={k+"_"+mode:[] for k in routes for mode in ("old","new")}
-    samples.update({k:[] for k in ("public_identity","public_name","public_order","native_assignment")})
-    row=rows[0];mapping=dict(zip(params,row,strict=True))
-    others={"public_identity":lambda:c.bind(mapping),"public_name":lambda:c.bind(**{k.name:v for k,v in mapping.items()}),"public_order":lambda:c.bind(row),"native_assignment":lambda:raw.assign_parameters(mapping,inplace=False,flat_input=True)}
+    samples.update({k:[] for k in ("public_identity","public_name","public_order","previous_identity","previous_name","previous_order","native_assignment")})
+    row=rows[0];mapping=dict(zip(params,row,strict=True));named_row={k.name:v for k,v in mapping.items()}
+    others={"public_identity":lambda:c.bind(mapping),"public_name":lambda:c.bind(**named_row),"public_order":lambda:c.bind(row),"previous_identity":lambda:previous_bind(c,mapping),"previous_name":lambda:previous_bind(c,**named_row),"previous_order":lambda:previous_bind(c,row),"native_assignment":lambda:raw.assign_parameters(mapping,inplace=False,flat_input=True)}
     rnd=random.Random(seed)
     for _ in range(reps):
         for k in rnd.sample(list(samples),len(samples)):
@@ -61,5 +107,5 @@ def main():
         for layers in (1,4,8):
             for count in (1,8,32):
                 row=evaluate(n,layers,count,a.seed);rows.append(row);print(json.dumps(row),flush=True)
-    a.output.write_text(json.dumps(dict(scope="paired public sweep plan construction; previous row dispatch emulated; no execution timing; shared CI",rows=rows),indent=2,allow_nan=False))
+    a.output.write_text(json.dumps(dict(scope="paired public sweep plan construction; previous public bind and sweep dispatch reproduced; no execution timing; shared CI",rows=rows),indent=2,allow_nan=False))
 if __name__=="__main__":main()
