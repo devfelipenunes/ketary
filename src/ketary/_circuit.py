@@ -164,6 +164,11 @@ class Circuit:
         bound=template.assign_parameters({key:_angle(value) for key,value in bindings.items()},inplace=False)
         return cls._from_native(bound,owned=True)
 
+    def diff(self,other,*,atol=1e-9,max_bytes=64*1024**2):
+        """Explicit structural, snapshot and operator comparison."""
+        from ._verification import semantic_diff
+        return semantic_diff(self,other,atol=atol,max_bytes=max_bytes)
+
     def inspect(self, *, start=0, limit=32):
         """Bounded logical operations, no copy or execution."""
         self._require_bound()

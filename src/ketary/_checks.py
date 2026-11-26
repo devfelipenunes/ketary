@@ -78,3 +78,9 @@ class _CircuitChecks:
                     max_element_error=float(np.max(np.abs(delta))),
                     frobenius_norm=float(np.linalg.norm(delta)),
                     operator_norm=spectral,process_fidelity=fidelity)
+
+
+    def compare(self,other,*,inputs=None,complete=True,ignore_global_phase=False,atol=1e-9,max_bytes=64*1024**2):
+        from ._verification import compare
+        return compare(self._c,other,inputs=inputs,complete=complete,ignore_global_phase=ignore_global_phase,
+                       atol=atol,max_bytes=max_bytes)
