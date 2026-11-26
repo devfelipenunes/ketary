@@ -103,3 +103,7 @@ assert_type(c.ry([.1,.2],c.wires),q.Circuit)
 assert_type(q.Circuit.symbolic(2).rz([angle,2*angle],[0,1]),q.Circuit)
 
 assert_type(q.Circuit.classical(3,3).measure([2,0],[0,2]).reset(range(3)),q.Circuit)
+
+assert_type(c.cx(pairs=[(0,1)]).cz(pairs=q.chain(c.wires)),q.Circuit)
+assert_type(c.rzz(.2,pairs=[(0,1)]),q.Circuit)
+assert_type(q.Circuit.symbolic(2).crx(angle,pairs=[(0,1)]),q.Circuit)
