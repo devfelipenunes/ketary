@@ -72,3 +72,22 @@ workflow cannot be expressed adequately with existing abstractions.
 See [compatibility](compatibility.md) and [acceptance](core-acceptance.md).
 
 For implementation boundaries and ownership flows, see [architecture](architecture.md).
+
+## Exact commuting evolution (advanced)
+
+`Circuit.evolve(H,time=t)` appends the unitary exp(-i t H) for a real
+Pauli Observable whose nonzero terms commute pairwise. It mutates and
+returns the same bound unitary Circuit; no simulation. Absolute wire
+indices and identity-term global phase are preserved. Native single and
+same-axis pair rotations are used where possible. Bound to eight wires,
+256 observable terms and 10,000 conservatively estimated gates. All
+angles and commutation are validated before mutation. Noncommuting sums,
+unbound parameters and classical mode are unsupported, never approximated
+silently. Checkpoint lifecycle follows apply().
+
+```python
+import ketary as q
+H=q.Z(0)@q.Z(1)+.5*q.Z(1)@q.Z(2)
+c=q.Circuit(3).h(range(3)).evolve(H,time=.2)
+r=c.run()
+```
