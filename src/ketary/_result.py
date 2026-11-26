@@ -16,9 +16,16 @@ class CheckResult:
     def to_dict(self):
         return asdict(self)
 
+    def render(self):
+        return f"{self.status}: actual={self.actual}, expected={self.expected}, tolerance={self.tolerance}; {self.detail}"
+
+    def to_json(self):
+        import json
+        return json.dumps(self.to_dict(),sort_keys=True,allow_nan=False)
+
     def require(self):
         if self.status != "PASS":
-            raise AssertionError(f"{self.status}: actual={self.actual}, expected={self.expected}, tolerance={self.tolerance}; {self.detail}")
+            raise AssertionError(self.render())
         return self
 
     def __bool__(self):
@@ -433,7 +440,8 @@ class _Checks:
         if not isinstance(pauli,Observable) and not -1<=expected<=1:
             raise ValueError("expected Pauli value must be in [-1,1]")
         a=self._r.math.expectation(pauli)
-        return CheckResult("PASS" if abs(a-expected)<=t else "FAIL",a,expected,t,f"Pauli {pauli}")
+        detail=f"Observable {pauli.to_dict(self._r.num_qubits)}" if isinstance(pauli,Observable) else f"Pauli {pauli}"
+        return CheckResult("PASS" if abs(a-expected)<=t else "FAIL",a,expected,t,detail)
 
     def expectations(self,values,*,atol=1e-9):
         from ._contracts import Contract

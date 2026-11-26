@@ -5,8 +5,8 @@
 ```python
 import ketary as q
 
-reference = q.bell().gates.x(0)
-observed = q.bell().gates.z(0)
+reference = q.bell().x(0)
+observed = q.bell().z(0)
 comparison = observed.debug.compare(reference)
 assert comparison.step_index == 3
 assert comparison.check.status == "FAIL"
@@ -35,7 +35,7 @@ import ketary as q
 from qiskit.circuit.library import RXGate
 
 c = q.Circuit(2).append(RXGate(0.2), [0])
-c.gates.x(1).gates.x(1)
+c.x(1).x(1)
 optimized = c.optimize()
 c.test.equivalent(optimized).require()
 assert optimized.resources.summary().gate_count == 1
@@ -66,7 +66,7 @@ Default tables show the first 16 basis indices (not the most probable outcomes).
 import ketary as q
 c = q.Circuit(2).h(0).cx(0, 1)
 r = c.run(initial_state="00")
-assert r.verify(expectations={"XX": 1, "ZZ": 1})["status"] == "PASS"
+r.verify(expectations={q.X(0) @ q.X(1): 1, "ZZ": 1}).require()
 assert abs(r.math.purity([0]) - 0.5) < 1e-9
 print(r.math.dirac())
 ```
@@ -87,7 +87,7 @@ assert q.grover("101").run().math.probability("101") > 0.9
 import ketary as q
 theta = q.Circuit.parameter("theta")
 template = q.Circuit.symbolic(1).ry(theta, 0)
-c = template.bind({theta: 3.141592653589793})
+c = template.bind(theta=3.141592653589793)
 assert c.run().math.probability("1") > 0.999999
 ```
 
@@ -96,7 +96,7 @@ assert c.run().math.probability("1") > 0.999999
 ```python
 import ketary as q
 r = q.phase_estimation(3/8, 3).run()
-assert r.math.marginal_probabilities([2, 1, 0])["011"] > 0.999999
+assert q.decode_phase_estimation(r, precision=3).phase == 3/8
 ```
 
 ## Optional local dynamic execution

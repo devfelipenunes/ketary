@@ -8,7 +8,7 @@ The examples here run against the installed package, not a second simulator.
 ```python
 import ketary as q
 
-circuit = q.Circuit(2).gates.h(0).gates.cx(0, 1)
+circuit = q.Circuit(2).h(0).cx(0, 1)
 result = circuit.run()
 result.test.normalized().require()
 result.test.probability("00", 0.5).require()
@@ -28,7 +28,7 @@ import ketary as q
 
 circuit = q.bell()
 before = circuit.run()
-circuit.gates.z(0)
+circuit.z(0)
 after = circuit.run()
 before.test.distribution(after).require()
 assert before.test.state(after).status == "FAIL"

@@ -37,3 +37,9 @@ prefixes; a divergence is not proof of root cause. Evidence JSON has a
 content hash, not an authentication signature. Reproduction runs explicitly;
 greedy minimization preserves a fixed witness, not a globally minimal cause.
 See [roadmap contracts](verification-roadmap.md) for exact boundaries.
+
+## Canonical usage
+
+Use `.status` for branching, `.require()` for an assertion, `.render()` for a human-facing message and `.to_dict()` / `.to_json()` for explicit export of verdict reports. Legacy report truthiness and dictionary schemas are retained for compatibility; never infer PASS from `bool(report)`. SemanticDiffReport deliberately has separate dimensions and no aggregate status. A decoder's PASS denotes a unique mode, not verified algorithm correctness.
+
+Single and aggregate expectation checks accept real Observable expressions as well as full-width Pauli strings. A plain local-wire mapping works for an individual check; use immutable Observable expressions as aggregate mapping keys. Mixed aggregates preserve legacy `expectation:XX` keys and use `expectation:observable:` followed by canonical embedded JSON for expressions. Contract export adds `observable_expectations` only when present; string-only exports are unchanged. There is no contract import or new replay format. Duplicate embedded expression keys are rejected. Numeric expectations for weighted sums are finite real values, not restricted to [-1,1].

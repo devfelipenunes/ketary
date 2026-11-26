@@ -44,16 +44,15 @@ def result_evidence(result, *, bits, paulis):
 def verify_result(result, *, probabilities, expectations, normalized, atol):
     if type(normalized) is not bool: raise ValueError("normalized must be bool")
     t=_tol(atol)
-    requested=[]
-    for name,values in (("probability",probabilities),("expectation",expectations)):
-        if values is None: continue
-        if not isinstance(values,Mapping): raise TypeError("expected mapping of labels to targets")
-        labels=_labels(values)
-        for label in labels: requested.append((name,label,values[label]))
-    if len(requested)+int(normalized)>32: raise ResourceLimit("aggregate check cap exceeded")
-    from ._contracts import _evaluate
-    p=[(label,value) for kind,label,value in requested if kind=="probability"]
-    e=[(label,value) for kind,label,value in requested if kind=="expectation"]
+    from ._contracts import _evaluate,_expectation_predicates
+    p=[]
+    if probabilities is not None:
+        if not isinstance(probabilities,Mapping):
+            raise TypeError("expected probability mapping")
+        p=[(label,probabilities[label]) for label in _labels(probabilities)]
+    e=_expectation_predicates(expectations,result.num_qubits,ordered=True)
+    if len(p)+len(e)+int(normalized)>32:
+        raise ResourceLimit("aggregate check cap exceeded")
     report=_evaluate(result,p,e,normalized,t).to_dict()
     # Preserve the existing public dictionary scope and empty-check behavior.
     report["scope"]="explicit ideal snapshot checks only"

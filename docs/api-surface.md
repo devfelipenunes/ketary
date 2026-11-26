@@ -1,0 +1,64 @@
+# Public API surface inventory
+
+All declared non-private classes, top-level functions, public methods, properties and dataclass fields in the public stub are classified once. Namespace names beginning with `_` are implementation types reached through public properties. Constructors and Python dunder protocols are covered by their type's entry; inherited methods are listed at their declaring type. Categories describe the recommended learning path, not visibility or stability. The JSON inventory is checked against the stub in CI.
+
+## Core (86)
+
+- **Top-level**: `CheckResult`, `Circuit`, `ComparisonReport`, `Contract`, `Evidence`, `I`, `Observable`, `Result`, `SnapshotReport`, `VerificationReport`, `X`, `Y`, `Z`, `bell`
+- **CheckResult**: `actual`, `detail`, `expected`, `render`, `require`, `status`, `tolerance`
+- **Circuit**: `apply`, `ccx`, `ch`, `contract`, `copy`, `cp`, `crx`, `cry`, `crz`, `cswap`, `cx`, `cy`, `cz`, `h`, `mcx`, `num_qubits`, `p`, `run`, `rx`, `rxx`, `ry`, `ryy`, `rz`, `rzz`, `s`, `sdg`, `swap`, `sx`, `sxdg`, `t`, `tdg`, `test`, `u`, `x`, `y`, `z`
+- **ComparisonReport**: `evidence`
+- **Contract**: `atol`, `expectations`, `normalized`, `num_qubits`, `probabilities`, `verify`
+- **Evidence**: `reproduce`
+- **Observable**: `num_qubits`
+- **Result**: `math`, `num_qubits`, `test`
+- **SnapshotReport**: `checks`
+- **VerificationReport**: `checks`, `render`, `require`, `scope`, `status`
+- **_Checks**: `expectation`, `probability`
+- **_CircuitChecks**: `compare`
+- **_Math**: `amplitude`, `expectation`, `probabilities`, `probability`, `variance`
+- **_Report**: `render`, `require`, `status`
+
+## Advanced (162)
+
+- **CheckResult**: `to_dict`, `to_json`
+- **Circuit**: `bind`, `capabilities`, `checkpoint`, `checkpoints`, `classical`, `compose`, `compute_action_uncompute`, `debug`, `decompose`, `diff`, `from_json`, `if_x`, `if_z`, `inspect`, `inverse`, `measure`, `num_clbits`, `optimize`, `parameter`, `parameters`, `plan`, `register`, `registers`, `reset`, `resources`, `run_shots`, `sweep`, `symbolic`, `to_json`, `visualize`
+- **Contract**: `to_dict`
+- **Top-level**: `DiagnosticReport`, `ModalOutcomeReport`, `OperatorMetricsReport`, `PhaseEstimateReport`, `QueryPlan`, `ResourceLimit`, `ResourceReport`, `SemanticDiffReport`, `ShotResult`, `StatisticalContract`, `StatisticalReport`, `SweepPlan`, `TraceComparison`, `TraceStep`, `UnsupportedOperation`, `bernstein_vazirani`, `constant_oracle`, `decode_bernstein_vazirani`, `decode_phase_estimation`, `decode_teleportation`, `deutsch_jozsa`, `ghz`, `grover`, `parity_oracle`, `phase_estimation`, `qft`, `recover_simon`, `simon`, `superdense`, `teleportation`
+- **Evidence**: `from_dict`, `from_json`, `minimize`, `to_dict`, `to_json`
+- **ExternalVerificationReport**: `external_equivalence`
+- **ModalOutcomeReport**: `label`, `peak_probability`
+- **Observable**: `to_dict`
+- **OperatorMetricsReport**: `operator_norm`
+- **PhaseEstimateReport**: `phase`
+- **QueryPlan**: `bits`, `estimate`, `paulis`, `run`, `subsystems`
+- **ResourceReport**: `by_gate`, `depth`, `gate_count`, `num_qubits`, `three_plus_qubit_gates`, `two_qubit_gates`
+- **Result**: `evidence`, `sample`, `verify`, `visualize`
+- **SemanticDiffReport**: `operator`, `render`, `scope`, `structure_equal`, `to_dict`, `to_json`, `zero_input`
+- **ShotResult**: `backend`, `backend_version`, `counts`, `measured_bits`, `measurements`, `num_clbits`, `probabilities`, `seed`, `shots`
+- **StatisticalContract**: `confidence`, `margin`, `num_clbits`, `probabilities`, `verify`
+- **SweepPlan**: `bindings`, `run`
+- **TraceComparison**: `actual_operation`, `actual_wires`, `check`, `reference_operation`, `reference_wires`, `step_index`, `to_dict`
+- **TraceStep**: `operation`, `result`, `wires`
+- **VerificationReport**: `to_dict`, `to_json`
+- **_Checks**: `distribution`, `entangled`, `expectations`, `fidelity`, `normalized`, `state`
+- **_CircuitChecks**: `equivalent`, `metrics`
+- **_Debug**: `checkpoint`, `compare`, `compare_checkpoints`, `trace`, `verify_checkpoints`
+- **_Math**: `conditional_probability`, `density_matrix`, `dirac`, `entropy`, `explain_probability`, `fidelity`, `marginal_probabilities`, `norm`, `observable_variance`, `observable_variance_streamed`, `purity`, `schmidt`, `statevector`, `table`, `top_probabilities`, `trace_distance`
+- **_Report**: `scope`, `to_dict`, `to_json`
+- **_Resources**: `summary`
+- **_ResultVisualize**: `bloch`, `bloch_svg`, `histogram`
+- **_Visualize**: `svg`, `text`
+
+## Native (8)
+
+- **Circuit**: `append`, `from_parameterized`, `to_qiskit`, `transpile`
+- **Top-level**: `ExternalVerificationReport`, `from_qiskit`
+- **Observable**: `to_qiskit`
+- **_CircuitChecks**: `external_equivalence`
+
+## Compatibility (34)
+
+- **Circuit**: `analyze`, `gates`, `h_many`
+- **_Gates**: `ccx`, `ch`, `cp`, `crx`, `cry`, `crz`, `cswap`, `cx`, `cy`, `cz`, `h`, `mcx`, `p`, `rx`, `rxx`, `ry`, `ryy`, `rz`, `rzz`, `s`, `sdg`, `swap`, `sx`, `sxdg`, `t`, `tdg`, `u`, `x`, `y`, `z`
+- **_Math**: `observable`

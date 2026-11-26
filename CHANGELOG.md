@@ -25,3 +25,5 @@ approved. See docs/sdk-roadmap.md for limitations and release gates.
 - Experimental DX ergonomics: typed JSON-compatible reports, ordered batches, named logical selections/checkpoints, explicit block application and reversible composition, local Pauli maps, named binding and zipped sweeps, modal/empirical decoders, and paired semantic examples.
 
 - Immutable real Pauli observable expressions with explicit embedding, native SparsePauliOp export and existing expectation/variance/check integration.
+
+- Core consolidation: canonical entry path and exhaustive surface map, real Observable keys in existing aggregate predicates, consistent verdict export/render, installed-wheel canonical examples and compatibility policy. No algorithms or execution features added.

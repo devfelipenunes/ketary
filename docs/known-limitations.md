@@ -25,3 +25,5 @@
 - No published distribution; use a verified checkout or build artifact.
 
 - Named selections/checkpoint annotations are local conveniences; logical replay preserves operators, not names. General controlled blocks and automatic ancilla cleanup are not supported. Sweep plans are bounded zipped ideal simulations, not hardware jobs. Typed report dictionaries retain mutable legacy behavior.
+
+- Core designation is a recommended experimental entry path, not a stable 1.0 guarantee. Aggregate expressions require hashable Observable keys or full-width strings; no general symbolic predicate language. Named annotations remain local, not serialized.

@@ -4,6 +4,7 @@ import ketary as q
 def main():
     circuit = q.bell()
     result = circuit.run()
+    result.test.expectation(q.X(0) @ q.X(1), 1).require()
     result.test.normalized().require()
     result.test.probability("00", 0.5).require()
     result.test.probability("11", 0.5).require()
