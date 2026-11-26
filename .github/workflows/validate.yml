@@ -87,12 +87,15 @@ jobs:
           cat benchmark_results.json
           python research/verification_scaling.py > verification-scaling.json
           cat verification-scaling.json
+          python research/priority_sampling_rss.py --quick > priority-sampling-rss.json
+          cat priority-sampling-rss.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: benchmark-results
           path: |
             benchmark_results.json
             verification-scaling.json
+            priority-sampling-rss.json
             environment.txt
 
   dependency-review:
