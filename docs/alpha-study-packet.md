@@ -33,9 +33,23 @@ update c=-.16,t=.62; input (|01>-i|10>)/sqrt(2).
 
 ## Administration and rubric (reviewer only)
 
-Use a counterbalanced order: participants 1/3/5 Ketary A then Qiskit B;
-participants 2/4 Qiskit A then Ketary B. Rotate task order V-D-H, D-H-V,
-H-V-D, V-H-D, H-D-V across participants. Record prior experience, route,
+Use the predeclared schedule below, assigned by enrollment slot before
+observing performance. Four slots cross route order and variant order;
+the fifth is an explicitly unbalanced formative extension. With three
+participants, exact four-cell balance is impossible. Do not replace
+incomplete sessions to manufacture a balanced outcome.
+
+| Slot | First route / variant | Second route / variant | Task order |
+|---|---|---|---|
+| 1 | Ketary A | Qiskit B | V-D-H |
+| 2 | Qiskit A | Ketary B | D-H-V |
+| 3 | Ketary B | Qiskit A | H-V-D |
+| 4 | Qiskit B | Ketary A | V-H-D |
+| 5 | Ketary A | Qiskit B | H-D-V |
+
+No personal identifiers in assignment records. Reviewer freezes tasks and
+scores independently before actual recruitment. The fixed public tasks
+are formative; they are not a secret held-out benchmark. Record prior experience, route,
 variant, elapsed time to first correct result, attempts, help requests,
 unresolved errors, and maintenance time. Same 25-minute cap per task/route;
 record timeout as incomplete, not as missing data. No cross-task score

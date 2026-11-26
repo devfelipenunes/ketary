@@ -160,7 +160,16 @@ def phase_estimation(phase, precision=3):
     c=Circuit(precision+1).x(precision).h_many(range(precision))
     for wire in range(precision):
         c.cp(2*pi*((phase*(1<<wire))%1),wire,precision)
-    return c.compose(qft(precision,inverse=True),wires=range(precision))
+    # Reverse the canonical forward QFT sequence directly. This avoids
+    # temporary construction, inversion and composition, without changing
+    # the gate sequence, precision cap or phase policy.
+    for wire in reversed(range(precision//2)):
+        c.swap(wire,precision-1-wire)
+    for target in range(precision):
+        for control in range(target):
+            c.cp(-pi/(2**(target-control)),control,target)
+        c.h(target)
+    return c
 
 
 def simon(secret):
