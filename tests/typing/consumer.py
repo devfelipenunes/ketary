@@ -101,3 +101,5 @@ assert_type(q.star(c.wires),tuple[tuple[int,int],...])
 assert_type(q.all_pairs(c.wires),tuple[tuple[int,int],...])
 assert_type(c.ry([.1,.2],c.wires),q.Circuit)
 assert_type(q.Circuit.symbolic(2).rz([angle,2*angle],[0,1]),q.Circuit)
+
+assert_type(q.Circuit.classical(3,3).measure([2,0],[0,2]).reset(range(3)),q.Circuit)
