@@ -48,6 +48,57 @@ class Circuit:
         c._qc=qc if owned else qc.copy()
         return c
 
+    def inspect(self, *, start=0, limit=32):
+        """Research candidate: bounded logical operations, no copy or run."""
+        from ._inspection import inspect_circuit
+        return inspect_circuit(self,start=start,limit=limit)
+
+    # Research-only syntax aliases. Existing gates namespace stays unchanged.
+    def h(self,q):
+        return self.gates.h(q)
+
+    def x(self,q):
+        return self.gates.x(q)
+
+    def y(self,q):
+        return self.gates.y(q)
+
+    def z(self,q):
+        return self.gates.z(q)
+
+    def s(self,q):
+        return self.gates.s(q)
+
+    def sdg(self,q):
+        return self.gates.sdg(q)
+
+    def t(self,q):
+        return self.gates.t(q)
+
+    def tdg(self,q):
+        return self.gates.tdg(q)
+
+    def rx(self,theta,q):
+        return self.gates.rx(theta,q)
+
+    def ry(self,theta,q):
+        return self.gates.ry(theta,q)
+
+    def rz(self,theta,q):
+        return self.gates.rz(theta,q)
+
+    def cx(self,c,t):
+        return self.gates.cx(c,t)
+
+    def cz(self,c,t):
+        return self.gates.cz(c,t)
+
+    def swap(self,a,b):
+        return self.gates.swap(a,b)
+
+    def ccx(self,c1,c2,t):
+        return self.gates.ccx(c1,c2,t)
+
     def to_qiskit(self):
         return self._qc.copy()
 

@@ -1,6 +1,6 @@
 """Explicit bounded ideal-state trace."""
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import numpy as np
 from ._adapter import _sdk
 from ._validation import _int, _limit, _tol, ResourceLimit
@@ -21,6 +21,13 @@ class TraceComparison:
     reference_operation: str | None = None
     actual_wires: tuple[int,...] | None = None
     reference_wires: tuple[int,...] | None = None
+
+    def to_dict(self):
+        record=asdict(self)
+        for field in ('actual_wires','reference_wires'):
+            if record[field] is not None: record[field]=list(record[field])
+        record['scope']='aligned zero-input checkpoints, not root cause'
+        return record
 
 class _Debug:
     def __init__(self,c):

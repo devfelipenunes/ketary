@@ -1,6 +1,6 @@
 """Independent result snapshots and mathematical checks."""
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import math
 import numpy as np
 from ._validation import _int, _tol, _real, _limit, ResourceLimit
@@ -12,6 +12,9 @@ class CheckResult:
     expected: float | None
     tolerance: float
     detail: str = ""
+
+    def to_dict(self):
+        return asdict(self)
 
     def require(self):
         if self.status != "PASS":
@@ -47,6 +50,16 @@ class Result:
     @property
     def test(self):
         return _Checks(self)
+
+    def evidence(self, *, bits=(), paulis=()):
+        """Research candidate: explicit evidence from this snapshot."""
+        from ._inspection import result_evidence
+        return result_evidence(self,bits=bits,paulis=paulis)
+
+    def verify(self, *, probabilities=None, expectations=None, normalized=False, atol=1e-9):
+        """Research candidate: aggregate named checks, never execute a circuit."""
+        from ._inspection import verify_result
+        return verify_result(self,probabilities=probabilities,expectations=expectations,normalized=normalized,atol=atol)
 
     def sample(self, *, shots, seed=None, max_outcomes=65536):
         shots = _int(shots,1)
@@ -212,7 +225,7 @@ class _Checks:
 
     def expectation(self,pauli,expected,*,atol=1e-9):
         t=_tol(atol)
-        expected=float(expected)
+        expected=_real(expected)
         if not math.isfinite(expected) or not -1<=expected<=1:
             raise ValueError("expected Pauli value must be in [-1,1]")
         a=self._r.math.expectation(pauli)
