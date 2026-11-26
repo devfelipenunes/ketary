@@ -308,18 +308,10 @@ class Circuit:
 
     def _apply_placements(self,block,placements):
         from ._adapter import _append_bound_blocks
-        if getattr(self,"_symbolic",False) and (self._qc.parameters or block._qc.parameters):
-            # Isolate the native parameter table as well as the instruction
-            # stream. Source stays unchanged, including self-application.
-            candidate=self._qc.copy()
-            changed=False
-            for wires in placements:
-                phase=candidate.global_phase
-                candidate.compose(block._qc,qubits=list(wires),inplace=True)
-                changed=changed or candidate.global_phase!=phase
-            self._qc=candidate
-        else:
-            changed=_append_bound_blocks(self._qc,block._qc,placements)
+        # Both bound and symbolic unitary sources are preflighted, including
+        # parameter identity and wire mappings. Self-application snapshots
+        # its source once; ordinary composition rolls back suffix and phase.
+        changed=_append_bound_blocks(self._qc,block._qc,placements)
         if changed:
             self._named_checkpoints={}
         return self

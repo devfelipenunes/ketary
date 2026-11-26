@@ -88,7 +88,7 @@ def _validate_bound_values(qc):
 
 
 def _append_bound_blocks(target,block,placements):
-    """Append validated ordered placements in one suffix/phase transaction.
+    """Append validated bound or symbolic placements in one suffix/phase transaction.
 
     The caller preflights mappings and bounds. No concurrent mutation
     guarantee. Self-application uses one independent source snapshot.
