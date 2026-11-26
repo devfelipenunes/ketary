@@ -13,7 +13,7 @@ Python objects, serialization, allocator fragmentation and child processes.
 | Observable / aggregate | Up to 256 terms per observable, up to 32 predicates | Up to 8192 Pauli evaluations; no aggregate time guarantee |
 | Density / Schmidt | State-sized input and output, matrix work | Existing separate payload/rank bounds, not scratch/RSS |
 | QueryPlan | Exactly one simulation; selected dense outputs | Sum state and matrix payload estimate; Python real/imag lists add overhead |
-| SweepPlan | Up to 32 privately retained bound native circuits and result snapshots | Aggregate snapshot payload preflight, not total peak RSS |
+| SweepPlan | Up to 32 privately retained bound native circuits and result snapshots | Complete finite rows preflight once; each native assignment still checks evaluated values and phase; aggregate snapshot payload preflight, not total peak RSS |
 | Trace / compare | Prefix state evolution, bounded retained states | Existing conservative budgets unchanged |
 | External QCEC | Optional backend worker | Deadline and width/gate limits, not child RSS |
 
