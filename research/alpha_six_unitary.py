@@ -53,7 +53,7 @@ def native_composed(labels,mask):
     for label in labels:
         zeros=[i for i,b in enumerate(reversed(label)) if b=="0"]
         if zeros:c.x(zeros)
-        c.mcx(range(n),n)
+        c.mcx(list(range(n)),n)
         if zeros:c.x(zeros)
     for i,b in enumerate(reversed(mask)):
         if b=="1":c.cx(i,n)
@@ -74,7 +74,7 @@ def sdk_reflection(v):
 def native_reflection(v):
     u=native_dense(v);n=u.num_qubits
     c=QuantumCircuit(n);c.compose(u.inverse(),inplace=True)
-    c.x(range(n));c.h(n-1);c.mcx(range(n-1),n-1);c.h(n-1);c.x(range(n))
+    c.x(range(n));c.h(n-1);c.mcx(list(range(n-1)),n-1);c.h(n-1);c.x(range(n))
     c.compose(u,inplace=True)
     return c
 
@@ -85,7 +85,7 @@ def native_amplify(labels,k):
     n=len(labels[0]);c=QuantumCircuit(n);c.h(range(n))
     for _ in range(k):
         c.compose(native_phase(labels),inplace=True)
-        c.h(range(n));c.x(range(n));c.h(n-1);c.mcx(range(n-1),n-1);c.h(n-1)
+        c.h(range(n));c.x(range(n));c.h(n-1);c.mcx(list(range(n-1)),n-1);c.h(n-1)
         c.x(range(n));c.h(range(n));c.global_phase+=np.pi
     return c
 
