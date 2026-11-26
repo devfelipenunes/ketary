@@ -294,7 +294,9 @@
     "Circuit.from_dynamic",
     "Circuit.run_density",
     "Circuit.run_noisy",
-    "Circuit.transpile_for"
+    "Circuit.transpile_for",
+    "Circuit.run_channel",
+    "_Math.expectation_complex"
   ],
   "Compatibility": [
     "Circuit.analyze",

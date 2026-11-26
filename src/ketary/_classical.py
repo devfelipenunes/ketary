@@ -193,3 +193,34 @@ def _run_noisy(circuit,noise_model,*,seed,max_bytes):
     if out.num_qubits!=circuit.num_qubits or not out.is_valid(atol=1e-9,rtol=0):
         raise ArithmeticError("native noise simulation returned invalid density")
     return DensityMatrix(out.data.copy())
+
+
+def _run_channel(circuit,channel,initial_state,*,max_bytes):
+    """Trusted native Kraus data; exact-in-model density evolution, no Aer."""
+    from math import isfinite
+    from qiskit.quantum_info import Kraus,DensityMatrix
+    n=_density_preflight(circuit,max_bytes)
+    if n>4:
+        raise ResourceLimit("Kraus channel execution supports <=4 wires")
+    if not isinstance(channel,Kraus):
+        raise TypeError("expected native Kraus channel")
+    dim=(2,)*n
+    if channel.input_dims()!=dim or channel.output_dims()!=dim:
+        raise ValueError("channel must preserve full qubit dimensions")
+    matrices=channel.data
+    if not isinstance(matrices,list) or not 1<=len(matrices)<=16:
+        raise UnsupportedOperation("expected 1..16 standard Kraus operators")
+    _limit(2*n,3+len(matrices),budget=max_bytes)
+    for matrix in matrices:
+        if matrix.shape!=(1<<n,1<<n) or any(
+            not isfinite(z.real) or not isfinite(z.imag) for z in matrix.flat
+        ):
+            raise ValueError("Kraus operators must be finite square matrices")
+    owned=Kraus([m.copy() for m in matrices],input_dims=dim,output_dims=dim)
+    if not owned.is_cptp(atol=1e-9,rtol=0):
+        raise ValueError("channel must be completely positive and trace preserving")
+    state=_run_density(circuit,initial_state,max_bytes=max_bytes)
+    result=state.evolve(owned)
+    if not result.is_valid(atol=1e-9,rtol=0):
+        raise ArithmeticError("native channel returned invalid density")
+    return DensityMatrix(result.data.copy(),dims=dim)
