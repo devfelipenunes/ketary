@@ -185,7 +185,7 @@ class _Math:
         from qiskit.quantum_info import Pauli, Statevector
         # Native Pauli evaluation operates on the snapshot, not a dense operator.
         value=complex(Statevector(self._r._data).expectation_value(Pauli(pauli)))
-        if abs(value.imag)>1e-9 or not math.isfinite(value.real):
+        if not math.isfinite(value.real) or not math.isfinite(value.imag) or abs(value.imag)>1e-9:
             raise ArithmeticError("invalid Hermitian Pauli expectation")
         return float(np.clip(value.real/self._r._norm_sq,-1,1))
 
