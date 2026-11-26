@@ -53,7 +53,7 @@ def build_cases():
         code("generation", family, n, gates+[tail], mutant+[tail])
 
     for i in range(26):
-        n = 3 + i % 2
+        n = 3 + i // 6
         a, b, c = [(i+j) % n for j in range(3)]
         theta = round(.11 + .03*i, 2)
         mode = i % 4
@@ -71,7 +71,7 @@ def build_cases():
             ref = [("h",a),("cx",a,b),("rx",theta,c)]
             add("comprehension","phase-vs-distribution",n,
                 f"Reference ordered gates: {ref!r}. Return [same Z distribution, same state up to global phase] as booleans.",
-                source=ref+[("z",a)], answer=[True,False], wrong=[True,True])
+                source=ref+[("z",a)], reference_gates=ref, answer=[True,False], wrong=[True,True])
         else:
             ops = [("x",a),("x",b),("ccx",a,b,c)]
             add("comprehension","toffoli",n,"Return the unique measurement label from zero input, highest wire first.",
