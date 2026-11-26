@@ -1,6 +1,6 @@
 # ADR 004 — Consolidate native execution and trace evolution
 
-Status: candidate implementation; acceptance requires CI and review.
+Status: implemented in #43; exact-head and post-merge CI passed.
 
 Context: Circuit.run combines public mode/budget validation with native
 state creation/evolution, and tracing duplicated zero-state/global-phase
