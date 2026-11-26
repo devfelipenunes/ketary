@@ -165,7 +165,14 @@ class Evidence:
         d=self.to_dict()["data"]
         a,b=Circuit.from_json(d["observed"]),Circuit.from_json(d["reference"])
         _pair(a,b,max_bytes)
-        if not self.reproduce(max_bytes=max_bytes)["reproduced"]:
+        from qiskit.quantum_info import Statevector
+        # The fixed reference and input are independent snapshots for this
+        # explicit operation. No shared cache, extra metrics or reference rerun.
+        initial=Statevector.from_label(d["input"]).data
+        reference=b.run(initial_state=initial,max_bytes=max_bytes)
+        distance=_distance(a.run(initial_state=initial,max_bytes=max_bytes),
+                           reference,d["ignore_global_phase"])
+        if not distance>d["atol"]:
             return {"status":"INCONCLUSIVE","reason":"witness no longer reproduces","attempts":0}
         native=a.to_qiskit()
         start=len(native.data)
@@ -175,15 +182,19 @@ class Evidence:
             trial=native.copy()
             del trial.data[i]
             candidate=Circuit._from_native(trial,owned=True)
-            record=_snapshot(candidate,b,d["input"],d["ignore_global_phase"],max_bytes)
+            trial_distance=_distance(candidate.run(initial_state=initial,max_bytes=max_bytes),
+                                     reference,d["ignore_global_phase"])
             used+=1
-            if record["state_l2"]>d["atol"]:
+            if trial_distance>d["atol"]:
                 native=trial
+                distance=trial_distance
+                # Earlier rejected deletions can become valid after this one.
+                # A complete unchanged pass establishes one-deletion minimality.
+                i=0
             else:
                 i+=1
         candidate=Circuit._from_native(native,owned=True)
-        record=_snapshot(candidate,b,d["input"],d["ignore_global_phase"],max_bytes)
-        evidence=_make_evidence(candidate,b,d["input"],d["ignore_global_phase"],d["atol"],record["state_l2"])
+        evidence=_make_evidence(candidate,b,d["input"],d["ignore_global_phase"],d["atol"],distance)
         return {"status":"FAIL","scope":"greedy deletion preserving witness; not root cause or global minimum",
                 "before_gates":start,"after_gates":len(native.data),"attempts":used,
                 "budget_exhausted":used==attempts and i<len(native.data),"evidence":evidence.to_dict()}
