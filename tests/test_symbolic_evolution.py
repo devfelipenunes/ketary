@@ -50,7 +50,7 @@ def test_symbolic_weighted_qaoa(seed):
 
 def test_shared_expression_and_phase_only_parameter():
     a,b=q.Circuit.parameter_vector("t",2)
-    c=q.Circuit.symbolic(2).ry(a,0).checkpoint("before")
+    c=q.Circuit.symbolic(2).checkpoint("before").ry(a,0)
     c.evolve(q.I(),time=b)
     assert not c.checkpoints
     assert set(c.parameters)=={a,b}
@@ -68,22 +68,22 @@ def test_same_parameter_reuse_through_composition():
 
 def test_symbolic_preflight_and_transaction(monkeypatch):
     t=q.Circuit.parameter("t")
-    c=q.Circuit.symbolic(2).ry(t,0).checkpoint("before");before=c.to_qiskit()
+    c=q.Circuit.symbolic(2).checkpoint("before").ry(t,0);before=c.to_qiskit()
     for H,time in ((q.X(0)+q.Z(0),t),(q.Z(2),t),(q.X(0),q.Circuit.parameter("t"))):
         with pytest.raises(ValueError):c.evolve(H,time=time)
-        assert c.to_qiskit()==before and c.checkpoints=={"before":1}
+        assert c.to_qiskit()==before and c.checkpoints=={"before":0}
     original=QuantumCircuit.compose
     def fail(self,*args,**kwargs):
         original(self,*args,**kwargs)
         raise RuntimeError("injected after native compose")
     monkeypatch.setattr(QuantumCircuit,"compose",fail)
     with pytest.raises(RuntimeError):c.evolve(q.I()+q.Z(0)@q.Z(1),time=t)
-    assert c.to_qiskit()==before and c.checkpoints=={"before":1}
+    assert c.to_qiskit()==before and c.checkpoints=={"before":0}
 
 def test_binding_rejects_nonfinite_evaluated_angles():
     t=q.Circuit.parameter("t")
     c=q.Circuit.symbolic(1).evolve(q.X(0),time=t*1e150)
-    with pytest.raises((ValueError,OverflowError)):c.bind({t:1e200})
+    with pytest.raises(ValueError,match="finite real"):c.bind({t:1e200})
     assert c.parameters==(t,)
 
 def test_numeric_zero_and_symbolic_mode():
