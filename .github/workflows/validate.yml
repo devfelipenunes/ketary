@@ -98,6 +98,7 @@ jobs:
           python -m research.alpha_observable_reuse_profile --reps 9 > alpha-observable-reuse-profile.json
           python -m research.alpha_operator_metrics_profile --reps 5 > alpha-operator-metrics-profile.json
           python -m research.alpha_native_cost_audit --reps 9 > alpha-native-cost-audit.json
+          python -m research.alpha_native_logical_profile > alpha-native-logical-profile.json
           python -m research.alpha_commutation_lab --reps 9 > alpha-commutation-lab.json
           python -m research.closure_physical_dynamics > closure-physical-dynamics.json
           python -m research.closure_reversible_logic > closure-reversible-logic.json
@@ -119,6 +120,7 @@ jobs:
             alpha-observable-reuse-profile.json
             alpha-operator-metrics-profile.json
             alpha-native-cost-audit.json
+            alpha-native-logical-profile.json
             alpha-commutation-lab.json
             closure-physical-dynamics.json
             closure-reversible-logic.json

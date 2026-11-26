@@ -40,14 +40,15 @@ def _encode(circuit):
     _width_and_count(qc.num_qubits,len(qc.data))
     _validate(qc)
     operations=[]
+    indices={wire:i for i,wire in enumerate(qc.qubits)}
     for item in qc.data:
-        op=item.operation
-        if op.name not in _ARITY and op.name!='mcx':
+        name=item.name
+        if name not in _ARITY and name!='mcx':
             raise ValueError("unsupported replay gate")
         operations.append({
-            "gate":op.name,
-            "wires":[qc.find_bit(wire).index for wire in item.qubits],
-            "params":[float(p) for p in op.params],
+            "gate":name,
+            "wires":[indices[wire] for wire in item.qubits],
+            "params":[float(p) for p in item.params],
         })
     data={
         "schema_version":_SCHEMA,
