@@ -58,3 +58,7 @@ resource caps to make tests pass.
 Independent human validation, controlled host results, formal verification,
 hardware support and public distribution are not implied by this work.
 No tag or publication until separate explicit approval.
+
+## 2026-11-26 integrated functional evidence
+
+#351 main 5c0d3798, exact head 36caaee8, 18/18 workflows, identical tree; 2039 core passed / 29 skipped / 38 warnings / 93% combined coverage; 2079 dynamic passed / 38 warnings / 94%. 51 authored comparison cases pass, covering 35/37 distinct selected tasks via direct or explicit native routes, not API-wide compatibility. Native metadata/barrier preservation remains unresolved. Core skips include optional Aer. New GenericBackendV2 warning reflects BasicSimulator fallback without Aer in core; no physical hardware validation. Production gates remain partial: dedicated hardware benchmark, independent user pilot, platform compatibility, mutation score and release/license review outstanding. CI connector filters to PR runs; push CI not confirmed.

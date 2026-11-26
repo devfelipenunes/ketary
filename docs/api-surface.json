@@ -272,7 +272,10 @@
     "Circuit.bind_partial",
     "Circuit.control",
     "Circuit.evolve_product",
-    "Observable.anticommutator"
+    "Observable.anticommutator",
+    "Circuit.prepare_state",
+    "Circuit.from_unitary",
+    "Circuit.evolve_exact"
   ],
   "Native": [
     "Circuit.append",

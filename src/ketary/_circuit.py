@@ -262,6 +262,23 @@ class Circuit:
         from ._transpilation import _control_block
         return _control_block(self,controls=controls,control_state=control_state,seed=seed)
 
+    @classmethod
+    def prepare_state(cls,amplitudes,*,seed=0):
+        """Return a bounded unitary preparation block (no reset or execution)."""
+        from ._transpilation import _prepare_state
+        return _prepare_state(amplitudes,seed=seed)
+
+    @classmethod
+    def from_unitary(cls,matrix,*,seed=0):
+        """Synthesize a bounded finite unitary matrix into logical gates."""
+        from ._transpilation import _from_unitary
+        return _from_unitary(matrix,seed=seed)
+
+    def evolve_exact(self,observable,*,time,seed=0):
+        """Append dense exact-in-model evolution, including noncommuting sums."""
+        from ._transpilation import _evolve_dense
+        return _evolve_dense(self,observable,time=time,seed=seed)
+
     def evolve_product(self,observable,*,time,steps,order=2):
         """Explicit first/second-order Pauli product formula."""
         from ._ergonomics import _evolve_product
