@@ -13,3 +13,13 @@ equality at small widths and independent exact-grid/off-grid distributions.
 Archive 3 precisions × 3 phases × 3 seeds × 9 repeats, common gates/CX/depth.
 No generic QPE, hardware, or cross-host speed claim. Keep #180 open until
 reviewed full artifact and integrated decision.
+
+## Runtime promotion candidate
+
+The qualified research head showed faster direct construction with identical
+logical circuits and strict operators. The installed factory now proposes
+the direct sequence, preserving the historical composed implementation as
+an independent benchmark and structure reference. Validate actual installed
+factory output against the historical route, including precision 12 and
+near-one phase. No new API. Final integration remains subject to exact-head
+CI and raw profile review; the dedicated-host gate is unchanged.

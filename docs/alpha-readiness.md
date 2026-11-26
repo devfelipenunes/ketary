@@ -37,3 +37,21 @@ Follow docs/release-validation.md; record commit, CPU, RAM, affinity,
 environment, raw replicates, output equality. Shared CI does not satisfy
 the host gate. Inspect distributions and third-party notices; manual
 review is not replaced by vulnerability scanning. No tag/upload/publish.
+
+## Integrated baseline 7e973206
+
+PR #482 qualified head 9a7771a356c291a3e8deb40c82f2a93ce2cccfe5, 20/20
+workflows, six SDK jobs, 4909 Core and 4999 Dynamic tests passed; coverage
+96.977975% and 97.029196%. Merge tree 7e97320609393e7dcca163f71217bd44b4a45049
+matched the candidate. Main push CI was not separately observed. This is
+historical evidence, not qualification of a later commit or release.
+
+[Parallel issue ledger](alpha-parallel-issue-ledger.md) separates the active
+engineering packages and external gates. Use the counterbalanced
+[formative packet](alpha-study-packet.md); independent freeze and recruitment
+remain pending. Check built archive identity and layout with
+`python -m research.alpha_distribution_audit <wheel> <sdist>`; the checker
+is not an install, reproducible build or legal approval. Run clean wheel and
+source installs using the existing CI. Dedicated-host protocol remains
+[release validation](release-validation.md); do not execute it on an
+unauthorized or shared host and call the result controlled evidence.
