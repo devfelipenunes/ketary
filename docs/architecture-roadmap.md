@@ -90,3 +90,8 @@ reverse dependencies, no claim of eliminating the SCC. AUD-A03/04/06:
 [resource and ownership contracts](resource-contracts.md), no breaking
 wire migration or new budgets. AUD-A05: all explicit imports guarded.
 Exact-head CI and review required; dedicated host still pending.
+
+## High-level design inventory
+
+See [ABS01–ABS36](high-level-abstraction-map.md) for the proposed next design
+cycle. No new public API is approved by that inventory.
