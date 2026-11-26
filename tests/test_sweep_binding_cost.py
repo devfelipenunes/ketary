@@ -54,3 +54,15 @@ def test_sweep_keeps_subclass_public_dispatch():
 def test_sweep_cost_routes(n,layers,count):
     row=evaluate(n,layers,count,reps=2)
     assert all(len(v["raw_ms"])==2 for v in row["stages"].values())
+
+@pytest.mark.parametrize("route",["named","ordered"])
+def test_sweep_rejects_source_changed_by_input_iterator(route,monkeypatch):
+    p,r=q.Circuit.parameter("p"),q.Circuit.parameter("r")
+    c=q.Circuit.symbolic(2).ry(p,0)
+    def values():
+        c.ry(r,1)
+        yield .2 if route=="named" else [.2]
+    monkeypatch.setattr(q.Circuit,"_bind_numeric",lambda *a:pytest.fail("assigned stale parameter identities"))
+    with pytest.raises(ValueError,match="bindings must cover"):
+        if route=="named":c.sweep(p=values())
+        else:c.sweep_rows(values())
