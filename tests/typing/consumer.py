@@ -107,3 +107,7 @@ assert_type(q.Circuit.classical(3,3).measure([2,0],[0,2]).reset(range(3)),q.Circ
 assert_type(c.cx(pairs=[(0,1)]).cz(pairs=q.chain(c.wires)),q.Circuit)
 assert_type(c.rzz(.2,pairs=[(0,1)]),q.Circuit)
 assert_type(q.Circuit.symbolic(2).crx(angle,pairs=[(0,1)]),q.Circuit)
+
+assert_type(q.ansatz(4,reps=2).bind([0.1]*12),q.Circuit)
+params=q.Circuit.parameter_vector("weight",2)
+assert_type(q.Circuit.symbolic(2).ry(params,[0,1]).bind([.1,.2]),q.Circuit)
