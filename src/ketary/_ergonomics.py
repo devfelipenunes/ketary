@@ -285,11 +285,27 @@ def _evolve(c,observable,time):
     return c.apply(block)
 
 
+def _shifted_bound_circuit(bound,offsets):
+    """Own and validate one disposable native shift, never execute it.
+
+    Offsets are already bounded by the derivative planner, in radians.
+    Keep native gate copies and full validation before any simulation.
+    """
+    from ._validation import _real
+    from ._circuit import Circuit
+    raw=bound.copy()
+    for index,shift in offsets:
+        item=raw.data[index]
+        gate=item.operation.to_mutable()
+        gate.params=[_real(float(gate.params[0])+shift)]
+        raw.data[index]=item.replace(operation=gate)
+    return Circuit._from_native(raw,owned=True)
+
+
 def _expectation_jacobian(c,bindings,observables,*,max_bytes):
     """Bounded occurrence-wise two/four-point shifts; not a state derivative."""
     from math import pi,fsum
     from ._validation import _real
-    from ._circuit import Circuit
     from ._observable import Observable
     if c.num_clbits:
         raise UnsupportedOperation("unitary expectation derivative only")
@@ -348,12 +364,7 @@ def _expectation_jacobian(c,bindings,observables,*,max_bytes):
         shifted_pair=[]
         shifts=(pi/2,-pi/2,pi,-pi) if four else (pi/2,-pi/2)
         for shift in shifts:
-            shifted=bound.copy()
-            item=shifted.data[index]
-            gate=item.operation.to_mutable()
-            gate.params=[_real(float(gate.params[0])+shift)]
-            shifted.data[index]=item.replace(operation=gate)
-            shifted_pair.append(Circuit._from_native(shifted,owned=True))
+            shifted_pair.append(_shifted_bound_circuit(bound,((index,shift),)))
         pairs.append((weights,*shifted_pair))
     contributions=[[[] for _ in params] for _ in obs]
     from math import sqrt
@@ -409,7 +420,6 @@ def _quantum_geometric_tensor(c,bindings,*,max_bytes):
     from math import pi,sqrt
     import numpy as np
     from ._validation import _real
-    from ._circuit import Circuit
     if c.num_clbits:
         raise UnsupportedOperation("QGT requires ideal unitary evolution")
     if c.num_qubits>8 or len(c.parameters)>16 or len(c._qc.data)>256:
@@ -455,12 +465,7 @@ def _quantum_geometric_tensor(c,bindings,*,max_bytes):
     for index,weights,factor in staged:
         pair=[]
         for sign in (1,-1):
-            raw=bound._qc.copy()
-            item=raw.data[index]
-            gate=item.operation.to_mutable()
-            gate.params=[_real(float(gate.params[0])+sign*pi/2)]
-            raw.data[index]=item.replace(operation=gate)
-            pair.append(Circuit._from_native(raw,owned=True))
+            pair.append(_shifted_bound_circuit(bound._qc,((index,sign*pi/2),)))
         pairs.append((weights,factor,*pair))
     psi=bound.run(max_bytes=max_bytes).math.statevector()
     derivatives=np.zeros((psi.size,len(params)),dtype=complex)
@@ -483,7 +488,6 @@ def _expectation_hessian(c,bindings,observables,*,max_bytes):
     """Bounded second-order chain rule with exact ideal occurrence shifts."""
     from math import pi,sqrt,fsum
     from ._validation import _real
-    from ._circuit import Circuit
     from ._observable import Observable
     if c.num_clbits:
         raise UnsupportedOperation("Hessian requires ideal unitary evolution")
@@ -569,13 +573,7 @@ def _expectation_hessian(c,bindings,observables,*,max_bytes):
     # All native copies and numeric angles validated before any execution.
     circuits={}
     for k in sorted(needed):
-        raw=bound.copy()
-        for index,offset in k:
-            item=raw.data[index]
-            gate=item.operation.to_mutable()
-            gate.params=[_real(float(gate.params[0])+offset*pi/2)]
-            raw.data[index]=item.replace(operation=gate)
-        circuits[k]=Circuit._from_native(raw,owned=True)
+        circuits[k]=_shifted_bound_circuit(bound,((index,offset*pi/2) for index,offset in k))
     evaluated={k:run.run(max_bytes=max_bytes).math.expectations(obs) for k,run in circuits.items()}
     def shifted(terms,o):
         return _real(fsum(_real(a*evaluated[k][o]) for k,a in terms))

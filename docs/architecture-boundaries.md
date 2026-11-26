@@ -103,3 +103,10 @@ Grouped real and explicit native complex Pauli expectation now share private
 single-label numerical acceptance and a call-local native handle in _result.
 No new module/import edge, cache, native state mutation or public API.
 See ADR 005. Existing legacy observable mapping path remains unchanged.
+
+Jacobian, QGT and Hessian planners in _ergonomics share one private native
+shift-copy-validation transaction. The three planners retain their own
+mathematical frequency rules, distinct caps and preflight ordering. No
+new import edge or cyclic component; extraction stays in the same module
+so the current dependency graph is preserved. A late staging failure must
+precede every simulation. No performance claim from code deduplication.
