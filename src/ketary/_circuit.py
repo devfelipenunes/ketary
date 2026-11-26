@@ -68,6 +68,17 @@ class Circuit:
         self._qc.append(gate,indices,copy=True)
         return self
 
+    def to_json(self):
+        """Serialize the supported logical circuit to a bounded versioned artifact."""
+        from ._replay import _encode
+        return _encode(self)
+
+    @classmethod
+    def from_json(cls,payload):
+        """Reconstruct a supported logical circuit without executing it."""
+        from ._replay import _decode
+        return cls._from_native(_decode(payload),owned=True)
+
     def optimize(self):
         """Return a new circuit after conservative adjacent inverse cancellation."""
         from ._optimization import _cancel_adjacent
