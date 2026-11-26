@@ -97,6 +97,7 @@ jobs:
           python -m research.alpha_parity_profile --reps 9 > alpha-parity-profile.json
           python -m research.alpha_observable_reuse_profile --reps 9 > alpha-observable-reuse-profile.json
           python -m research.alpha_operator_metrics_profile --reps 5 > alpha-operator-metrics-profile.json
+          python -m research.alpha_chunk_profile --reps 5 --rss > alpha-chunk-profile.json
           python -m research.closure_physical_dynamics > closure-physical-dynamics.json
           python -m research.closure_reversible_logic > closure-reversible-logic.json
           python -m research.priority_architecture_audit > closure-architecture.json
@@ -116,6 +117,7 @@ jobs:
             alpha-parity-profile.json
             alpha-observable-reuse-profile.json
             alpha-operator-metrics-profile.json
+            alpha-chunk-profile.json
             closure-physical-dynamics.json
             closure-reversible-logic.json
             closure-architecture.json

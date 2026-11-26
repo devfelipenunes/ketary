@@ -42,7 +42,7 @@ MUTANTS=(
 ("hessian_controlled_frequency","_ergonomics.py","controlled_coefficient=(1-sqrt(2))/4","controlled_coefficient=0","tests/test_production_hessian.py::test_controlled_second_frequency"),
 ("hessian_occurrence_cap","_ergonomics.py","if len(active)>8:","if len(active)>16:","tests/test_production_hessian.py::test_hessian_invalid_preflight"),
 ("hessian_shift_cap","_ergonomics.py","if len(needed)>256:","if len(needed)>1024:","tests/test_production_hessian.py::test_hessian_invalid_preflight"),
-("synthesis_wrong_operator_accepted","_transpilation.py","if not float(abs(Operator(raw).data-reference.data).max())<=1e-9:","if False:","tests/test_production_native_faults.py::test_synthesis_wrong_operator_never_accepted"),
+("synthesis_wrong_operator_accepted","_transpilation.py","if not residual<=1e-9:","if False:","tests/test_production_native_faults.py::test_synthesis_wrong_operator_never_accepted"),
 ("synthesis_noncanonical_accepted","_transpilation.py","if any(item.operation.name not in (\"u\",\"cx\") for item in raw.data):","if False:","tests/test_production_native_faults.py::test_synthesis_noncanonical_output"),
 ("synthesis_output_cap","_transpilation.py","if len(raw.data)>10000:","if len(raw.data)>20000:","tests/test_production_native_faults.py::test_synthesis_output_limit_isolated"),
 ("local_channel_wrong_wire_order","_classical.py","result=state.evolve(owned,qargs=list(selected))","result=state.evolve(owned,qargs=list(reversed(selected)))","tests/test_production_local_channels.py::test_local_channel_dense_oracle"),
