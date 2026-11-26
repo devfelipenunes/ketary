@@ -6,6 +6,7 @@ reviewed fixture source, not user-supplied code. Shared inputs are excluded
 consistently and printed with results. Preserve every negative result.
 """
 import argparse,ast,io,json,platform,random,statistics,time,tokenize
+from collections import Counter
 from pathlib import Path
 from importlib.metadata import version
 import numpy as np
@@ -44,7 +45,13 @@ def metrics(source):
         d=depth+int(isinstance(node,(ast.For,ast.While,ast.If,ast.comprehension)))
         return max([d]+[nested(x,d) for x in ast.iter_child_nodes(node)])
     calls=[x.func.attr for x in nodes if isinstance(x,ast.Call) and isinstance(x.func,ast.Attribute)]
-    return dict(tokens=tokens,ast_nodes=len(nodes),statements=sum(isinstance(x,ast.stmt) for x in nodes),
+    # Count repeated nontrivial expression/statement shapes, not trivial names
+    # or constants. This is exact syntactic duplication, not semantics.
+    duplicates=Counter(ast.dump(x,include_attributes=False) for x in nodes
+                       if isinstance(x,(ast.expr,ast.stmt)) and sum(1 for _ in ast.walk(x))>=5)
+    return dict(duplicate_ast_groups=sum(v>1 for v in duplicates.values()),
+                duplicate_ast_excess=sum(v-1 for v in duplicates.values() if v>1),
+                tokens=tokens,ast_nodes=len(nodes),statements=sum(isinstance(x,ast.stmt) for x in nodes),
                 loops=sum(isinstance(x,(ast.For,ast.While,ast.comprehension)) for x in nodes),
                 branches=sum(isinstance(x,ast.If) for x in nodes),nesting=nested(tree),calls=sum(isinstance(x,ast.Call) for x in nodes),
                 numeric_literals=sum(isinstance(x,ast.Constant) and type(x.value) in (int,float) for x in nodes),
