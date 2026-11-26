@@ -9,7 +9,7 @@ from pathlib import Path
 from importlib.metadata import version
 import numpy as np
 import ketary as q
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit,transpile
 from qiskit.circuit import ParameterVector
 from qiskit.circuit.library import PauliEvolutionGate
 from qiskit.quantum_info import Statevector,SparsePauliOp
@@ -34,6 +34,17 @@ for j in range(2):
     c.append(PauliEvolutionGate(M,time=p[2*j+1]),range(n))
 results=[Statevector.from_instruction(c.assign_parameters(dict(zip(p,row,strict=True)))) for row in rows]
 out=[(r.data.copy(),float(r.expectation_value(H).real),float(r.expectation_value(H@H).real-r.expectation_value(H).real**2)) for r in results]"""
+QAOA_DIRECT="""p=ParameterVector('p',4)
+H=SparsePauliOp.from_list(cost_terms)
+c=QuantumCircuit(n)
+c.h(range(n))
+for j in range(2):
+    c.global_phase-=sum(weights)*p[2*j]/2
+    for w,(a,b) in zip(weights,edges,strict=True):c.rzz(-w*p[2*j],a,b)
+    c.rx(2*p[2*j+1],range(n))
+results=[Statevector.from_instruction(c.assign_parameters(dict(zip(p,row,strict=True)))) for row in rows]
+out=[(r.data.copy(),float(r.expectation_value(H).real),float(r.expectation_value(H@H).real-r.expectation_value(H).real**2)) for r in results]"""
+QAOA_EXPANDED=QAOA_Q.replace("\nresults=", "\nc=transpile(c,basis_gates=['u','cx'],optimization_level=0,seed_transpiler=seed,qubits_initially_zero=False)\nresults=")
 VQE_K="""p=q.Circuit.parameter_vector('p',2*n)
 H=q.Observable(terms)
 c=q.Circuit.symbolic(n)
@@ -86,7 +97,8 @@ def evaluate(kind,n,seed=1101,count=3,reps=5):
     rows=rng.uniform(-.8,.8,(count,4 if kind=="qaoa" else 2*n)).tolist()
     expected=oracle(kind,n,rows,dict(cost_terms) if kind=="qaoa" else terms,dense(dict(mixer_terms)) if kind=="qaoa" else None)
     sources={"ketary":QAOA_K if kind=="qaoa" else VQE_K,"qiskit":QAOA_Q if kind=="qaoa" else VQE_Q}
-    env=dict(q=q,np=np,QuantumCircuit=QuantumCircuit,ParameterVector=ParameterVector,
+    if kind=="qaoa":sources.update(qiskit_direct=QAOA_DIRECT,qiskit_preexpanded=QAOA_EXPANDED)
+    env=dict(q=q,np=np,QuantumCircuit=QuantumCircuit,ParameterVector=ParameterVector,transpile=transpile,seed=seed,
              PauliEvolutionGate=PauliEvolutionGate,Statevector=Statevector,SparsePauliOp=SparsePauliOp,n=n,
              edges=edges,weights=weights,cost_terms=cost_terms,mixer_terms=mixer_terms,terms=terms,rows=rows)
     # Split source at the explicit results= boundary, keeping objective
@@ -94,23 +106,29 @@ def evaluate(kind,n,seed=1101,count=3,reps=5):
     compiled={}
     for key,source in sources.items():
         a,b=source.split("\nresults=",1)
-        compiled[key]=(compile(a,"<build>","exec"),compile("results="+b,"<objective>","exec"))
+        build,sep,lower=a.partition("\nc=transpile(")
+        compiled[key]=(compile(build,"<build>","exec"),compile("c=transpile("+lower,"<lower>","exec") if sep else None,compile("results="+b,"<objective>","exec"))
     def run(key):
-        a,b=compiled[key];scope=env.copy()
+        a,lower,b=compiled[key];scope=env.copy()
         t=time.perf_counter_ns();exec(a,scope);build=(time.perf_counter_ns()-t)/1e6
+        t=time.perf_counter_ns()
+        if lower is not None:exec(lower,scope)
+        synthesis=(time.perf_counter_ns()-t)/1e6 if lower is not None else 0.0
+        raw=scope["c"].to_qiskit() if key=="ketary" else scope["c"]
+        gates=len(raw.data);depth=raw.depth()
         t=time.perf_counter_ns();exec(b,scope);execute=(time.perf_counter_ns()-t)/1e6
-        return scope["out"],build,execute
-    errors={};samples={k:{"build":[],"objective":[]} for k in sources}
+        return scope["out"],build,synthesis,execute,gates,depth
+    errors={};resources={};samples={k:{"build":[],"synthesis":[],"objective":[]} for k in sources}
     for key in sources:
-        got,_,_=run(key);assert len(got)==len(expected)
+        got,_,_,_,gates,depth=run(key);resources[key]=(gates,depth);assert len(got)==len(expected)
         errors[key]=max(max(float(np.max(np.abs(x-y))) for x,y in zip(a,b,strict=True)) for a,b in zip(got,expected,strict=True))
         if errors[key]>1e-9:raise AssertionError((kind,key,errors[key]))
     rnd=random.Random(seed)
     for _ in range(reps):
         order=list(sources);rnd.shuffle(order)
         for k in order:
-            _,build,execute=run(k);samples[k]["build"].append(build);samples[k]["objective"].append(execute)
-    return dict(kind=kind,n=n,seed=seed,rows=count,variants={k:dict(source=sources[k],**metrics(sources[k]),max_error=errors[k],**{name:dict(raw_ms=v,p50_ms=statistics.median(v),p95_ms=float(np.quantile(v,.95))) for name,v in sample.items()}) for k,sample in samples.items()})
+            _,build,synthesis,execute,_,_=run(k);samples[k]["build"].append(build);samples[k]["synthesis"].append(synthesis);samples[k]["objective"].append(execute)
+    return dict(kind=kind,n=n,seed=seed,rows=count,variants={k:dict(source=sources[k],**metrics(sources[k]),max_error=errors[k],logical_gates=resources[k][0],logical_depth=resources[k][1],**{name:dict(raw_ms=v,p50_ms=statistics.median(v),p95_ms=float(np.quantile(v,.95))) for name,v in sample.items()}) for k,sample in samples.items()})
 def gradient_counterexample(t=.37):
     """Shared parameter: naive single two-point shift is not general."""
     a=q.Circuit.parameter("a")
