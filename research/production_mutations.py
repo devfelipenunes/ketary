@@ -17,6 +17,16 @@ MUTANTS=(
 ("controlled_phase_loss","_transpilation.py","raw.append(circuit.to_qiskit().to_gate().control(controls,ctrl_state=state,annotated=False),range(raw.num_qubits))","source=circuit.to_qiskit();source.global_phase=0;raw.append(source.to_gate().control(controls,ctrl_state=state,annotated=False),range(raw.num_qubits))","tests/test_dx_coverage_promotions.py::test_control_phase"),
 ("controlled_shift_correction","_ergonomics.py","correction=(1-sqrt(2))/4","correction=0","tests/test_production_controlled_gradient.py::test_both_controlled_frequencies"),
 ("register_bit_order","_classical.py",'key=label.replace(" ","")','key=label.replace(" ","")[::-1]',"tests/test_dx_execution_coverage.py::test_dynamic_multiple_register_shots"),
+("sequential_real_sum","_observable.py","real=fsum(z.real for z in values)","real=__import__('functools').reduce(lambda a,z:a+z.real,values,0.0)","tests/test_production_pauli_robustness.py::test_duplicate_real_cancellation"),
+("sequential_imaginary_sum","_observable.py","imag=fsum(z.imag for z in values)","imag=__import__('functools').reduce(lambda a,z:a+z.imag,values,0.0)","tests/test_production_pauli_robustness.py::test_duplicate_imaginary_residual_rejected"),
+("ignore_nonhermitian","_observable.py","if any(value.imag!=0 for value in terms.values()):","if False:","tests/test_production_pauli_robustness.py::test_duplicate_imaginary_residual_rejected"),
+("pauli_xy_sign","_observable.py","(\"X\",\"Y\"):(\"Z\",1j)","(\"X\",\"Y\"):(\"Z\",-1j)","tests/test_production_pauli_robustness.py::test_pauli_algebra_dense_oracle"),
+("pauli_yx_sign","_observable.py","(\"Y\",\"X\"):(\"Z\",-1j)","(\"Y\",\"X\"):(\"Z\",1j)","tests/test_production_pauli_robustness.py::test_pauli_algebra_dense_oracle"),
+("discard_product_terms","_observable.py","out.setdefault(key,[]).append(complex(_real(value.real),_real(value.imag)))","out[key]=[complex(_real(value.real),_real(value.imag))]","tests/test_production_pauli_robustness.py::test_product_cancellation_identity"),
+("complex_imaginary_sign","_result.py","imag=math.fsum(im*cache[label] for label,re,im in terms)","imag=-math.fsum(im*cache[label] for label,re,im in terms)","tests/test_production_channels_complex.py::test_complex_pauli_expectation"),
+("channel_ignored","_classical.py","result=state.evolve(owned)","result=state","tests/test_production_channels_complex.py::test_amplitude_damping_oracle"),
+("channel_preflight_ignored","_classical.py","if not owned.is_cptp(atol=1e-9,rtol=0):","if False:","tests/test_production_channels_complex.py::test_channel_rejects_before_execution"),
+("controlled_shift_frequency","_ergonomics.py","shifts=(pi/2,-pi/2,pi,-pi) if four else (pi/2,-pi/2)","shifts=(pi/2,-pi/2,pi/2,-pi/2) if four else (pi/2,-pi/2)","tests/test_production_controlled_gradient.py::test_both_controlled_frequencies"),
 )
 
 def run_test(root,node):
@@ -53,6 +63,6 @@ def main():
     rows=[]
     for m in MUTANTS:
         row=evaluate(m);rows.append(row);print(json.dumps(row),flush=True)
-    a.output.write_text(json.dumps(dict(scope="eight declared source mutants; not general mutation coverage",rows=rows),indent=2))
+    a.output.write_text(json.dumps(dict(scope=f"{len(MUTANTS)} declared source mutants; not general mutation coverage",rows=rows),indent=2))
     if any(r["status"]!="killed" for r in rows):raise SystemExit(1)
 if __name__=="__main__":main()
