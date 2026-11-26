@@ -19,7 +19,7 @@ class _Resources:
         """Logical metrics only; not a hardware cost or transpilation estimate."""
         native=self._c._qc
         by_gate=tuple(sorted((name,int(count)) for name,count in native.count_ops().items()))
-        arities=[item.operation.num_qubits for item in native.data]
+        arities=[len(item.qubits) for item in native.data]
         return ResourceReport(
             native.num_qubits,len(arities),native.depth(),
             sum(a==2 for a in arities),sum(a>=3 for a in arities),by_gate
