@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 import numpy as np
-from ._validation import _int, _tol, ResourceLimit
+from ._validation import _int, _tol, _real, ResourceLimit
 
 @dataclass(frozen=True)
 class CheckResult:
@@ -28,8 +28,10 @@ class Result:
         a = np.asarray(amplitudes, dtype=np.complex128)
         if a.ndim != 1 or a.size < 2 or a.size & (a.size-1):
             raise ValueError("state must have dimension 2**n, n>=1")
-        if not np.isfinite(a).all() or not math.isclose(float(np.vdot(a,a).real),1,rel_tol=0,abs_tol=1e-9):
+        norm_sq=float(np.vdot(a,a).real)
+        if not np.isfinite(a).all() or not math.isclose(norm_sq,1,rel_tol=0,abs_tol=1e-9):
             raise ValueError("state must be finite and normalized")
+        self._norm_sq = norm_sq
         self._data = a.copy()
         self._data.flags.writeable = False
         self._n = a.size.bit_length()-1
@@ -71,13 +73,13 @@ class _Math:
         return complex(self._r._data[int(bits,2)])
 
     def probability(self,bits):
-        return float(abs(self.amplitude(bits))**2)
+        return float(abs(self.amplitude(bits))**2/self._r._norm_sq)
 
     def explain_probability(self,bits):
         """Deterministic, numerical Born-rule explanation, not symbolic proof."""
         a=self.amplitude(bits)
         p=self.probability(bits)
-        return f"p(|{bits}>) = |{a.real:.12g}{a.imag:+.12g}j|^2 = {p:.12g}"
+        return f"p(|{bits}>) = |{a.real:.12g}{a.imag:+.12g}j|^2 / {self._r._norm_sq:.12g} = {p:.12g}"
 
     def expectation(self,pauli):
         """Expectation of a Hermitian Pauli string, leftmost character is q[n-1]."""
@@ -88,12 +90,12 @@ class _Math:
         value=complex(Statevector(self._r._data).expectation_value(Pauli(pauli)))
         if abs(value.imag)>1e-9 or not math.isfinite(value.real):
             raise ArithmeticError("invalid Hermitian Pauli expectation")
-        return float(value.real)
+        return float(np.clip(value.real/self._r._norm_sq,-1,1))
 
     def probabilities(self, *, max_outcomes=65536):
         if self._r._data.size>_int(max_outcomes,1):
             raise ResourceLimit("probability dictionary exceeds outcome limit")
-        return {format(i,f"0{self._r._n}b"):float(p) for i,p in enumerate(np.abs(self._r._data)**2)}
+        return {format(i,f"0{self._r._n}b"):float(p) for i,p in enumerate(np.abs(self._r._data)**2/self._r._norm_sq)}
 
     def marginal_probabilities(self,wires,*,max_outcomes=65536):
         """Z-basis probabilities; output labels follow the given wire order.
@@ -106,7 +108,7 @@ class _Math:
             raise ValueError("invalid marginal wires")
         if (1<<len(wires))>_int(max_outcomes,1):
             raise ResourceLimit("marginal dictionary exceeds outcome limit")
-        p=(np.abs(self._r._data)**2).reshape((2,)*n)
+        p=(np.abs(self._r._data)**2/self._r._norm_sq).reshape((2,)*n)
         axes=[n-1-i for i in wires]
         rest=[i for i in range(n) if i not in axes]
         marginal=p.transpose(axes+rest).reshape(1<<len(wires),-1).sum(axis=1)
@@ -116,7 +118,7 @@ class _Math:
         other = target if isinstance(target,Result) else Result(target)
         if other._data.shape != self._r._data.shape:
             raise ValueError("dimension mismatch")
-        denominator=np.vdot(other._data,other._data).real*np.vdot(self._r._data,self._r._data).real
+        denominator=other._norm_sq*self._r._norm_sq
         return float(np.clip(abs(np.vdot(other._data,self._r._data))**2/denominator,0,1))
 
     def norm(self):
@@ -146,14 +148,14 @@ class _Checks:
 
     def probability(self,bits,expected,*,atol=1e-9):
         t=_tol(atol)
-        expected=float(expected)
+        expected=_real(expected)
         if not math.isfinite(expected) or not 0<=expected<=1:
             raise ValueError("invalid probability")
         a=self._r.math.probability(bits)
         return CheckResult("PASS" if abs(a-expected)<=t else "FAIL",a,expected,t)
 
     def fidelity(self,target,*,minimum=1-1e-9):
-        minimum=float(minimum)
+        minimum=_real(minimum)
         if not math.isfinite(minimum) or not 0<=minimum<=1:
             raise ValueError("invalid minimum")
         a=self._r.math.fidelity(target)
