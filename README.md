@@ -2,7 +2,7 @@
 
 An experimental Python SDK for quantum programming, built on Qiskit.
 
-**Status: design spike.** The interface is not stable, the production gate is open, and no package release is available. This repository does not yet have an approved open-source license. Licensing will be resolved before distribution.
+**Status: design spike.** The interface is not stable, the production gate is open, and no package release is available. This branch proposes Apache-2.0 licensing (see LICENSE); adoption is subject to PR review. Third-party licenses remain applicable. No PyPI release is authorized.
 
 ## Try the proof of concept
 
@@ -13,7 +13,7 @@ python -m pip install -r requirements.txt
 python -m pytest -q -rs tests research/probes
 ```
 
-Run from the repository root. Python 3.11 and 3.12 are candidate CI versions. The Qiskit pin is an experimental baseline to be verified.
+Run from the repository root. Python 3.11 and 3.12 have passed the experimental CI with Qiskit 2.6.2.
 
 ```python
 import ketary as q
@@ -48,6 +48,10 @@ python benchmark.py > benchmark_results.json
 ```
 
 The diagnostic benchmark uses paired randomized timing, mixed gate workloads and isolated peak RSS processes. It runs after required tests in CI. Shared runner results are preliminary, not release guarantees; build and execution costs are reported separately. User ergonomics and broader workload coverage remain to be measured. No performance claim is made.
+
+## Examples and review
+
+Run `python -m examples.first_bell` and `python -m examples.diagnose_phase` from the repository root. These executable examples illustrate the same API. See `docs/validation.md` for the performance and human usability protocol.
 
 ## Workflow
 

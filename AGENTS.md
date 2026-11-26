@@ -7,6 +7,6 @@
 - Validate the small PoC first: execute all tests and independent Qiskit probes; fix failures before benchmarking. Do not skip required checks or loosen oracles to get green CI.
 - Benchmark equivalent workloads; record versions, raw timings, median/p95, and peak RSS separately. Do not claim a speedup without evidence.
 - Production gate: validated PoC, benchmark, RFC review and explicit approval. Later extend gates, math, algorithms, sampling/primitives, tests, diagnostics and visualization in separate PRs.
-- No new DSL, CLI, separate compiler, alternative quantum SDK, hardware execution or publishing in the initial scope. License and release approval remain pending.
+- No new DSL, CLI, separate compiler, alternative quantum SDK, hardware execution or publishing in the initial scope. Apache-2.0 is proposed in the draft PR; preserve third-party notices. Final release approval remains pending.
 - Use English in code and public documentation. Do not put private workspace links, credentials, personal information or internal notes in this public repository.
 - Never merge automatically or push changes directly to main. Record actual test results and limitations in each PR.

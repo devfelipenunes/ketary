@@ -57,3 +57,36 @@ jobs:
           path: |
             benchmark_results.json
             environment.txt
+
+  dependency-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Inventory validation dependencies
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip check
+          python tools/audit_dependencies.py
+      - name: Scan exact resolved versions
+        run: |
+          python -m venv audit-venv
+          audit-venv/bin/python -m pip install pip-audit
+          audit-venv/bin/python -m pip_audit --no-deps --disable-pip -r audited-requirements.txt -f json -o vulnerability-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dependency-review-${{ matrix.python }}
+          path: |
+            license-inventory.json
+            audited-requirements.txt
+            vulnerability-report.json

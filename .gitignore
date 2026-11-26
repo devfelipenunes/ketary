@@ -8,3 +8,8 @@ dist/
 *.egg-info/
 environment.txt
 benchmark_results.json
+
+audit-venv/
+license-inventory.json
+audited-requirements.txt
+vulnerability-report.json
