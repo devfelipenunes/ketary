@@ -1,0 +1,621 @@
+{
+  "schema_version": 1,
+  "baseline": "963e7643744d6912256ab1f054736a3ec8871e99",
+  "scope": "Historical reconciliation and explicit public cap inventory; not an independent review, all-native-allocation proof, or release authorization.",
+  "historical_expressivity": [
+    {
+      "issue": 55,
+      "title": "EXP07: explicit aligned pair gates and topology ergonomics",
+      "disposition": "qualified",
+      "evidence": "Ordered pair grammar; exact #55 closure and later #105",
+      "source": "tests/test_ordered_pair_gates.py"
+    },
+    {
+      "issue": 56,
+      "title": "EXP08: symbolic reusable layers and variational writing study",
+      "disposition": "open",
+      "evidence": "#56 retained; independent writing before API decision not performed",
+      "source": "research/parameter_workflow.py"
+    },
+    {
+      "issue": 106,
+      "title": "TC19 [P1]: Expressivity and negative evidence",
+      "disposition": "consolidated",
+      "evidence": "#345 matched source, negative cases; no standalone implementation claim",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 107,
+      "title": "TC20 [P1]: Developer documentation and executable recipes",
+      "disposition": "qualified",
+      "evidence": "23 installed wheel snippets; cross-family research separate",
+      "source": "docs/core-api.md"
+    },
+    {
+      "issue": 141,
+      "title": "ABS01 [P0]: Circuit pattern corpus and abstraction opportunity atlas",
+      "disposition": "consolidated",
+      "evidence": "32 bounded historical authored comparisons; distinct #460 atlas deferred",
+      "source": "research/abstraction_atlas.py"
+    },
+    {
+      "issue": 143,
+      "title": "ABS03 [P0]: Finite parameterized layers",
+      "disposition": "consolidated",
+      "evidence": "#56 finite layers; explicit shared/independent symbols; recipe retained",
+      "source": "research/parameter_workflow.py"
+    },
+    {
+      "issue": 144,
+      "title": "ABS04 [P0]: Operation scheduling and zipped parameter rows",
+      "disposition": "consolidated",
+      "evidence": "#56/#97 zipped sweeps vs sequential apply; no Cartesian",
+      "source": "docs/alpha-parameter-contract-closure.md"
+    },
+    {
+      "issue": 145,
+      "title": "ABS05 [P1]: Circuit sequence composition and reuse",
+      "disposition": "not-planned",
+      "evidence": "Reject new sequence spelling; retain ordered apply/repeat",
+      "source": "#91"
+    },
+    {
+      "issue": 147,
+      "title": "ABS07 [P1]: Explicit noncommuting evolution and product formulas",
+      "disposition": "consolidated",
+      "evidence": "#90/#352 explicit approximation; strict reference and bound",
+      "source": "docs/product-formula-cost-and-shrink.md"
+    },
+    {
+      "issue": 148,
+      "title": "ABS08 [P1]: Controlled logical blocks with strict phase",
+      "disposition": "consolidated",
+      "evidence": "#189/#352 explicit bounded control, relative phase",
+      "source": "tests/test_controlled_composite_closure.py"
+    },
+    {
+      "issue": 149,
+      "title": "ABS09 [P1]: Operator powers and controlled powers",
+      "disposition": "not-planned",
+      "evidence": "Generic zero/negative/fractional power API deferred; retain repeat/inverse",
+      "source": "docs/api-decisions.json"
+    },
+    {
+      "issue": 150,
+      "title": "ABS10 [P1]: Reversible conjugation ergonomics",
+      "disposition": "not-planned",
+      "evidence": "No context manager; explicit compute-action-uncompute",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 151,
+      "title": "ABS11 [P1]: Reflections and generalized amplitude amplification",
+      "disposition": "qualified",
+      "evidence": "Prepared reflection and multi-mark amplification; #498",
+      "source": "research/alpha_six_unitary.py"
+    },
+    {
+      "issue": 152,
+      "title": "ABS12 [P1]: State preparation abstractions",
+      "disposition": "qualified",
+      "evidence": "Basis/product/dense preparation, #498, no implicit reset",
+      "source": "research/alpha_six_unitary.py"
+    },
+    {
+      "issue": 153,
+      "title": "ABS13 [P1]: Composable oracle construction",
+      "disposition": "qualified",
+      "evidence": "Parity/phase/explicit truth oracle; negative composition cost",
+      "source": "research/alpha_six_unitary.py"
+    },
+    {
+      "issue": 154,
+      "title": "ABS14 [P1]: Parity and Pauli-string circuit primitives",
+      "disposition": "qualified",
+      "evidence": "Coherent parity and measured distinction #499",
+      "source": "research/alpha_four_parity.py"
+    },
+    {
+      "issue": 155,
+      "title": "ABS15 [P2]: Syndrome extraction and stabilizer checks",
+      "disposition": "qualified",
+      "evidence": "Ideal X/Z repetition-code and syndrome, no physical fault tolerance",
+      "source": "docs/alpha-existing-issue-closure.md"
+    },
+    {
+      "issue": 156,
+      "title": "ABS16 [P2]: Reversible arithmetic primitives",
+      "disposition": "consolidated",
+      "evidence": "#294 qualified increment/add/compare, explicit ancilla",
+      "source": "research/closure_reversible_logic.py"
+    },
+    {
+      "issue": 157,
+      "title": "ABS17 [P2]: Generalized classical feed-forward",
+      "disposition": "qualified",
+      "evidence": "Bounded feed-forward and native nested import #498",
+      "source": "research/alpha_six_dynamic.py"
+    },
+    {
+      "issue": 158,
+      "title": "ABS18 [P2]: Circuit algebra and operator notation",
+      "disposition": "not-planned",
+      "evidence": "Reject ambiguous operator overloads and second DSL",
+      "source": "docs/api-decisions.json"
+    },
+    {
+      "issue": 159,
+      "title": "ABS19 [P2]: Automatic uncomputation feasibility",
+      "disposition": "not-planned",
+      "evidence": "Automatic cleanup not promised, dirty-ancilla counterexample",
+      "source": "tests/test_abstraction_advanced.py"
+    },
+    {
+      "issue": 160,
+      "title": "ABS20 [P1]: Graph-state and topology expressivity",
+      "disposition": "qualified",
+      "evidence": "Topology and graph recipes, no synonym or hardware routing",
+      "source": "research/abstraction_atlas.py"
+    },
+    {
+      "issue": 161,
+      "title": "ABS21 [P0]: Matched expressivity benchmark harness",
+      "disposition": "consolidated",
+      "evidence": "#345 matched harness: source, strict phase, raw timings, common basis",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 162,
+      "title": "ABS22 [P0]: Abstraction semantic and cost regression gates",
+      "disposition": "consolidated",
+      "evidence": "#90/#91/#94/#345 semantics and resource gates; #91 remains open",
+      "source": "docs/resource-contracts.md"
+    },
+    {
+      "issue": 163,
+      "title": "ABS23 [P1]: Algorithm composition recipes and cross-family reuse",
+      "disposition": "consolidated",
+      "evidence": "#345 cross-family recipes: QFT/QPE, QAOA, VQE, Trotter, Grover, graph and addition matched; local measured teleportation artifact 15159225277 contains six analytic cases and paired source/build/run, 2048 shots, 3 repeats per route. Distinct measured vs coherent scope; no physical gate claim.",
+      "source": "research/abstraction_atlas.py"
+    },
+    {
+      "issue": 164,
+      "title": "ABS24 [P1]: API consolidation and discoverability study",
+      "disposition": "consolidated",
+      "evidence": "#105 closed, 330 declarations and decision/typing review",
+      "source": "research/alpha_api_usage.py"
+    },
+    {
+      "issue": 166,
+      "title": "ABS26 [P1]: Abstraction promotion RFC and decision register",
+      "disposition": "consolidated",
+      "evidence": "#105/#345 retain decision register and compatibility; no automatic promotion",
+      "source": "docs/api-decisions.json"
+    },
+    {
+      "issue": 169,
+      "title": "RF01 [P0]: Freeze matched circuit rewriting baseline",
+      "disposition": "consolidated",
+      "evidence": "Historical baseline 452a2f5 and source scope; not a new experiment",
+      "source": "docs/circuit-refinement-review.md"
+    },
+    {
+      "issue": 171,
+      "title": "RF03 [P0]: Aligned pair performance and native batch transaction",
+      "disposition": "qualified",
+      "evidence": "Aligned pair ablation, native faster in some cases",
+      "source": "docs/circuit-refinement-review.md"
+    },
+    {
+      "issue": 172,
+      "title": "RF04 [P0]: Ketary-only source rewrite ladder",
+      "disposition": "qualified",
+      "evidence": "13 four-way authored rewrite cases; no automatic rewriting",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 173,
+      "title": "RF05 [P0]: Executable source quality scoring",
+      "disposition": "qualified",
+      "evidence": "Syntactic metrics, not readability",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 174,
+      "title": "RF06 [P0]: Fair Qiskit matched baselines",
+      "disposition": "qualified",
+      "evidence": "Idiomatic native comparators and negative cases",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 175,
+      "title": "RF07 [P0]: Pauli rotation public contract design",
+      "disposition": "qualified",
+      "evidence": "Explicit time/identity phase and mixed Pauli",
+      "source": "tests/test_pauli_synthesis.py"
+    },
+    {
+      "issue": 178,
+      "title": "RF10 [P1]: QAOA rewriting ladder and weighted costs",
+      "disposition": "consolidated",
+      "evidence": "#56/#345 weighted QAOA ladder and independent objective; no new loop DSL",
+      "source": "docs/five-front-evidence.md"
+    },
+    {
+      "issue": 179,
+      "title": "RF11 [P1]: QFT rewriting ladder",
+      "disposition": "not-planned",
+      "evidence": "Existing qft and strict DFT sufficient; no new rewrite-only issue",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 180,
+      "title": "RF12 [P1]: QPE controlled-power cost reduction",
+      "disposition": "historical-closed",
+      "evidence": "Specialized QPE cost study exists; closure record not equivalent to independent review",
+      "source": "research/alpha_qpe_power_profile.py"
+    },
+    {
+      "issue": 181,
+      "title": "RF13 [P1]: VQE layer rewriting and parameter identity",
+      "disposition": "consolidated",
+      "evidence": "#56/#293 VQE identity and binding; independent writing remains",
+      "source": "research/parameter_workflow.py"
+    },
+    {
+      "issue": 182,
+      "title": "RF14 [P1]: Product/basis preparation promotion study",
+      "disposition": "consolidated",
+      "evidence": "#152 qualified basis/product/explicit dense unitary",
+      "source": "research/alpha_six_unitary.py"
+    },
+    {
+      "issue": 183,
+      "title": "RF15 [P1]: Truth oracle and parity rewriting",
+      "disposition": "consolidated",
+      "evidence": "#153/#154 qualified oracle/parity",
+      "source": "research/alpha_six_unitary.py"
+    },
+    {
+      "issue": 184,
+      "title": "RF16 [P1]: Reversible arithmetic consolidation",
+      "disposition": "consolidated",
+      "evidence": "#294 bounded reversible arithmetic qualified",
+      "source": "research/closure_reversible_logic.py"
+    },
+    {
+      "issue": 185,
+      "title": "RF17 [P1]: Graph state and entanglement rewriting",
+      "disposition": "qualified",
+      "evidence": "Graph recipe and ordered topology, no routing claim",
+      "source": "research/abstraction_atlas.py"
+    },
+    {
+      "issue": 186,
+      "title": "RF18 [P1]: Reflection and amplitude amplification rewriting",
+      "disposition": "consolidated",
+      "evidence": "#151 bounded reflection/amplification qualified",
+      "source": "research/alpha_six_unitary.py"
+    },
+    {
+      "issue": 187,
+      "title": "RF19 [P1]: Conjugation and sequence refactoring",
+      "disposition": "qualified",
+      "evidence": "Explicit conjugation, retain negative lexical cases",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 188,
+      "title": "RF20 [P1]: Explicit approximation refinement",
+      "disposition": "qualified",
+      "evidence": "54 Trotter workloads and explicit error scope",
+      "source": "docs/product-formula-cost-and-shrink.md"
+    },
+    {
+      "issue": 189,
+      "title": "RF21 [P1]: Controlled synthesis and phase fast path",
+      "disposition": "qualified",
+      "evidence": "Strict general control and X-only research; negative phase cost",
+      "source": "tests/test_controlled_composite_closure.py"
+    },
+    {
+      "issue": 191,
+      "title": "RF23 [P1]: Mutation/ownership and negative rewrite cases",
+      "disposition": "qualified",
+      "evidence": "Late invalid/rollback, ownership and phase regressions",
+      "source": "tests/test_native_batch_transaction.py"
+    },
+    {
+      "issue": 192,
+      "title": "RF24 [P1]: Common-basis resource and depth comparison",
+      "disposition": "qualified",
+      "evidence": "u,cx strict before/after, common counts not hardware cost",
+      "source": "research/circuit_rewrite_ladder.py"
+    },
+    {
+      "issue": 194,
+      "title": "RF26 [P1]: Code review iteration evidence ledger",
+      "disposition": "qualified",
+      "evidence": "Authored iteration, raw sources and losing variants",
+      "source": "docs/circuit-refinement-review.md"
+    },
+    {
+      "issue": 196,
+      "title": "RF28 [P1]: Promotion and rejection matrix for ABS26",
+      "disposition": "consolidated",
+      "evidence": "#105/#345 decision register; no generic DSL",
+      "source": "docs/api-decisions.json"
+    },
+    {
+      "issue": 206,
+      "title": "API03 [P1]: Parameter workflow differential and ergonomic evaluation",
+      "disposition": "consolidated",
+      "evidence": "#56/#97 five parameter routes, 27 matched rows; independent held-out requirement separate",
+      "source": "research/parameter_workflow.py"
+    },
+    {
+      "issue": 345,
+      "title": "LANG01–10: mathematical intent, executable language corpus and scoped promotions",
+      "disposition": "open",
+      "evidence": "Epic and remaining inherited cross-family/acceptance scope",
+      "source": "research/language_corpus.py"
+    },
+    {
+      "issue": 352,
+      "title": "DX functional coverage acceptance matrix — local mathematics, dynamics and native hardware handoff",
+      "disposition": "qualified",
+      "evidence": "37/37 original bounded direct or explicit native interop alternatives; not complete Qiskit equivalence",
+      "source": "docs/qiskit-workflow-coverage.md"
+    }
+  ],
+  "capped_methods": [
+    {
+      "method": "SweepPlan.run",
+      "implementation": "_ergonomics.py / _plan.py",
+      "contract": "Retained state rows or aggregate planned payload; no total RSS.",
+      "tests": "test_sweep_preparation.py; test_query_plan_snapshot.py"
+    },
+    {
+      "method": "QueryPlan.run",
+      "implementation": "_ergonomics.py / _plan.py",
+      "contract": "Retained state rows or aggregate planned payload; no total RSS.",
+      "tests": "test_sweep_preparation.py; test_query_plan_snapshot.py"
+    },
+    {
+      "method": "Evidence.reproduce",
+      "implementation": "_verification.py",
+      "contract": "Four state payloads, <=12 wires/256 gates, <=128 attempts; replay input and circuit limits.",
+      "tests": "test_coverage_verification_boundaries.py"
+    },
+    {
+      "method": "Evidence.minimize",
+      "implementation": "_verification.py",
+      "contract": "Four state payloads, <=12 wires/256 gates, <=128 attempts; replay input and circuit limits.",
+      "tests": "test_coverage_verification_boundaries.py"
+    },
+    {
+      "method": "Result.sample",
+      "implementation": "_result.py",
+      "contract": "Output rows/outcomes/terms; selected probability hard cap 65536; caller-selected table/Dirac cap; marginal scratch excluded.",
+      "tests": "test_sampling_dispatch.py; test_preflight_verdict_hardening.py"
+    },
+    {
+      "method": "_Math.probabilities",
+      "implementation": "_result.py",
+      "contract": "Output rows/outcomes/terms; selected probability hard cap 65536; caller-selected table/Dirac cap; marginal scratch excluded.",
+      "tests": "test_sampling_dispatch.py; test_preflight_verdict_hardening.py"
+    },
+    {
+      "method": "_Math.marginal_probabilities",
+      "implementation": "_result.py",
+      "contract": "Output rows/outcomes/terms; selected probability hard cap 65536; caller-selected table/Dirac cap; marginal scratch excluded.",
+      "tests": "test_sampling_dispatch.py; test_preflight_verdict_hardening.py"
+    },
+    {
+      "method": "_Math.table",
+      "implementation": "_result.py",
+      "contract": "Output rows/outcomes/terms; selected probability hard cap 65536; caller-selected table/Dirac cap; marginal scratch excluded.",
+      "tests": "test_sampling_dispatch.py; test_preflight_verdict_hardening.py"
+    },
+    {
+      "method": "_Math.dirac",
+      "implementation": "_result.py",
+      "contract": "Output rows/outcomes/terms; selected probability hard cap 65536; caller-selected table/Dirac cap; marginal scratch excluded.",
+      "tests": "test_sampling_dispatch.py; test_preflight_verdict_hardening.py"
+    },
+    {
+      "method": "_Math.statevector",
+      "implementation": "_result.py",
+      "contract": "State or matrix payload and Schmidt rank; transpose/SVD/native scratch excluded.",
+      "tests": "test_math_resources.py; test_resource_bounds.py"
+    },
+    {
+      "method": "_Math.density_matrix",
+      "implementation": "_result.py",
+      "contract": "State or matrix payload and Schmidt rank; transpose/SVD/native scratch excluded.",
+      "tests": "test_math_resources.py; test_resource_bounds.py"
+    },
+    {
+      "method": "_Math.purity",
+      "implementation": "_result.py",
+      "contract": "State or matrix payload and Schmidt rank; transpose/SVD/native scratch excluded.",
+      "tests": "test_math_resources.py; test_resource_bounds.py"
+    },
+    {
+      "method": "_Math.schmidt",
+      "implementation": "_result.py",
+      "contract": "State or matrix payload and Schmidt rank; transpose/SVD/native scratch excluded.",
+      "tests": "test_math_resources.py; test_resource_bounds.py"
+    },
+    {
+      "method": "_Math.entropy",
+      "implementation": "_result.py",
+      "contract": "State or matrix payload and Schmidt rank; transpose/SVD/native scratch excluded.",
+      "tests": "test_math_resources.py; test_resource_bounds.py"
+    },
+    {
+      "method": "_Checks.entangled",
+      "implementation": "_result.py",
+      "contract": "State or matrix payload and Schmidt rank; transpose/SVD/native scratch excluded.",
+      "tests": "test_math_resources.py; test_resource_bounds.py"
+    },
+    {
+      "method": "_Math.expectation_complex",
+      "implementation": "_result.py",
+      "contract": "Pauli-state workload and/or bounded dense/streamed payload; no timing/RSS guarantee.",
+      "tests": "test_alpha_third_closure.py; test_production_channels_complex.py"
+    },
+    {
+      "method": "_Math.expectations",
+      "implementation": "_result.py",
+      "contract": "Pauli-state workload and/or bounded dense/streamed payload; no timing/RSS guarantee.",
+      "tests": "test_alpha_third_closure.py; test_production_channels_complex.py"
+    },
+    {
+      "method": "_Math.observable_variance_streamed",
+      "implementation": "_result.py",
+      "contract": "Pauli-state workload and/or bounded dense/streamed payload; no timing/RSS guarantee.",
+      "tests": "test_alpha_third_closure.py; test_production_channels_complex.py"
+    },
+    {
+      "method": "_Math.observable_variance",
+      "implementation": "_result.py",
+      "contract": "Pauli-state workload and/or bounded dense/streamed payload; no timing/RSS guarantee.",
+      "tests": "test_alpha_third_closure.py; test_production_channels_complex.py"
+    },
+    {
+      "method": "_Debug.verify_checkpoints",
+      "implementation": "_trace.py",
+      "contract": "Prefix steps, width, retained state payload; explicit unsupported comparison result where applicable.",
+      "tests": "test_alpha_third_closure.py"
+    },
+    {
+      "method": "_Debug.trace",
+      "implementation": "_trace.py",
+      "contract": "Prefix steps, width, retained state payload; explicit unsupported comparison result where applicable.",
+      "tests": "test_alpha_third_closure.py"
+    },
+    {
+      "method": "_Debug.checkpoint",
+      "implementation": "_trace.py",
+      "contract": "Prefix steps, width, retained state payload; explicit unsupported comparison result where applicable.",
+      "tests": "test_alpha_third_closure.py"
+    },
+    {
+      "method": "_Debug.compare_checkpoints",
+      "implementation": "_trace.py",
+      "contract": "Prefix steps, width, retained state payload; explicit unsupported comparison result where applicable.",
+      "tests": "test_alpha_third_closure.py"
+    },
+    {
+      "method": "_Debug.compare",
+      "implementation": "_trace.py",
+      "contract": "Prefix steps, width, retained state payload; explicit unsupported comparison result where applicable.",
+      "tests": "test_alpha_third_closure.py"
+    },
+    {
+      "method": "_CircuitChecks.compare",
+      "implementation": "_checks.py / _verification.py",
+      "contract": "Selected state budget vs separate full operator budget; 2/3 dense matrices; width and scope distinct.",
+      "tests": "test_coverage_verification_boundaries.py"
+    },
+    {
+      "method": "_CircuitChecks.metrics",
+      "implementation": "_checks.py / _verification.py",
+      "contract": "Selected state budget vs separate full operator budget; 2/3 dense matrices; width and scope distinct.",
+      "tests": "test_coverage_verification_boundaries.py"
+    },
+    {
+      "method": "_CircuitChecks.equivalent",
+      "implementation": "_checks.py / _verification.py",
+      "contract": "Selected state budget vs separate full operator budget; 2/3 dense matrices; width and scope distinct.",
+      "tests": "test_coverage_verification_boundaries.py"
+    },
+    {
+      "method": "Circuit.diff",
+      "implementation": "_checks.py / _verification.py",
+      "contract": "Selected state budget vs separate full operator budget; 2/3 dense matrices; width and scope distinct.",
+      "tests": "test_coverage_verification_boundaries.py"
+    },
+    {
+      "method": "_Visualize.text",
+      "implementation": "_resources.py / _visualization.py",
+      "contract": "Logical drawing width/gates; SVG hard cap 12/64, text caller caps, no simulation.",
+      "tests": "test_resource_bounds.py"
+    },
+    {
+      "method": "_Visualize.svg",
+      "implementation": "_resources.py / _visualization.py",
+      "contract": "Logical drawing width/gates; SVG hard cap 12/64, text caller caps, no simulation.",
+      "tests": "test_resource_bounds.py"
+    },
+    {
+      "method": "Circuit.expectation_jacobian",
+      "implementation": "_ergonomics.py",
+      "contract": "State payload, bounded shifts/active occurrences, native shifted copies and scratch separate.",
+      "tests": "test_production_hessian.py; test_production_qgt.py"
+    },
+    {
+      "method": "Circuit.quantum_geometric_tensor",
+      "implementation": "_ergonomics.py",
+      "contract": "State payload, bounded shifts/active occurrences, native shifted copies and scratch separate.",
+      "tests": "test_production_hessian.py; test_production_qgt.py"
+    },
+    {
+      "method": "Circuit.expectation_hessian",
+      "implementation": "_ergonomics.py",
+      "contract": "State payload, bounded shifts/active occurrences, native shifted copies and scratch separate.",
+      "tests": "test_production_hessian.py; test_production_qgt.py"
+    },
+    {
+      "method": "Circuit.run_shots",
+      "implementation": "_classical.py",
+      "contract": "Dynamic width/expanded gates/shots, density and Kraus payloads; optional native execution.",
+      "tests": "test_production_dense_and_dynamic.py; test_production_local_channels.py"
+    },
+    {
+      "method": "Circuit.run_density",
+      "implementation": "_classical.py",
+      "contract": "Dynamic width/expanded gates/shots, density and Kraus payloads; optional native execution.",
+      "tests": "test_production_dense_and_dynamic.py; test_production_local_channels.py"
+    },
+    {
+      "method": "Circuit.run_channel",
+      "implementation": "_classical.py",
+      "contract": "Dynamic width/expanded gates/shots, density and Kraus payloads; optional native execution.",
+      "tests": "test_production_dense_and_dynamic.py; test_production_local_channels.py"
+    },
+    {
+      "method": "Circuit.run_noisy",
+      "implementation": "_classical.py",
+      "contract": "Dynamic width/expanded gates/shots, density and Kraus payloads; optional native execution.",
+      "tests": "test_production_dense_and_dynamic.py; test_production_local_channels.py"
+    },
+    {
+      "method": "Circuit.run",
+      "implementation": "_execution.py / _circuit.py",
+      "contract": "One state or 2*rows+1 state payloads, bounded 32 inputs and complete admission.",
+      "tests": "test_alpha_parallel_preflight.py; test_alpha_third_closure.py"
+    },
+    {
+      "method": "Circuit.run_many",
+      "implementation": "_execution.py / _circuit.py",
+      "contract": "One state or 2*rows+1 state payloads, bounded 32 inputs and complete admission.",
+      "tests": "test_alpha_parallel_preflight.py; test_alpha_third_closure.py"
+    }
+  ],
+  "excluded": [
+    35,
+    100,
+    165,
+    462,
+    460
+  ],
+  "fixed_and_legacy": [
+    "Replay: 1 MiB/22 wires/10000 gates; logical inspect: 256 rows; evidence: 32 labels/group; top-k: 65536; histogram: 32.",
+    "Composition: repeated/placed 10000 placements/100000 operations; legacy one-block apply remains uncapped by that ceiling.",
+    "Dense preparation/synthesis: <=5 wires, <=10000 lowered instructions; dynamic 12 wires/bits, 1024 expanded instructions; derivative caps as documented.",
+    "Caller-provided Result, native circuit copies, ordinary builder appends, native transpilation, distributions and fidelity may allocate without a public max_bytes; preserve accepted contracts, distinguish caller/native scratch and documented width limits.",
+    "No generic RSS bound or exhaustive call-graph proof; remaining fixed/legacy paths require review."
+  ]
+}
