@@ -201,3 +201,21 @@ overwritten classical bits and repeated resets remain expressible as
 separate scalar calls. These operations require explicit classical mode;
 execution remains a separate optional Aer operation. The existing 12-wire,
 12-bit, 1024-instruction execution limits remain unchanged.
+
+
+## Explicit ordered pairs
+
+```python
+c = q.Circuit(4).h(0).cx(pairs=q.chain(range(4)))
+c.cz(pairs=q.ring(c.wires)).rzz(.3, pairs=q.star(c.wires))
+```
+
+Use `pairs=` on fluent cx, cy, cz, ch, swap, cp, crx/cry/crz,
+rxx/ryy/rzz. Scalar calls and the scalar gates namespace are retained.
+Pairs are ordered, distinct within each pair; repeated and overlapping
+pairs are allowed and applied in caller order. At most 10,000 pairs
+per call; validate all before mutation. Parameterized pair gates accept
+one scalar real or explicitly symbolic angle for the whole batch.
+No Cartesian product, scheduling, hidden execution, or implicit controls.
+Bound mode appends directly through the native transaction; symbolic
+and classical mode stage on a native copy.
