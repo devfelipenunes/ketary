@@ -1,12 +1,12 @@
 # Public API surface inventory
 
-All declared non-private classes, top-level functions, public methods, properties and dataclass fields in the public stub are classified once. Namespace names beginning with `_` are implementation types reached through public properties. Constructors and Python dunder protocols are covered by their type's entry; inherited methods are listed at their declaring type. Categories describe the recommended learning path, not visibility or stability. The JSON inventory is checked against the stub in CI.
+All declared public stub entries are classified once; constructors and dunder protocols belong to their types. Inherited methods are listed at their declaring type. The JSON inventory is checked in CI. Categories guide learning, not stability guarantees.
 
-## Core (86)
+## Core (89)
 
 - **Top-level**: `CheckResult`, `Circuit`, `ComparisonReport`, `Contract`, `Evidence`, `I`, `Observable`, `Result`, `SnapshotReport`, `VerificationReport`, `X`, `Y`, `Z`, `bell`
 - **CheckResult**: `actual`, `detail`, `expected`, `render`, `require`, `status`, `tolerance`
-- **Circuit**: `apply`, `ccx`, `ch`, `contract`, `copy`, `cp`, `crx`, `cry`, `crz`, `cswap`, `cx`, `cy`, `cz`, `h`, `mcx`, `num_qubits`, `p`, `run`, `rx`, `rxx`, `ry`, `ryy`, `rz`, `rzz`, `s`, `sdg`, `swap`, `sx`, `sxdg`, `t`, `tdg`, `test`, `u`, `x`, `y`, `z`
+- **Circuit**: `apply`, `apply_each`, `ccx`, `ch`, `contract`, `copy`, `cp`, `crx`, `cry`, `crz`, `cswap`, `cx`, `cy`, `cz`, `h`, `mcx`, `num_qubits`, `p`, `repeat`, `run`, `rx`, `rxx`, `ry`, `ryy`, `rz`, `rzz`, `s`, `sdg`, `swap`, `sx`, `sxdg`, `t`, `tdg`, `test`, `u`, `x`, `y`, `z`
 - **ComparisonReport**: `evidence`
 - **Contract**: `atol`, `expectations`, `normalized`, `num_qubits`, `probabilities`, `verify`
 - **Evidence**: `reproduce`
@@ -16,7 +16,7 @@ All declared non-private classes, top-level functions, public methods, propertie
 - **VerificationReport**: `checks`, `render`, `require`, `scope`, `status`
 - **_Checks**: `expectation`, `probability`
 - **_CircuitChecks**: `compare`
-- **_Math**: `amplitude`, `expectation`, `probabilities`, `probability`, `variance`
+- **_Math**: `amplitude`, `expectation`, `expectations`, `probabilities`, `probability`, `variance`
 - **_Report**: `render`, `require`, `status`
 
 ## Advanced (162)
