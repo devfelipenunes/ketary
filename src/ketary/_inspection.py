@@ -31,6 +31,12 @@ def _labels(values):
 
 def result_evidence(result, *, bits, paulis):
     bits=_labels(bits); paulis=_labels(paulis)
+    n=result.num_qubits
+    # Admit every label before any amplitude or native Pauli evaluation.
+    if any(len(label)!=n or set(label)-set("01") for label in bits):
+        raise ValueError("invalid bit string")
+    if any(len(label)!=n or set(label)-set("IXYZ") for label in paulis):
+        raise ValueError("expected a full-width uppercase I/X/Y/Z Pauli label")
     # Fixed output bounds; no enumeration of all basis labels.
     rows={}
     for label in bits:
