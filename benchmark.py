@@ -209,6 +209,28 @@ def main(reps):
         assert direct().to_qiskit()==loop().to_qiskit()
         data["cases"].append({"operation":"expressive_repeat","n":4,"gates":count*4,
             "native_label":"Ketary explicit loop","sdk_label":"Ketary apply times",**paired(loop,direct,reps)})
+    # Compare the same ordered pair sequence, including overlapping pairs,
+    # against both native broadcast and the previous generic placement grammar.
+    for n,layers in ((8,100),(32,500)):
+        placements=q.ring(range(n))
+        first,second=zip(*placements,strict=True)
+        edge=q.Circuit(2).cz(0,1)
+        def pair_program(variant):
+            c=QuantumCircuit(n) if variant=="native" else q.Circuit(n)
+            for _ in range(layers):
+                if variant=="native":
+                    c.cz(list(first),list(second))
+                elif variant=="apply_each":
+                    c.apply_each(edge,placements=placements)
+                else:
+                    c.cz(pairs=placements)
+            return c
+        expected=pair_program("native")
+        assert expected==pair_program("apply_each").to_qiskit()==pair_program("pairs").to_qiskit()
+        for baseline in ("native","apply_each"):
+            data["cases"].append({"operation":"ordered_pairs_vs_"+baseline,"n":n,"gates":n*layers,
+                "native_label":baseline,"sdk_label":"Ketary pairs",
+                **paired(lambda:pair_program(baseline),lambda:pair_program("pairs"),reps)})
     variants=["native","sdk"]*3; random.Random(42).shuffle(variants)
     for variant in variants:
         raw=subprocess.check_output([sys.executable,__file__,"--rss-worker",variant],text=True)
