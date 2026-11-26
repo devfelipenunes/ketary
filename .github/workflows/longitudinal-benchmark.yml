@@ -1,0 +1,53 @@
+name: Longitudinal SDK benchmark
+on:
+  pull_request:
+    paths:
+      - 'research/longitudinal_benchmark.py'
+      - '.github/workflows/longitudinal-benchmark.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [1101, 2202, 3303]
+    env:
+      OMP_NUM_THREADS: 1
+      OPENBLAS_NUM_THREADS: 1
+      MKL_NUM_THREADS: 1
+      RAYON_NUM_THREADS: 1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version-file: '.python-version'
+      - name: Install pinned SDK
+        run: |
+          python -m pip install -c constraints/linux-py312.txt -r requirements.txt
+          python -m pip install --no-deps -e .
+      - name: Environment and preflight
+        run: |
+          git rev-parse HEAD > commit.txt
+          uname -a > host.txt
+          lscpu >> host.txt
+          free -h >> host.txt
+          python -m pip freeze > environment.txt
+          python research/longitudinal_benchmark.py --smoke --repetitions 3 > smoke.json
+      - name: Longitudinal diagnostic
+        run: python research/longitudinal_benchmark.py --repetitions 30 --seed ${{ matrix.seed }} > longitudinal.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: longitudinal-${{ matrix.seed }}
+          path: |
+            commit.txt
+            host.txt
+            environment.txt
+            smoke.json
+            longitudinal.json
