@@ -89,7 +89,7 @@ def test_checkpoint_names_and_first_nonpass():
     assert c.debug.compare(q.Circuit(3)).check.status=="UNSUPPORTED"
     assert c.debug.compare(c.copy(),max_bytes=1).check.status=="UNSUPPORTED"
 
-@pytest.mark.parametrize("success,counts",[(False,{}),(True,{"0":7}),(True,{"2":8}),(True,{"0":8.0}),(True,{"0":9,"1":-1})])
+@pytest.mark.parametrize("success,counts",[(False,{}),(True,{"0":7}),(True,{"2":8}),(True,{"0":8.0}),(True,{"0":9,"1":-1}),(True,None),(True,[]),(True,[{"0":8}]),(True,{0:8}),(True,{"0":"8"}),(True,{"0":None}),(True,{"0":True,"1":7})])
 def test_dynamic_backend_invalid_result_is_rejected(monkeypatch,success,counts):
     import qiskit
     class FakeBackend:
