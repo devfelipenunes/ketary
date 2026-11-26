@@ -41,6 +41,8 @@ jobs:
           cat public-defects.json
           python research/dx_comparison.py > dx-comparison.json
           cat dx-comparison.json
+          python research/complete_workflows.py > complete-workflows.json
+          cat complete-workflows.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage-report
@@ -49,6 +51,7 @@ jobs:
             verification-comparison.json
             public-defects.json
             dx-comparison.json
+            complete-workflows.json
 
   benchmark:
     needs: tests
