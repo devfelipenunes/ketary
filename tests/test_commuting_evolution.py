@@ -72,4 +72,6 @@ def test_modes_and_width():
     with pytest.raises(q.ResourceLimit):q.Circuit(9).evolve(q.X(0),time=.3)
     with pytest.raises(q.UnsupportedOperation):q.Circuit.classical(2,1).evolve(q.X(0),time=.3)
     t=q.Circuit.parameter("t")
-    with pytest.raises(q.UnsupportedOperation):q.Circuit.symbolic(2).ry(t,0).evolve(q.X(0),time=.3)
+    c=q.Circuit.symbolic(2).ry(t,0).evolve(q.X(0),time=.3)
+    assert c.parameters==(t,)
+    with pytest.raises(q.UnsupportedOperation):c.run()

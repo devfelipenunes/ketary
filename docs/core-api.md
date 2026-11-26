@@ -77,13 +77,13 @@ For implementation boundaries and ownership flows, see [architecture](architectu
 
 `Circuit.evolve(H,time=t)` appends the unitary exp(-i t H) for a real
 Pauli Observable whose nonzero terms commute pairwise. It mutates and
-returns the same bound unitary Circuit; no simulation. Absolute wire
+returns the same unitary Circuit; no simulation. A bound Circuit accepts numeric time; explicit symbolic() mode also accepts native real parameter expressions. Absolute wire
 indices and identity-term global phase are preserved. Native single and
 same-axis pair rotations are used where possible. Bound to eight wires,
 256 observable terms and 10,000 conservatively estimated gates. All
-angles and commutation are validated before mutation. Noncommuting sums,
-unbound parameters and classical mode are unsupported, never approximated
-silently. Checkpoint lifecycle follows apply().
+angles and commutation are validated before mutation. Noncommuting sums and
+classical mode are unsupported, never approximated
+silently. Symbolic templates must be fully bound before execution or replay. Checkpoint lifecycle follows apply().
 
 ```python
 import ketary as q

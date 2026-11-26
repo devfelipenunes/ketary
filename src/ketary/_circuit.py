@@ -184,8 +184,11 @@ class Circuit:
         from ._validation import _angle
         if set(bindings)!=set(self._qc.parameters):
             raise ValueError("bindings must cover exactly the template parameters")
-        bound=self._qc.assign_parameters({key:_angle(value) for key,value in bindings.items()},
-                                         inplace=False,flat_input=True)
+        numeric={key:_angle(value) for key,value in bindings.items()}
+        try:
+            bound=self._qc.assign_parameters(numeric,inplace=False,flat_input=True)
+        except (ZeroDivisionError,OverflowError) as exc:
+            raise ValueError("parameter expression must evaluate to a finite real number") from exc
         _validate_bound_values(bound)
         c=Circuit.__new__(Circuit)
         c._qc=bound
