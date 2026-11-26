@@ -127,6 +127,30 @@ CASES=[
 "c=QuantumCircuit(1); c.ry(.3,0); out=float(StatevectorEstimator().run([(c,SparsePauliOp('Z'))]).result()[0].data.evs)",
 "c=q.Circuit(1).ry(.3,0); out=float(StatevectorEstimator().run([(c.to_qiskit(),q.Z(0).to_qiskit())]).result()[0].data.evs)"),
 ]
+
+# Recovery routes for six rejected direct operations. These are the same
+# mathematical tasks, not six additional independent capabilities.
+CASES.extend([
+("recovery_open_control","Implement open control by explicit conjugation","operator","direct",
+"from qiskit.circuit.library import CXGate\nc=QuantumCircuit(2); c.append(CXGate(ctrl_state=0),[0,1]); out=c",
+"out=q.Circuit(2).x(0).cx(0,1).x(0)"),
+("recovery_composite_control","Controlled rotation with strict relative phase","operator","direct",
+"b=QuantumCircuit(1); b.ry(.4,0); b.global_phase=.3; c=QuantumCircuit(2); c.append(b.to_gate().control(1),[0,1]); out=c",
+"out=q.Circuit(2).cry(.4,0,1).p(.3,0)"),
+("recovery_noncommuting_evolution","Exact one-qubit noncommuting Hamiltonian by analytic basis change","operator","direct",
+"from scipy.linalg import expm\nH=SparsePauliOp.from_list([('X',1.),('Z',1.)]); c=QuantumCircuit(1); c.unitary(expm(-.2j*H.to_matrix()),[0]); out=c",
+"out=q.Circuit(1).ry(-np.pi/4,0).rz(.4*np.sqrt(2),0).ry(np.pi/4,0)"),
+("recovery_identity_gate","Logical operator identity without preserving instruction count","operator","direct",
+"c=QuantumCircuit(1); c.id(0); out=c",
+"out=q.Circuit(1)"),
+("recovery_state_preparation","Explicit unitary lowering of StatePreparation, not reset","operator","interop",
+"c=QuantumCircuit(2); c.append(StatePreparation([.5,.5j,.5,-.5j]),[0,1]); out=c",
+"c=QuantumCircuit(2); c.append(StatePreparation([.5,.5j,.5,-.5j]),[0,1]); out=q.from_qiskit(transpile(c,basis_gates=['u','cx'],optimization_level=0,qubits_initially_zero=False))"),
+("recovery_xx_plus_yy","Explicit native lowering of XX+YY entangler","operator","interop",
+"c=QuantumCircuit(2); c.append(XXPlusYYGate(.4,.2),[0,1]); out=c",
+"c=QuantumCircuit(2); c.append(XXPlusYYGate(.4,.2),[0,1]); out=q.from_qiskit(transpile(c,basis_gates=['u','cx'],optimization_level=0,qubits_initially_zero=False))"),
+])
+
 def shape(s):
     tree=ast.parse(s)
     return dict(tokens=sum(t.type not in (tokenize.ENDMARKER,tokenize.NEWLINE,tokenize.NL,tokenize.INDENT,tokenize.DEDENT,tokenize.COMMENT) for t in tokenize.generate_tokens(io.StringIO(s).readline)),calls=sum(isinstance(n,ast.Call) for n in ast.walk(tree)),statements=sum(isinstance(n,ast.stmt) for n in ast.walk(tree)))

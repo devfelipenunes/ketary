@@ -1,13 +1,17 @@
 # Qiskit workflow coverage and usability
 
 Goal: preserve professional capability, not win a line-count competition.
-The audit uses 37 authored tasks with matched outputs or explicit rejections.
+The audit uses 37 authored tasks and six recovery routes with matched outputs or explicit rejections.
 Direct means only the Ketary public API is used for the operation; interop
 means explicit Qiskit use or conversion is necessary; gap means a tested
 direct route is rejected, not that no mathematical decomposition exists.
 Native baseline must execute even for rejected routes. No false PASS,
 unsupported cases are not successes. Operator comparisons retain phase.
 Single timings are diagnostics, not human task times or benchmarks.
+Recovery rows reattempt six of the same rejected direct operations using
+explicit decomposition or Qiskit lowering; do not add them to the task
+denominator. Identity recovery preserves the operator, not instruction
+count/timing, and one-qubit noncommuting evolution is not a general algorithm.
 
 Official reference: https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.circuit.QuantumCircuit
 and https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.quantum_info.SparsePauliOp
@@ -28,3 +32,5 @@ identity/barrier/metadata semantics; typed diagnostics and docs. Dynamic
 import/control, mixed states, hardware/noise and general backend support need
 separate scoped architectural decisions. No automatic lowering, hidden runs,
 unbounded matrices, silent metadata loss or publication.
+
+Initial head e99b13bc, CI 45790487697: 37/37 tests; 17 direct and five interop matched; 15 tested direct routes rejected; maximum matched error 2.23e-15 (rounded up). Recovery rows require independent CI. No runtime change.
