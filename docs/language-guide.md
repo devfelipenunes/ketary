@@ -179,3 +179,25 @@ c.apply_each(q.Circuit(2).cz(0,1), placements=q.ring(c.wires))
 ```
 
 Topology helpers generate ordered logical pairs, not hardware couplings. `chain` uses adjacent pairs; `ring` closes the chain (at least 3 wires); `star` uses the first wire as center; `all_pairs` emits combinations in caller order (not both directions). At most 4096 distinct nonnegative indices and 10000 pairs. The target validates actual bounds. `rx/ry/rz/p` accept ordered sequences of angles aligned one-to-one with ordered wires, or the existing scalar broadcast. All values preflight before mutation; no implicit Cartesian product. See [circuit-writing study](circuit-writing-study.md).
+
+
+## Ordered dynamic measurement and reset
+
+```python
+import ketary as q
+c = q.Circuit.classical(3, 3)
+c.x(2).measure([2, 0], [0, 2]).reset(c.wires)
+c.measure(1, 1)
+counts = c.run_shots(shots=256, seed=42).counts
+```
+
+Scalar calls are unchanged. For batch measurement, use two nonempty ordered
+sequences of equal length; wires and classical destinations must each be
+distinct within that call. No broadcasting or implicit measurement.
+Reset accepts an ordered selection of distinct wires. All batch inputs
+are validated before mutation; operations are appended in caller order
+on a native copy and committed only on success. Repeated measurements,
+overwritten classical bits and repeated resets remain expressible as
+separate scalar calls. These operations require explicit classical mode;
+execution remains a separate optional Aer operation. The existing 12-wire,
+12-bit, 1024-instruction execution limits remain unchanged.
