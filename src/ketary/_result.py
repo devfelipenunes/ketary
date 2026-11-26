@@ -141,6 +141,9 @@ class _Math:
 
     def expectation(self,pauli):
         """Expectation of a Hermitian Pauli string, leftmost character is q[n-1]."""
+        from ._observable import Observable
+        if isinstance(pauli,Observable):
+            return self.observable(pauli.to_dict(self._r._n))
         from ._ergonomics import _pauli_label
         pauli=_pauli_label(self._r._n,pauli)
         if not isinstance(pauli,str) or len(pauli)!=self._r._n or any(p not in "IXYZ" for p in pauli):
@@ -258,14 +261,23 @@ class _Math:
     def observable(self, terms):
         """Expectation of a bounded real linear combination of full-width Paulis."""
         from collections.abc import Mapping
+        from ._observable import Observable
+        if isinstance(terms,Observable):
+            terms=terms.to_dict(self._r._n)
         if not isinstance(terms,Mapping) or not 1<=len(terms)<=256:
             raise ValueError("expected 1..256 Pauli terms")
-        return math.fsum(_real(coefficient)*self.expectation(label) for label,coefficient in terms.items())
+        value=math.fsum(_real(coefficient)*self.expectation(label) for label,coefficient in terms.items())
+        if not math.isfinite(value):
+            raise ArithmeticError("observable expectation is not finite")
+        return value
 
     def observable_variance(self, terms, *, max_bytes=64*1024**2):
         """Variance of a real weighted Pauli sum using a bounded native matrix."""
         from collections.abc import Mapping
         from qiskit.quantum_info import SparsePauliOp
+        from ._observable import Observable
+        if isinstance(terms,Observable):
+            terms=terms.to_dict(self._r._n)
         if not isinstance(terms,Mapping) or not 1<=len(terms)<=256:
             raise ValueError("expected 1..256 Pauli terms")
         n=self._r._n
@@ -293,6 +305,9 @@ class _Math:
         """Apply native Pauli terms to one snapshot without dense operators."""
         from collections.abc import Mapping
         from qiskit.quantum_info import Statevector
+        from ._observable import Observable
+        if isinstance(terms,Observable):
+            terms=terms.to_dict(self._r._n)
         if not isinstance(terms,Mapping) or not 1<=len(terms)<=256:
             raise ValueError("expected 1..256 Pauli terms")
         n=self._r._n
@@ -323,7 +338,10 @@ class _Math:
         return value
 
     def variance(self,pauli):
-        """Variance of a Hermitian Pauli string, whose square is identity."""
+        """Pauli variance or bounded streamed variance of a real Pauli sum."""
+        from ._observable import Observable
+        if isinstance(pauli,Observable):
+            return self.observable_variance_streamed(pauli)
         expectation=self.expectation(pauli)
         return max(0.0,1-expectation**2)
 
@@ -411,7 +429,8 @@ class _Checks:
     def expectation(self,pauli,expected,*,atol=1e-9):
         t=_tol(atol)
         expected=_real(expected)
-        if not math.isfinite(expected) or not -1<=expected<=1:
+        from ._observable import Observable
+        if not isinstance(pauli,Observable) and not -1<=expected<=1:
             raise ValueError("expected Pauli value must be in [-1,1]")
         a=self._r.math.expectation(pauli)
         return CheckResult("PASS" if abs(a-expected)<=t else "FAIL",a,expected,t,f"Pauli {pauli}")

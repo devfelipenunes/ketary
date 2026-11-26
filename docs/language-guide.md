@@ -106,3 +106,34 @@ examples intentionally use more tokens; no claim of universal improvement.
 No human or dedicated-host experiment has been completed.
 
 For end-to-end mathematical calibration run `python research/complete_workflows.py`. See the [developer pilot protocol](developer-pilot.md) for a separate formative human evaluation; no participant results yet.
+
+
+## Mathematical expressions: real Pauli observables
+
+```python
+import ketary as q
+H = 0.5*q.Z(0) + 0.8*(q.X(0) @ q.X(1))
+r = q.bell().run()
+energy = r.math.expectation(H)
+variance = r.math.variance(H)
+r.test.expectation(H, 0.8).require()
+```
+
+An Observable is an immutable bounded real Pauli sum; it does not execute
+a circuit or represent a new gate. X/Y/Z/I use absolute wire indices;
+shorter expressions pad identities on the left, preserving little-endian
+order. Addition/subtraction and real scalar multiplication combine terms.
+The @ operator is restricted to tensor products with disjoint nonidentity
+wire support, not general matrix multiplication: overlapping support is
+rejected even when the factors commute. Complex coefficients, arbitrary
+matrices, exponentiation and synthesis are outside this API. Maximum 62
+declared wires, 256 terms, 4096 product pairs. Zero retains its declared
+embedding width. Explicit conversion via to_dict(width) or
+to_qiskit(width) returns independent representations.
+
+Expectation delegates to existing real weighted Pauli evaluation;
+variance uses the existing streamed implementation and its default
+resource limits. Explicit dense/streamed variance methods accept the
+same Observable and expose their existing budgets. Observable expectations
+may exceed [-1,1]; single Pauli checks retain that interval. No automatic
+resimulation, no new state engine, no change to logical circuit replay.

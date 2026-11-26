@@ -68,3 +68,5 @@ See [language guide](language-guide.md) for typed dictionary reports, ordered si
 ### Consistent result access
 
 `Result.verify()` returns a dictionary-compatible SnapshotReport, with `.status`, `.checks`, `.require()` and JSON export. External equivalence returns a separate ExternalVerificationReport: do not confuse its criterion with strict operator equality. Modal decoders expose `.label` and `.peak_probability`; QPE additionally exposes `.phase` (None on a tie). All retain existing dictionary keys. Checkpoint lookup and explicit alignment accept names or indices; returned alignment still records resolved numeric indices. Composition, apply and append require ordered wire mappings, not sets or dictionaries. No implicit execution is introduced.
+
+Observable, X/Y/Z/I and real scalar/sum/disjoint tensor syntax are experimental mathematical conveniences. See [language guide](language-guide.md). Existing full-width strings and weighted dictionaries remain supported.
