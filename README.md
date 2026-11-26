@@ -56,3 +56,7 @@ Run `python -m examples.first_bell` and `python -m examples.diagnose_phase` from
 ## Workflow
 
 All changes go through branches and pull requests. Do not merge automatically. Review evidence and production readiness before expanding scope or publishing.
+
+## Internal architecture (experimental)
+
+The public import remains `import ketary as q`. Internal modules separate circuit construction, Qiskit validation, result math and checks, trace, resource guards, and state factories. No new capability or production-readiness claim follows from this refactor. Internal modules are not a second public API.
