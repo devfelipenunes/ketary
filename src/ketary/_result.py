@@ -670,5 +670,9 @@ class _Checks:
 
     def state(self,target,*,ignore_global_phase=True,atol=1e-9):
         """Maximum amplitude residual after optional phase alignment."""
+        # Reject invalid controls before converting a caller-owned target.
+        t=_tol(atol)
+        if type(ignore_global_phase) is not bool:
+            raise ValueError("ignore_global_phase must be bool")
         other=target if isinstance(target,Result) else Result(target)
-        return _residual(self._r._data,other._data,ignore_global_phase,atol)
+        return _residual(self._r._data,other._data,ignore_global_phase,t)
