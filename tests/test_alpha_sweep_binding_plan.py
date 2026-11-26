@@ -46,3 +46,18 @@ def test_sparse_phase_only_and_ownership():
     plan=c.sweep_rows([(.1,),(.7,)])
     for angle,out in zip((.1,.7),plan._payloads,strict=True):
         np.testing.assert_allclose(Operator(out.to_qiskit()).data,Operator(raw.assign_parameters({a:angle})).data,atol=1e-9,rtol=0)
+
+
+def test_sparse_path_still_validates_each_assignment(monkeypatch):
+    from ketary import _adapter
+    p=q.Circuit.parameter("p")
+    c=q.Circuit.symbolic(2).h(0).cx(0,1).h(0).ry(p,1)
+    seen=[];original=_adapter._validate_bound_values
+    def check(raw,indices=None):
+        seen.append((raw,indices))
+        original(raw,indices)
+    monkeypatch.setattr(_adapter,"_validate_bound_values",check)
+    c.sweep_rows([[.2],[.4]])
+    assert len(seen)==2 and seen[0][0] is not seen[1][0]
+    assert [indices for _,indices in seen]==[(3,),(3,)]
+    assert all(not raw.parameters for raw,_ in seen)
