@@ -96,8 +96,12 @@ class Circuit:
         value=_int(value)
         if value not in (0,1):
             raise ValueError("condition must be zero or one")
-        with self._qc.if_test((self._qc.clbits[bit],value)):
-            getattr(self._qc,gate)(wire)
+        # Stage the complete conditional; a native context exit may append
+        # a branch before raising. Never expose a partial builder mutation.
+        candidate=self._qc.copy()
+        with candidate.if_test((candidate.clbits[bit],value)):
+            getattr(candidate,gate)(wire)
+        self._qc=candidate
         return self
 
     def if_x(self,wire,bit,*,value=1):

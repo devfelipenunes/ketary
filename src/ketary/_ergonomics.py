@@ -88,7 +88,10 @@ def _pairs(c,name,a,b,pairs,*params):
         raise ValueError("choose scalar wires or pairs, not both")
     if isinstance(pairs,(str,bytes,Mapping,set,frozenset)):
         raise ValueError("expected ordered wire pairs")
+    from ._circuit import Circuit
     gate=c.gates
+    exact=type(c) is Circuit
+    width=c.num_qubits
     selected=[]
     try:
         for row in islice(iter(pairs),10001):
@@ -102,7 +105,17 @@ def _pairs(c,name,a,b,pairs,*params):
                 pair=tuple(islice(iter(row),3))
             if len(pair)!=2:
                 raise ValueError("each pair must contain two distinct wires")
-            selected.append(gate._pair(*pair))
+            first,second=pair
+            if exact and type(first) is int and type(second) is int:
+                # Same error order as _Gates._pair, without repeated facade
+                # property lookups or integer validation dispatch.
+                if not (0<=first<width and 0<=second<width):
+                    raise ValueError("invalid wire")
+                if first==second:
+                    raise ValueError("duplicate wires")
+                selected.append((first,second))
+            else:
+                selected.append(gate._pair(first,second))
     except TypeError as exc:
         raise ValueError("expected ordered wire pairs") from exc
     if not selected:
@@ -272,7 +285,27 @@ def _evolve(c,observable,time):
     block=Circuit.symbolic(n) if symbolic else Circuit(n)
     native=block._qc
     native.global_phase=phase
-    for active,theta in rows:
+    from itertools import groupby
+    def diagonal_pivot(row):
+        active,_=row
+        return active[-1][0] if len(active)>=3 and all(axis=="Z" for _,axis in active) else None
+    # Consecutive diagonal parity rotations can share a running XOR mask.
+    # Flush before every other gate, including native two-wire rotations.
+    def expanded_rows():
+        for pivot,group in groupby(rows,key=diagonal_pivot):
+            if pivot is None:
+                yield from group
+                continue
+            current=set()
+            for active,theta in group:
+                wanted={wire for wire,_ in active[:-1]}
+                for wire in sorted(current^wanted):
+                    native.cx(wire,pivot)
+                native.rz(theta,pivot)
+                current=wanted
+            for wire in sorted(current):
+                native.cx(wire,pivot)
+    for active,theta in expanded_rows():
         if len(active)==1:
             wire,axis=active[0]
             getattr(native,"r"+axis.lower())(theta,wire)
@@ -293,6 +326,20 @@ def _evolve(c,observable,time):
             elif axis=="Y":native.rx(-pi/2,wire)
     # Existing application transaction preserves phase/checkpoint semantics.
     return c.apply(block)
+
+
+def _derivative_real(expr,values,invalid,nonreal):
+    """Shared native expression boundary; callers retain their error contract."""
+    from ._validation import _real
+    try:
+        if getattr(expr,"parameters",()):
+            expr=expr.bind({p:values[p] for p in expr.parameters})
+        z=complex(expr)
+    except (TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
+        raise ValueError(invalid) from exc
+    if z.imag!=0:
+        raise ValueError(nonreal)
+    return _real(z.real)
 
 
 def _shifted_bound_circuit(bound,offsets):
@@ -339,15 +386,7 @@ def _expectation_jacobian(c,bindings,observables,*,max_bytes):
     if any(not isinstance(H,Observable) or H.num_qubits>template.num_qubits for H in obs):
         raise ValueError("expected compatible real Observable objects")
     def numeric(expr):
-        try:
-            if getattr(expr,"parameters",()):
-                expr=expr.bind({p:vals[p] for p in expr.parameters})
-            value=complex(expr)
-        except (TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
-            raise ValueError("nonfinite or unbound derivative expression") from exc
-        if value.imag!=0:
-            raise ValueError("derivative expression must be real")
-        return _real(value.real)
+        return _derivative_real(expr,vals,"nonfinite or unbound derivative expression","derivative expression must be real")
     supported={"rx","ry","rz","rxx","ryy","rzz","p","cp"}
     controlled={"crx","cry","crz"}
     staged=[]
@@ -441,15 +480,7 @@ def _quantum_geometric_tensor(c,bindings,*,max_bytes):
         raise ValueError("complete native parameter identity mapping required")
     values={p:_real(bindings[p]) for p in params}
     def numeric(expr):
-        try:
-            if getattr(expr,"parameters",()):
-                expr=expr.bind({p:values[p] for p in expr.parameters})
-            z=complex(expr)
-        except (TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
-            raise ValueError("invalid state derivative expression") from exc
-        if z.imag!=0:
-            raise ValueError("state derivative expression must be real")
-        return _real(z.real)
+        return _derivative_real(expr,values,"invalid state derivative expression","state derivative expression must be real")
     rotations={"rx","ry","rz","rxx","ryy","rzz","crx","cry","crz"}
     phases={"p","cp"}
     staged=[]
@@ -520,15 +551,7 @@ def _expectation_hessian(c,bindings,observables,*,max_bytes):
     if any(not isinstance(H,Observable) or H.num_qubits>template.num_qubits for H in obs):
         raise ValueError("expected compatible real Observable objects")
     def numeric(expr):
-        try:
-            if getattr(expr,"parameters",()):
-                expr=expr.bind({p:values[p] for p in expr.parameters})
-            z=complex(expr)
-        except (TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
-            raise ValueError("invalid second derivative expression") from exc
-        if z.imag!=0:
-            raise ValueError("second derivative expression must be real")
-        return _real(z.real)
+        return _derivative_real(expr,values,"invalid second derivative expression","second derivative expression must be real")
     two=((1,.5),(-1,-.5))
     controlled_coefficient=(1-sqrt(2))/4
     four=two+((2,controlled_coefficient),(-2,-controlled_coefficient))
