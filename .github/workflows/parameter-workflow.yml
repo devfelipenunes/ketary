@@ -4,6 +4,8 @@ on:
     paths:
       - 'src/ketary/**'
       - 'research/parameter_workflow.py'
+      - 'research/sweep_preparation_cost.py'
+      - 'tests/test_sweep_preparation.py'
       - 'tests/test_parameter_workflow.py'
       - '.github/workflows/parameter-workflow.yml'
   workflow_dispatch:
@@ -39,12 +41,14 @@ jobs:
           git rev-parse HEAD > revision.txt
       - run: python -m pytest -q tests/test_parameter_workflow.py
       - run: python -m research.parameter_workflow --output parameter.json --seed "$SEED" --reps 7
+      - run: python -m research.sweep_preparation_cost --output sweep-cost.json --seed "$SEED" --reps 7
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: parameter-${{ matrix.seed }}
           path: |
             parameter.json
+            sweep-cost.json
             environment.txt
             host.txt
             revision.txt
