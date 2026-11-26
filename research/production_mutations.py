@@ -65,7 +65,7 @@ def read_evidence(path):
             status="skipped"
         elif failures:
             status="assertion" if all(
-                re.search(r": (AssertionError|Failed)\\s*$",f.text or "") for f in failures
+                re.search(r": (AssertionError|Failed)\s*$",f.text or "") for f in failures
             ) else "unexpected_exception"
         else:
             status="passed"
