@@ -20,7 +20,9 @@ def _lower(circuit, *, basis_gates, seed):
     from qiskit.transpiler.exceptions import TranspilerError
     from ._circuit import Circuit
     try:
-        raw=transpile(circuit.to_qiskit(),basis_gates=list(names),optimization_level=0,seed_transpiler=seed)
+        # Logical equivalence is for arbitrary input, not only clean ancillas.
+        raw=transpile(circuit.to_qiskit(),basis_gates=list(names),optimization_level=0,
+                      seed_transpiler=seed,qubits_initially_zero=False)
     except TranspilerError as exc:
         raise UnsupportedOperation("Qiskit could not lower to the requested logical basis") from exc
     lowered=Circuit._from_native(raw,owned=True)
