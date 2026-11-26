@@ -1,0 +1,31 @@
+name: Validate experimental SDK
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install experimental dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Record environment
+        run: |
+          python --version
+          python -m pip freeze
+          python -c "import qiskit; print(qiskit.__version__)"
+      - name: Required tests and upstream probes
+        run: python -m pytest -q -rs tests research/probes
