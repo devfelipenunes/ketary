@@ -14,3 +14,7 @@ add_subdirectory("${QUEST_SOURCE}" quest-build EXCLUDE_FROM_ALL)
 add_library(ketary_quest_extended SHARED bridge.cpp)
 target_link_libraries(ketary_quest_extended PRIVATE QuEST::QuEST)
 target_compile_features(ketary_quest_extended PRIVATE cxx_std_17)
+
+add_executable(ketary_extended_abi_test abi_test.cpp)
+target_link_libraries(ketary_extended_abi_test PRIVATE ketary_quest_extended)
+target_compile_features(ketary_extended_abi_test PRIVATE cxx_std_17)

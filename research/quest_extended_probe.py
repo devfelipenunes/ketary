@@ -61,6 +61,15 @@ class Extended:
         with _LOCK:
             if _USED:raise RuntimeError("one environment per process")
             self.lib=ct.CDLL(str(Path(library).resolve(strict=True)))
+            for name,expected in (("extended_abi_version",2),("extended_row_width",24),
+                                  ("extended_scalar_bytes",np.dtype(np.float64).itemsize),
+                                  ("extended_index_bytes",np.dtype(np.int32).itemsize)):
+                try:
+                    fn=getattr(self.lib,name)
+                except AttributeError as exc:
+                    raise RuntimeError("incompatible extended native ABI") from exc
+                fn.argtypes=[];fn.restype=ct.c_int
+                if fn()!=expected:raise RuntimeError("incompatible extended native ABI layout")
             self.lib.extended_init.argtypes=[];self.lib.extended_init.restype=ct.c_int
             self.lib.extended_close.argtypes=[];self.lib.extended_close.restype=ct.c_int
             self.lib.extended_run.argtypes=[ct.c_int,ct.c_int,ct.c_int,_I,_D,_D,ct.c_double,_D,_D]
@@ -76,7 +85,10 @@ class Extended:
 
     def run(self,program,state,angle_rows=None):
         n,ops,angles,phase=program
-        if type(n) is not int or not 1<=n<=22 or ops.shape!=(len(angles),24) or len(angles)>100000 or ops.dtype!=np.int32 or not ops.flags.c_contiguous:
+        if (type(n) is not int or not 1<=n<=22 or not isinstance(ops,np.ndarray)
+            or not isinstance(angles,np.ndarray) or angles.ndim!=1 or angles.dtype!=np.float64
+            or not angles.flags.c_contiguous or len(angles)>100000
+            or ops.shape!=(len(angles),24) or ops.dtype!=np.int32 or not ops.flags.c_contiguous):
             raise ValueError("invalid program")
         if angle_rows is None:angle_rows=angles.reshape(1,-1)
         count=len(angle_rows)

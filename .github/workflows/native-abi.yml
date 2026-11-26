@@ -1,0 +1,42 @@
+name: Native ABI sanitizer qualification
+on:
+  pull_request:
+    paths:
+      - 'research/quest_extended/**'
+      - 'research/quest_extended_probe.py'
+      - '.github/workflows/native-abi.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  abi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      QUEST_COMMIT: 9d7618d7263e3bfba433b88cf1eac0647f08fa0a
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+      ASAN_OPTIONS: halt_on_error=1:detect_leaks=1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Fetch pinned native source
+        run: |
+          git init "$RUNNER_TEMP/quest"
+          git -C "$RUNNER_TEMP/quest" remote add origin https://github.com/QuEST-Kit/QuEST.git
+          git -C "$RUNNER_TEMP/quest" fetch --depth=1 origin "$QUEST_COMMIT"
+          git -C "$RUNNER_TEMP/quest" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/quest" rev-parse HEAD)" = "$QUEST_COMMIT"
+      - name: Instrument bridge and QuEST and run standalone ABI oracle
+        run: |
+          flags="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          cmake -S research/quest_extended -B "$RUNNER_TEMP/abi" -DQUEST_SOURCE="$RUNNER_TEMP/quest" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="$flags" -DCMAKE_CXX_FLAGS="$flags" -DCMAKE_SHARED_LINKER_FLAGS="-fsanitize=address,undefined" -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+          cmake --build "$RUNNER_TEMP/abi" --target ketary_extended_abi_test --parallel 2
+          set -o pipefail
+          "$RUNNER_TEMP/abi/ketary_extended_abi_test" 2>&1 | tee abi-test.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: native-abi-sanitizer
+          path: abi-test.txt

@@ -13,6 +13,11 @@ static double ms(Clock::time_point a,Clock::time_point b){
     return std::chrono::duration<double,std::milli>(b-a).count();
 }
 static bool ready=false;
+// Same-process ABI contract. Native-endian rows and scalars, not a wire format.
+extern "C" int extended_abi_version(){return 2;}
+extern "C" int extended_row_width(){return 24;}
+extern "C" int extended_scalar_bytes(){return sizeof(double);}
+extern "C" int extended_index_bytes(){return sizeof(int32_t);}
 extern "C" int extended_init(){
     if(ready)return 1;
     initCustomQuESTEnv(0,0,0);ready=true;return 0;
