@@ -84,6 +84,32 @@ class _Math:
         p=self.probability(bits)
         return f"p(|{bits}>) = |{a.real:.12g}{a.imag:+.12g}j|^2 / {self._r._norm_sq:.12g} = {p:.12g}"
 
+    def table(self, bits=None, *, max_rows=16):
+        """Bounded basis table; default rows are the first basis indices.
+
+        Explicit labels preserve caller order. The default is a prefix,
+        not a ranking by probability. No state copy or re-execution.
+        """
+        cap=_int(max_rows,1)
+        if bits is None:
+            labels=[format(i,f"0{self._r._n}b") for i in range(min(cap,self._r._data.size))]
+            omitted=self._r._data.size-len(labels)
+        else:
+            from itertools import islice
+            if isinstance(bits,str):
+                raise ValueError("pass an iterable of basis labels, not one string")
+            labels=list(islice(iter(bits),cap+1))
+            if len(labels)>cap:
+                raise ResourceLimit("basis table exceeds row limit")
+            omitted=0
+        rows=["basis | amplitude | probability"]
+        for label in labels:
+            a=self.amplitude(label)
+            rows.append(f"{label} | {a.real:.8g}{a.imag:+.8g}j | {self.probability(label):.8g}")
+        if omitted:
+            rows.append(f"... {omitted} basis rows omitted")
+        return "\n".join(rows)
+
     def expectation(self,pauli):
         """Expectation of a Hermitian Pauli string, leftmost character is q[n-1]."""
         if not isinstance(pauli,str) or len(pauli)!=self._r._n or any(p not in "IXYZ" for p in pauli):

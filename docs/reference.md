@@ -9,7 +9,7 @@ The public import is `import ketary as q`. All factories return Circuit.
 | Circuit | num_qubits, append(gate,wires) mutates; compose(other,wires=None), inverse(), decompose(reps=1), optimize(), to_qiskit(), to_json(), Circuit.from_json(payload) do not mutate source. Decompose only lowers SWAP. |
 | Execution | run(mode="statevector",max_bytes=64 MiB), analyze() experimental alias |
 | Result | num_qubits, sample(shots,seed=None,max_outcomes=65536) |
-| Result.math | statevector(max_bytes=64 MiB), amplitude(bits), probability(bits), probabilities(max_outcomes=65536), marginal_probabilities(wires,max_outcomes=65536), explain_probability(bits), norm(), fidelity(target), entropy(partition,max_rank=256,max_bytes=64 MiB), expectation(pauli) |
+| Result.math | statevector(max_bytes=64 MiB), amplitude(bits), probability(bits), probabilities(max_outcomes=65536), marginal_probabilities(wires,max_outcomes=65536), explain_probability(bits), table(bits=None,max_rows=16), norm(), fidelity(target), entropy(partition,max_rank=256,max_bytes=64 MiB), expectation(pauli) |
 | Result.test | normalized(atol), probability(bits,expected,atol), fidelity(target,minimum), entangled(partition,atol,max_rank=256,max_bytes=64 MiB), distribution(target,atol), expectation(pauli,expected,atol), state(target,ignore_global_phase,atol) |
 | Circuit.test | equivalent(other,ignore_global_phase=False,atol=1e-9,max_bytes=16 MiB) |
 | Circuit.debug | trace(max_bytes=64 MiB,max_steps=256), compare(reference,ignore_global_phase=True,atol=1e-9,max_bytes=64 MiB,max_steps=256) |
