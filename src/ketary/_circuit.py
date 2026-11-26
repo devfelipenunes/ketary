@@ -4,6 +4,7 @@ from ._adapter import _sdk, _validate, _validate_gate
 from ._validation import _int, _limit, _angle, UnsupportedOperation
 from ._result import Result
 from ._trace import _Debug
+from ._resources import _Resources, _Visualize
 
 class Circuit:
     """One builder, one authoritative Qiskit circuit (strict PoC subset)."""
@@ -19,6 +20,14 @@ class Circuit:
     @property
     def debug(self):
         return _Debug(self)
+
+    @property
+    def resources(self):
+        return _Resources(self)
+
+    @property
+    def visualize(self):
+        return _Visualize(self)
 
     def analyze(self):
         return self.run()
