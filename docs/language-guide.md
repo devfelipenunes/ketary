@@ -31,7 +31,7 @@ bob=c.register("bob",[2,3])
 c.apply(q.bell(),wires=alice)
 c.apply(q.bell(),wires=bob)
 r=c.run()
-r.test.expectations({"IIXX":1,"XXII":1}).require()
+r.test.expectations({q.X(0) @ q.X(1):1,q.X(2) @ q.X(3):1}).require()
 assert abs(r.math.expectation({0:"X",1:"X"})-1)<1e-9
 ```
 
@@ -63,7 +63,7 @@ Sample-only matches remain INCONCLUSIVE.
 
 ```python
 c=q.bell().checkpoint("entangled").z(0).checkpoint("changed")
-contract=c.contract(expectations={"XX":1})
+contract=c.contract(expectations={q.X(0) @ q.X(1):1})
 report=c.debug.verify_checkpoints({"entangled":contract,"changed":contract})
 assert report.status=="FAIL"
 ```
@@ -79,7 +79,7 @@ template=q.Circuit.symbolic(1).ry(theta,0)
 plan=template.sweep(theta=[0,.5,1])
 results=plan.run()
 report=q.decode_phase_estimation(q.phase_estimation(.375,precision=3).run(),precision=3)
-assert report["phase"]==.375
+assert report.phase==.375
 ```
 
 Bind by native mapping or unique names, never both; use the native mapping if a parameter name conflicts with the bindings argument. Sweep columns are zipped,
@@ -137,3 +137,5 @@ resource limits. Explicit dense/streamed variance methods accept the
 same Observable and expose their existing budgets. Observable expectations
 may exceed [-1,1]; single Pauli checks retain that interval. No automatic
 resimulation, no new state engine, no change to logical circuit replay.
+
+The [core API](core-api.md) is the recommended entry path. Aggregate expectations accept immutable Observable keys or legacy full-width strings; use an Observable rather than an unhashable local-wire mapping as a key. See the compatibility policy for retained aliases and report formats.
