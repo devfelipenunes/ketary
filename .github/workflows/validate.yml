@@ -104,6 +104,8 @@ jobs:
           python -m research.alpha_commutation_lab --reps 9 > alpha-commutation-lab.json
           python -m research.alpha_buffer_normalization --reps 5 --rss > alpha-buffer-normalization.json
           python -m research.alpha_chunk_profile --reps 5 --rss > alpha-chunk-profile.json
+          python -m research.alpha_exact_topk_profile --reps 5 --rss > alpha-exact-topk-profile.json
+          python -m research.alpha_qpe_power_profile --reps 9 > alpha-qpe-power-profile.json
           python -m research.closure_physical_dynamics > closure-physical-dynamics.json
           python -m research.closure_reversible_logic > closure-reversible-logic.json
           python -m research.priority_architecture_audit > closure-architecture.json
@@ -130,6 +132,8 @@ jobs:
             alpha-commutation-lab.json
             alpha-buffer-normalization.json
             alpha-chunk-profile.json
+            alpha-exact-topk-profile.json
+            alpha-qpe-power-profile.json
             closure-physical-dynamics.json
             closure-reversible-logic.json
             closure-architecture.json
