@@ -202,24 +202,42 @@ def _run_noisy(circuit,noise_model,*,seed,max_bytes):
     return DensityMatrix(out.data.copy())
 
 
-def _run_channel(circuit,channel,initial_state,*,max_bytes):
+def _run_channel(circuit,channel,initial_state,*,wires=None,max_bytes):
     """Trusted native Kraus data; exact-in-model density evolution, no Aer."""
     from math import isfinite
     from qiskit.quantum_info import Kraus,DensityMatrix
     n=_density_preflight(circuit,max_bytes)
-    if n>4:
-        raise ResourceLimit("Kraus channel execution supports <=4 wires")
+    if wires is None:
+        if n>4:
+            raise ResourceLimit("full-width Kraus channel execution supports <=4 wires")
+        width=n
+        selected=None
+    else:
+        from collections.abc import Mapping
+        from itertools import islice
+        if isinstance(wires,(str,bytes,set,frozenset,Mapping)):
+            raise ValueError("expected ordered channel wires")
+        try:
+            selected=tuple(_int(w) for w in islice(iter(wires),5))
+        except TypeError as exc:
+            raise ValueError("expected ordered channel wires") from exc
+        width=len(selected)
+        if width>4:
+            raise ResourceLimit("local Kraus channel supports <=4 wires")
+        if not width or len(set(selected))!=width or any(w>=n for w in selected):
+            raise ValueError("expected nonempty distinct channel wires in range")
     if not isinstance(channel,Kraus):
         raise TypeError("expected native Kraus channel")
-    dim=(2,)*n
+    dim=(2,)*width
     if channel.input_dims()!=dim or channel.output_dims()!=dim:
-        raise ValueError("channel must preserve full qubit dimensions")
+        raise ValueError("channel must preserve selected qubit dimensions")
     matrices=channel.data
     if not isinstance(matrices,list) or not 1<=len(matrices)<=16:
         raise UnsupportedOperation("expected 1..16 standard Kraus operators")
-    _limit(2*n,3+len(matrices),budget=max_bytes)
+    if 16*(3*(1<<(2*n))+len(matrices)*(1<<(2*width)))>max_bytes:
+        raise ResourceLimit("density and Kraus payload budget exceeded")
     for matrix in matrices:
-        if matrix.shape!=(1<<n,1<<n) or any(
+        if matrix.shape!=(1<<width,1<<width) or any(
             not isfinite(z.real) or not isfinite(z.imag) for z in matrix.flat
         ):
             raise ValueError("Kraus operators must be finite square matrices")
@@ -227,7 +245,10 @@ def _run_channel(circuit,channel,initial_state,*,max_bytes):
     if not owned.is_cptp(atol=1e-9,rtol=0):
         raise ValueError("channel must be completely positive and trace preserving")
     state=_run_density(circuit,initial_state,max_bytes=max_bytes)
-    result=state.evolve(owned)
-    if not result.is_valid(atol=1e-9,rtol=0):
+    if selected is None:
+        result=state.evolve(owned)
+    else:
+        result=state.evolve(owned,qargs=list(selected))
+    if result.num_qubits!=n or not result.is_valid(atol=1e-9,rtol=0):
         raise ArithmeticError("native channel returned invalid density")
-    return DensityMatrix(result.data.copy(),dims=dim)
+    return DensityMatrix(result.data.copy(),dims=(2,)*n)
