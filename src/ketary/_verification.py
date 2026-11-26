@@ -39,7 +39,13 @@ def _label(label,n):
 
 def _outputs(a,b,label,max_bytes):
     from qiskit.quantum_info import Statevector
+    from ._circuit import Circuit
     initial=Statevector.from_label(_label(label,a.num_qubits)).data
+    if type(a) is Circuit and type(b) is Circuit:
+        # Both explicit runs borrow the same validated immutable input;
+        # their outputs remain independent. Subclasses retain ndarray input.
+        from ._result import Result
+        initial=Result(initial)
     return a.run(initial_state=initial,max_bytes=max_bytes),b.run(initial_state=initial,max_bytes=max_bytes)
 
 
@@ -176,7 +182,8 @@ class Evidence:
         from qiskit.quantum_info import Statevector
         # The fixed reference and input are independent snapshots for this
         # explicit operation. No shared cache, extra metrics or reference rerun.
-        initial=Statevector.from_label(d["input"]).data
+        from ._result import Result
+        initial=Result(Statevector.from_label(d["input"]).data)
         reference=b.run(initial_state=initial,max_bytes=max_bytes)
         distance=_distance(a.run(initial_state=initial,max_bytes=max_bytes),
                            reference,d["ignore_global_phase"])
