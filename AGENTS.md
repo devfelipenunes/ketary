@@ -1,6 +1,7 @@
 # Ketary development instructions
 
 - Treat this as an experimental Qiskit-backed SDK, not a released package.
+- Target Python 3.12.x only during initial development. Use .python-version as the CI and local version source; future packaging must declare >=3.12,<3.13 until support is deliberately expanded. Do not add a Python version matrix.
 - One public Python programming interface, with progressive access through namespaces. Factories return Circuit. Qiskit QuantumCircuit is authoritative; do not implement a second production simulator.
 - Builder gate operations mutate explicitly; transforms return copies; Result is a reusable defensive snapshot. Do not silently re-run simulations. Keep debug and costly analysis opt-in.
 - Preserve global phase and Qiskit little-endian qubit numbering. Reject unsupported operations explicitly. Compare operators in context, not only one output state.

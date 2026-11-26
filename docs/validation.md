@@ -1,5 +1,9 @@
 # Experimental validation and production gate
 
+## Runtime policy
+
+Python 3.12.x is the sole development and CI target. Earlier dual-version CI results below are retained as historical evidence; Python 3.11 support is not maintained. Future package metadata must declare `>=3.12,<3.13` until the policy changes.
+
 ## Performance evidence
 
 Commit ff866a14d1ed97678a29789fb2ca336a372afa79: [CI run](https://github.com/devfelipenunes/ketary/actions/runs/45731457342).

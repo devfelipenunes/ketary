@@ -7,13 +7,13 @@ An experimental Python SDK for quantum programming, built on Qiskit.
 ## Try the proof of concept
 
 ```bash
-python3 -m venv .venv
+python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 python -m pytest -q -rs tests research/probes
 ```
 
-Run from the repository root. Python 3.11 and 3.12 have passed the experimental CI with Qiskit 2.6.2.
+Run from the repository root. Python **3.12.x** is the sole supported development target, with Qiskit 2.6.2. The `.python-version` file defines the CI target. Earlier Python 3.11 results are historical, not a continuing support commitment.
 
 ```python
 import ketary as q
