@@ -161,7 +161,15 @@ class SweepPlan:
         # Exact Circuit instances can reuse the complete finite row preflight.
         # Subclasses keep the public bind dispatch. No source snapshot is cached;
         # assignment and validation of evaluated values happen for every row.
-        bind=circuit._bind_numeric if type(circuit) is Circuit else circuit.bind
+        if type(circuit) is Circuit:
+            # Iterating caller-owned rows/columns can mutate the source.
+            # Recheck completeness once after all user input is consumed,
+            # before native assignment; do not rely on a stale parameter view.
+            if set(params.values())!=set(circuit._qc.parameters) or {name for name,_ in rows[0]}!=set(params):
+                raise ValueError("bindings must cover exactly the template parameters")
+            bind=circuit._bind_numeric
+        else:
+            bind=circuit.bind
         payloads=tuple(bind({params[name]:v for name,v in row}) for row in rows)
         self._rows=rows
         self._payloads=payloads
