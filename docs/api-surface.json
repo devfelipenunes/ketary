@@ -276,7 +276,8 @@
     "Circuit.prepare_state",
     "Circuit.from_unitary",
     "Circuit.evolve_exact",
-    "Circuit.quantum_geometric_tensor"
+    "Circuit.quantum_geometric_tensor",
+    "Circuit.expectation_hessian"
   ],
   "Native": [
     "Circuit.append",
