@@ -194,6 +194,23 @@ class Circuit:
         c._qc=bound
         return c
 
+    def _bind_numeric(self,numeric):
+        """Sweep-only assignment for complete, preflighted finite rows.
+
+        Keep the scalar public binding body unchanged: paired measurements
+        showed a regression with an extra shared dispatch. Both paths keep
+        native assignment, exception translation and bound-value validation.
+        """
+        from ._adapter import _validate_bound_values
+        try:
+            bound=self._qc.assign_parameters(numeric,inplace=False,flat_input=True)
+        except (ZeroDivisionError,OverflowError) as exc:
+            raise ValueError("parameter expression must evaluate to a finite real number") from exc
+        _validate_bound_values(bound)
+        c=Circuit.__new__(Circuit)
+        c._qc=bound
+        return c
+
     def sweep(self,**values):
         """Construct a bounded zipped parameter plan without execution."""
         from ._ergonomics import SweepPlan
