@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 import numpy as np
-from ._validation import _int, _tol, _real, ResourceLimit
+from ._validation import _int, _tol, _real, _limit, ResourceLimit
 
 @dataclass(frozen=True)
 class CheckResult:
@@ -50,6 +50,8 @@ class Result:
 
     def sample(self, *, shots, seed=None, max_outcomes=65536):
         shots = _int(shots,1)
+        if shots>np.iinfo(np.int64).max:
+            raise ResourceLimit("shots exceed signed 64-bit range")
         if min(shots,self._data.size)>_int(max_outcomes,1):
             raise ResourceLimit("potential sample dictionary exceeds outcome limit")
         if seed is not None:
@@ -63,7 +65,8 @@ class _Math:
     def __init__(self, result):
         self._r = result
 
-    def statevector(self):
+    def statevector(self, *, max_bytes=64*1024**2):
+        _limit(self._r._n,budget=max_bytes)
         return self._r._data.copy()
 
     def amplitude(self,bits):
@@ -124,12 +127,15 @@ class _Math:
     def norm(self):
         return float(np.linalg.norm(self._r._data))
 
-    def entropy(self, partition):
+    def entropy(self, partition, *, max_rank=256, max_bytes=64*1024**2):
         # Pure-state bipartite entanglement entropy, q0 is LSB.
         left,right = (tuple(_int(i) for i in side) for side in partition)
         n = self._r._n
         if not left or not right or len(left)+len(right)!=n or set(left+right)!=set(range(n)):
             raise ValueError("partition must cover each qubit exactly once")
+        if (1<<min(len(left),len(right)))>_int(max_rank,1):
+            raise ResourceLimit("Schmidt matrix rank bound exceeds limit")
+        _limit(n,budget=max_bytes)
         axes = [n-1-i for i in left+right]
         matrix = self._r._data.reshape((2,)*n).transpose(axes).reshape(2**len(left),-1)
         p = np.linalg.svd(matrix,compute_uv=False)**2
@@ -161,9 +167,9 @@ class _Checks:
         a=self._r.math.fidelity(target)
         return CheckResult("PASS" if a>=minimum else "FAIL",a,minimum,0)
 
-    def entangled(self,*,partition,atol=1e-9):
+    def entangled(self,*,partition,atol=1e-9,max_rank=256,max_bytes=64*1024**2):
         t=_tol(atol)
-        a=self._r.math.entropy(partition)
+        a=self._r.math.entropy(partition,max_rank=max_rank,max_bytes=max_bytes)
         return CheckResult("PASS" if a>t else "FAIL",a,t,t)
 
     def distribution(self,target,*,atol=1e-9):

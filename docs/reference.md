@@ -9,12 +9,12 @@ The public import is `import ketary as q`. All factories return Circuit.
 | Circuit | num_qubits, append(gate,wires) mutates; compose(other,wires=None), inverse(), decompose(reps=1), optimize(), to_qiskit(), to_json(), Circuit.from_json(payload) do not mutate source. Decompose only lowers SWAP. |
 | Execution | run(mode="statevector",max_bytes=64 MiB), analyze() experimental alias |
 | Result | num_qubits, sample(shots,seed=None,max_outcomes=65536) |
-| Result.math | statevector(), amplitude(bits), probability(bits), probabilities(max_outcomes=65536), marginal_probabilities(wires,max_outcomes=65536), explain_probability(bits), norm(), fidelity(target), entropy(partition), expectation(pauli) |
-| Result.test | normalized(atol), probability(bits,expected,atol), fidelity(target,minimum), entangled(partition,atol), distribution(target,atol), expectation(pauli,expected,atol), state(target,ignore_global_phase,atol) |
+| Result.math | statevector(max_bytes=64 MiB), amplitude(bits), probability(bits), probabilities(max_outcomes=65536), marginal_probabilities(wires,max_outcomes=65536), explain_probability(bits), norm(), fidelity(target), entropy(partition,max_rank=256,max_bytes=64 MiB), expectation(pauli) |
+| Result.test | normalized(atol), probability(bits,expected,atol), fidelity(target,minimum), entangled(partition,atol,max_rank=256,max_bytes=64 MiB), distribution(target,atol), expectation(pauli,expected,atol), state(target,ignore_global_phase,atol) |
 | Circuit.test | equivalent(other,ignore_global_phase=False,atol=1e-9,max_bytes=16 MiB) |
 | Circuit.debug | trace(max_bytes=64 MiB,max_steps=256), compare(reference,ignore_global_phase=True,atol=1e-9,max_bytes=64 MiB,max_steps=256) |
 | Circuit.resources | summary(): immutable ResourceReport |
-| Circuit.visualize | text(): native text drawing |
+| Circuit.visualize | text(max_qubits=32,max_gates=512): native text drawing |
 
 Keyword-only arguments follow the implementation signatures; byte sizes above are descriptive, not Python expressions. CheckResult.status is PASS, FAIL or UNSUPPORTED; require() raises on non-PASS, and bool(check) raises TypeError. Invalid inputs raise errors; ResourceLimit and UnsupportedOperation inherit ValueError.
 
@@ -29,3 +29,5 @@ Keyword-only arguments follow the implementation signatures; byte sizes above ar
 
 ## Typing
 The installed package ships a PEP 561 marker and public API stubs. CI checks a strict typed consumer, including intentional invalid calls. Runtime checks still reject invalid values that static types cannot distinguish (e.g. bool as an integer).
+
+Additional guards: exporting a dense snapshot copy is bounded by its payload; entropy bounds the smaller Schmidt dimension and matrix payload before SVD; drawings have logical gate/qubit caps; sampling rejects shot counts above signed 64-bit range. These are not guarantees about LAPACK workspace, drawing output length, native temporaries or RSS.
