@@ -251,6 +251,22 @@
       "symbol": "test_phase_error_repetition",
       "scope": "local dynamic syndrome + analytic Bloch expectation",
       "status": "inventoried-authored"
+    },
+    {
+      "id": "modular-register-addition",
+      "family": "reversible",
+      "path": "tests/test_alpha_register_addition.py",
+      "symbol": "test_modular_register_addition",
+      "scope": "full ancilla-free modular operator, reversed placement, inverse",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "toy-h2-variational",
+      "family": "variational",
+      "path": "research/alpha_toy_h2.py",
+      "symbol": "evaluate",
+      "scope": "documented illustrative two-qubit Hamiltonian, full eigensystem and matched optimizer",
+      "status": "inventoried-authored"
     }
   ]
 }
