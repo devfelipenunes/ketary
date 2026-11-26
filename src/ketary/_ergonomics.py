@@ -75,6 +75,35 @@ def _rotation(c,name,theta,wire):
     return _native_batch(c,append)
 
 
+def _pairs(c,name,a,b,pairs,*params):
+    """Explicit ordered pair placement; no implicit zip or Cartesian mode."""
+    if pairs is None:
+        return getattr(c.gates,name)(*params,a,b)
+    if a is not None or b is not None:
+        raise ValueError("choose scalar wires or pairs, not both")
+    if isinstance(pairs,(str,bytes,Mapping,set,frozenset)):
+        raise ValueError("expected ordered wire pairs")
+    gate=c.gates
+    selected=[]
+    try:
+        for row in islice(iter(pairs),10001):
+            if isinstance(row,(str,bytes,Mapping,set,frozenset)):
+                raise ValueError("expected ordered wire pair")
+            pair=tuple(islice(iter(row),3))
+            if len(pair)!=2:
+                raise ValueError("each pair must contain two distinct wires")
+            selected.append(gate._pair(*pair))
+    except TypeError as exc:
+        raise ValueError("expected ordered wire pairs") from exc
+    if not selected:
+        raise ValueError("expected at least one wire pair")
+    if len(selected)>10000:
+        raise ResourceLimit("pair batch supports at most 10000 pairs")
+    values=tuple(c._gate_angle(p) for p in params)
+    first,second=zip(*selected,strict=True)
+    return _native_batch(c,lambda native:getattr(native,name)(*values,list(first),list(second)))
+
+
 class SweepPlan:
     """Frozen bound circuit payloads, zipped rows, never an implicit simulation."""
     def __init__(self,circuit,values):
