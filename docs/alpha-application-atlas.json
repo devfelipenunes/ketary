@@ -506,6 +506,86 @@
       "scope": "cardinality constraint and risk-return objective, exact classical minimum",
       "status": "inventoried-authored",
       "selector": "portfolio"
+    },
+    {
+      "id": "fourier-frequency-recovery",
+      "family": "fourier",
+      "path": "tests/test_alpha_fourth_applications.py",
+      "symbol": "test_fourier_frequency_recovery",
+      "scope": "exact inverse Fourier decoding of an authored phase ramp",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "modular-order-finding-15",
+      "family": "fourier",
+      "path": "tests/test_alpha_fourth_applications.py",
+      "symbol": "test_modular_order_finding_15",
+      "scope": "bounded multiplication-by-two orbit, exact period-four measurement support",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "diagonal-linear-system-postselection",
+      "family": "linear-algebra",
+      "path": "tests/test_alpha_fourth_applications.py",
+      "symbol": "test_diagonal_linear_system_postselection",
+      "scope": "two-eigenvalue oracle-assisted inverse, success and normalized solution",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "quantum-eraser-conditional-fringe",
+      "family": "metrology",
+      "path": "tests/test_alpha_fourth_applications.py",
+      "symbol": "test_quantum_eraser_conditional_fringe",
+      "scope": "conditional interference and erased which-path information",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "rank-two-subspace-compression",
+      "family": "information",
+      "path": "tests/test_alpha_fourth_applications.py",
+      "symbol": "test_rank_two_subspace_compression",
+      "scope": "explicit known subspace encoder/decoder, pure discarded wire",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "unambiguous-binary-discrimination",
+      "family": "protocols",
+      "path": "tests/test_alpha_fourth_applications.py",
+      "symbol": "test_unambiguous_binary_discrimination",
+      "scope": "three-outcome error-free discrimination with inconclusive outcome, distinct from Helstrom",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "bell-pair-bit-error-purification",
+      "family": "protocols",
+      "path": "tests/test_alpha_fourth_applications.py",
+      "symbol": "test_bell_pair_bit_error_purification",
+      "scope": "bilateral recurrence, success/fidelity under bit-error-only ensemble",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "ghz-phase-secret-sharing",
+      "family": "protocols",
+      "path": "tests/test_alpha_fourth_applications.py",
+      "symbol": "test_ghz_phase_secret_sharing",
+      "scope": "phase bit hidden in proper marginals, reconstructed by joint parity",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "amplitude-damping-relaxation",
+      "family": "noise",
+      "path": "tests/test_production_channels_complex.py",
+      "symbol": "test_amplitude_damping_oracle",
+      "scope": "analytic amplitude damping of pure/mixed inputs, distinct from dephasing",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "composed-local-noise-channel",
+      "family": "noise",
+      "path": "tests/test_production_local_channels.py",
+      "symbol": "test_composed_channel_oracle",
+      "scope": "ordered composition of amplitude damping and phase noise on entangled subsystem",
+      "status": "inventoried-authored"
     }
   ]
 }
