@@ -197,13 +197,12 @@ class SweepPlan:
             # before native assignment; do not rely on a stale parameter view.
             if set(params.values())!=set(circuit._qc.parameters) or {name for name,_ in rows[0]}!=set(params):
                 raise ValueError("bindings must cover exactly the template parameters")
-            bind=circuit._bind_numeric
-        else:
-            bind=circuit.bind
-        # Resolve immutable parameter identities once for the ordinary rows;
-        # preserve dictionary insertion order and subclass binding dispatch.
         keys=tuple(params[name] for name,_ in rows[0])
-        payloads=tuple(bind(dict(zip(keys,(v for _,v in row),strict=True))) for row in rows)
+        if type(circuit) is Circuit:
+            payloads=circuit._bind_sweep_rows(rows,keys)
+        else:
+            # Preserve subclass public dispatch and identity mapping.
+            payloads=tuple(circuit.bind(dict(zip(keys,(v for _,v in row),strict=True))) for row in rows)
         self._rows=rows
         self._payloads=payloads
         self._width=circuit.num_qubits
