@@ -36,3 +36,5 @@ oracles, legacy regressions, canonical examples and clean installation.
 No tag, publishing or independent usability claim follows from passing CI.
 
 See [resource and ownership contracts](resource-contracts.md) for canonical ordered wires, retained legacy unordered iterable acceptance and concurrency limitations.
+
+Exact commuting evolution is an additive advanced method; no change to logical replay v1 or existing gates. Noncommuting sums require a separate explicit approximation design.

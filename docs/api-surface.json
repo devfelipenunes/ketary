@@ -108,6 +108,7 @@
     "Circuit.debug",
     "Circuit.decompose",
     "Circuit.diff",
+    "Circuit.evolve",
     "Circuit.from_json",
     "Circuit.if_x",
     "Circuit.if_z",

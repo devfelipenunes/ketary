@@ -194,3 +194,66 @@ def _sweep_rows(circuit,rows):
         raise ResourceLimit("sweep requires 1..32 rows")
     return SweepPlan(circuit,{p.name:tuple(row[i] for row in parsed)
                               for i,p in enumerate(params)})
+
+
+def _evolve(c,observable,time):
+    """Exact commuting Pauli evolution; stage a single ordinary circuit."""
+    from ._observable import Observable
+    from ._circuit import Circuit
+    from ._validation import _angle
+    from math import fsum
+    c._require_bound()
+    if not isinstance(observable,Observable):
+        raise TypeError("expected Observable")
+    n=c.num_qubits
+    if n>8:
+        raise ResourceLimit("commuting evolution supports at most eight wires")
+    t=_angle(time)
+    terms=tuple((label,coef) for label,coef in observable.to_dict(n).items() if coef!=0)
+    # Deterministic canonical term order; symplectic Pauli parity.
+    # Exact evolution is deliberately unavailable for noncommuting sums.
+    for i,(left,_) in enumerate(terms):
+        for right,_ in terms[i+1:]:
+            if sum(a!="I" and b!="I" and a!=b for a,b in zip(left,right,strict=True))%2:
+                raise UnsupportedOperation("noncommuting Pauli sum requires explicit approximation")
+    if t==0 or not terms:
+        return c
+    rows=[];phases=[];gate_count=0
+    for label,coef in terms:
+        angle=_angle(2*(t*coef))
+        active=tuple((i,axis) for i,axis in enumerate(reversed(label)) if axis!="I")
+        if not active:
+            phases.append(-angle/2)
+            continue
+        if not angle:
+            continue
+        # Worst case two basis changes per side, two parity ladders and RZ.
+        gate_count+=1 if len(active)==1 or (len(active)==2 and active[0][1]==active[1][1]) else 6*len(active)-1
+        if gate_count>10000:
+            raise ResourceLimit("commuting evolution gate expansion exceeds 10000")
+        rows.append((active,angle))
+    phase=_angle(fsum(phases))
+    # Only one call-local block; no per-term Circuit objects or simulations.
+    block=Circuit(n);native=block._qc
+    native.global_phase=phase
+    for active,theta in rows:
+        if len(active)==1:
+            wire,axis=active[0]
+            getattr(native,"r"+axis.lower())(theta,wire)
+            continue
+        if len(active)==2 and active[0][1]==active[1][1]:
+            (a,axis),(b,_)=active
+            getattr(native,"r"+axis.lower()*2)(theta,a,b)
+            continue
+        for wire,axis in active:
+            if axis=="X":native.h(wire)
+            elif axis=="Y":native.sdg(wire);native.h(wire)
+        target=active[-1][0]
+        for wire,_ in active[:-1]:native.cx(wire,target)
+        native.rz(theta,target)
+        for wire,_ in reversed(active[:-1]):native.cx(wire,target)
+        for wire,axis in reversed(active):
+            if axis=="X":native.h(wire)
+            elif axis=="Y":native.h(wire);native.s(wire)
+    # Existing application transaction preserves phase/checkpoint semantics.
+    return c.apply(block)

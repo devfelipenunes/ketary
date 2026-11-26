@@ -332,6 +332,11 @@ class Circuit:
         self._check_expansion(self,count)
         return target.apply(self,times=count)
 
+    def evolve(self,observable,*,time):
+        """Append exp(-i*time*H) for a commuting real Pauli Observable."""
+        from ._ergonomics import _evolve
+        return _evolve(self,observable,time)
+
     def compute_action_uncompute(self,compute,action,*,compute_wires,action_wires):
         """Explicit U, V, U^-1 sequence; no claim that ancillas are cleared."""
         # Materialize once, validate both mappings before committing.
