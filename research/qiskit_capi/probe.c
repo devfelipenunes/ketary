@@ -35,7 +35,11 @@ static PyObject *build(PyObject *self,PyObject *args){
         if(op<0 || op>=8 || a<0 || a>=n || !isfinite(theta) ||
            (two(op)?(b<0 || b>=n || a==b):b!=-1)) return bad("invalid gate row");
     }
-    QkCircuit *qc=qk_circuit_new(n,0);
+    // Match QuantumCircuit(n), including its named quantum register.
+    QkCircuit *qc=qk_circuit_new(0,0);
+    QkQuantumRegister *reg=qk_quantum_register_new(n,"q");
+    qk_circuit_add_quantum_register(qc,reg);
+    qk_quantum_register_free(reg);
     QkParam *ph=qk_param_from_double(phase);
     QkExitCode rc=qk_circuit_set_global_phase(qc,ph);
     qk_param_free(ph);
