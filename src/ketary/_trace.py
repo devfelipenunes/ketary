@@ -51,6 +51,28 @@ class _Debug:
             steps.append(TraceStep(item.operation.name,wires,Result(state.data)))
         return tuple(steps)
 
+    def checkpoint(self,index,*,max_bytes=64*1024**2,max_steps=256):
+        """Explicit zero-input evolution through one requested checkpoint."""
+        qc=self._c._qc
+        index=_int(index)
+        if index>len(qc.data):
+            raise ValueError("checkpoint outside circuit")
+        if qc.num_qubits>8 or index>_int(max_steps):
+            raise ResourceLimit("checkpoint limit exceeded")
+        _limit(qc.num_qubits,budget=max_bytes)
+        _,SV=_sdk()
+        a=np.zeros(1<<qc.num_qubits,dtype=complex)
+        a[0]=np.exp(1j*float(qc.global_phase))
+        state=SV(a)
+        operation="initial (global phase applied)"
+        wires=()
+        for i in range(index):
+            item=qc.data[i]
+            wires=tuple(qc.find_bit(w).index for w in item.qubits)
+            operation=item.operation.name
+            state=state.evolve(item.operation,qargs=list(wires))
+        return TraceStep(operation,wires,Result(state.data))
+
     def compare(self,reference,*,ignore_global_phase=True,atol=1e-9,
                 max_bytes=64*1024**2,max_steps=256):
         """Compare states at equal-index checkpoints, not gate identities.

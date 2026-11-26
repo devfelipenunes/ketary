@@ -25,3 +25,7 @@ assert_type(r.math.density_matrix([0]), NDArray[np.complex128])
 assert_type(r.math.purity([0]), float)
 assert_type(q.qft(3), q.Circuit)
 assert_type(r.sample(shots=10,wires=[0]), dict[str,int])
+
+assert_type(q.Contract(2, expectations={"XX":1}).verify(r), q.VerificationReport)
+assert_type(c.debug.checkpoint(1), q.TraceStep)
+assert_type(r.math.top_probabilities(k=2), dict[str,float])

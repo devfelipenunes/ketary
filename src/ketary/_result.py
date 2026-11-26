@@ -187,12 +187,75 @@ class _Math:
         rho=self.density_matrix(wires,max_bytes=max_bytes)
         return float(np.clip(np.vdot(rho,rho).real,0,1))
 
+    def conditional_probability(self, event, given):
+        """P(event | given) over partial wire->bit assignments."""
+        from collections.abc import Mapping
+        def validated(mapping):
+            if not isinstance(mapping,Mapping) or len(mapping)>self._r._n:
+                raise ValueError("expected bounded wire-to-bit mapping")
+            result={}
+            for wire,bit in mapping.items():
+                w,b=_int(wire),_int(bit)
+                if w>=self._r._n or b not in (0,1):
+                    raise ValueError("invalid wire or bit")
+                result[w]=b
+            return result
+        e,g=validated(event),validated(given)
+        def mass(mapping):
+            if not mapping:
+                return 1.0
+            axis=[slice(None)]*self._r._n
+            for w,b in mapping.items():
+                axis[self._r._n-1-w]=b
+            data=self._r._data.reshape((2,)*self._r._n)[tuple(axis)].ravel()
+            return float(np.vdot(data,data).real/self._r._norm_sq)
+        denominator=mass(g)
+        if denominator<=0:
+            raise ValueError("conditioning event has zero probability")
+        if any(w in g and g[w]!=b for w,b in e.items()):
+            return 0.0
+        return float(np.clip(mass(g|e)/denominator,0,1))
+
+    def schmidt(self, wires, *, max_rank=256, max_bytes=64*1024**2):
+        """Normalized Schmidt singular values across selected/rest partition."""
+        from itertools import islice
+        n=self._r._n
+        selected=tuple(_int(w) for w in islice(iter(wires),n+1))
+        if not selected or len(selected)>=n or len(set(selected))!=len(selected) or any(w>=n for w in selected):
+            raise ValueError("expected nonempty proper wire subset")
+        if (1<<min(len(selected),n-len(selected)))>_int(max_rank,1):
+            raise ResourceLimit("Schmidt rank bound exceeded")
+        _limit(n,budget=max_bytes)
+        axes=[n-1-w for w in selected]
+        rest=[i for i in range(n) if i not in axes]
+        matrix=self._r._data.reshape((2,)*n).transpose(axes+rest).reshape(1<<len(selected),-1)
+        return np.linalg.svd(matrix,compute_uv=False)/math.sqrt(self._r._norm_sq)
+
+    def trace_distance(self,target):
+        """Trace distance between normalized pure-state density operators."""
+        return math.sqrt(max(0.0,1-self.fidelity(target)))
+
+    def top_probabilities(self, *, k=8):
+        """Bounded output, deterministic ties by ascending basis index."""
+        import heapq
+        k=_int(k,1)
+        if k>65536:
+            raise ResourceLimit("top-k output limit exceeded")
+        data=self._r._data
+        ranked=heapq.nlargest(min(k,len(data)),range(len(data)),key=lambda i:(abs(data[i])**2,-i))
+        return {format(i,f"0{self._r._n}b"):float(abs(data[i])**2/self._r._norm_sq) for i in ranked}
+
     def observable(self, terms):
         """Expectation of a bounded real linear combination of full-width Paulis."""
         from collections.abc import Mapping
         if not isinstance(terms,Mapping) or not 1<=len(terms)<=256:
             raise ValueError("expected 1..256 Pauli terms")
         return math.fsum(_real(coefficient)*self.expectation(label) for label,coefficient in terms.items())
+
+    def variance(self,pauli):
+        """Variance of a Hermitian Pauli string, whose square is identity."""
+        expectation=self.expectation(pauli)
+        return max(0.0,1-expectation**2)
 
     def dirac(self, *, max_terms=16, atol=1e-12):
         """Return first non-negligible amplitudes, with explicit truncation."""

@@ -6,11 +6,11 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 |---|---|---|
 | SDK01 | strict numeric expectation checks | broader edge and resource audit |
 | SDK02 | direct gates, copy, atomic H batch | canonical syntax review; analyze compatibility alias |
-| SDK03 | inspect/evidence/verify, serializable checks | reusable public contract and typed report RFC |
+| SDK03 | inspect/evidence/verify, immutable Contract and VerificationReport | report schema review |
 | SDK04 | explicit basis, array or Result initial state | broader resource tests |
 | SDK05 | 29 fixed logical gate types; central registry | MCX/variable-width gates and backend boundary |
-| SDK06 | reduced density, purity, weighted Pauli expectation, Dirac display | conditional probabilities, Schmidt, trace distance, variance |
-| SDK07 | incremental aligned comparison, historical budget retained | nontrivial alignment and selective checkpoints |
+| SDK06 | reduced density, purity, weighted Pauli expectation, Dirac, conditional probability, Schmidt, pure-state trace distance, Pauli variance, top-k | general mixed-state metrics and observable variance |
+| SDK07 | incremental aligned comparison, selected checkpoint, historical budget retained | nontrivial alignment |
 | SDK08 | native template binding, independent copy, compose | symbolic Circuit lifecycle RFC |
 | SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover and superdense | QPE, Simon and larger algorithms |
 | SDK10 | text/math rendering and executed how-to examples | graphical extra, notebooks, dedicated machine benchmark |
@@ -46,3 +46,13 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 
 Do not conflate terminal samples with mid-circuit measurement. Introduce a separate
 classical execution-result contract via RFC before expanding that scope.
+
+## Future classical execution RFC (SDK11)
+
+Keep the existing Result as a pure-state snapshot. A distinct execution result for
+classical registers must specify shots, register ordering, conditional control,
+reset and collapse semantics, random seed and simulator capability. No conversion
+from arbitrary classical outcomes into a pure Result. First validate terminal
+measurements and register mapping against the chosen native backend; only then
+consider dynamic circuits and mixed/noisy execution. Current marginal sampling
+does not implement this model. Do not ship it without the RFC and oracle tests.
