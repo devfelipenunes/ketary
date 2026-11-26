@@ -5,15 +5,8 @@ cache a simulation. Access to evidence parses the already recorded artifact.
 """
 import json
 
-class _Report(dict):
-    @property
-    def status(self):
-        return self["status"]
-
-    @property
-    def scope(self):
-        return self.get("scope","")
-
+class _JsonReport(dict):
+    """Shared serialization only; deliberately no aggregate verdict."""
     def to_dict(self):
         return json.loads(self.to_json())
 
@@ -22,6 +15,16 @@ class _Report(dict):
 
     def render(self):
         return self.to_json()
+
+class _Report(_JsonReport):
+    @property
+    def status(self):
+        return self["status"]
+
+    @property
+    def scope(self):
+        return self.get("scope","")
+
 
     def require(self):
         if self.status!="PASS":
@@ -46,7 +49,7 @@ class OperatorMetricsReport(_Report):
     def operator_norm(self):
         return self.get("operator_norm")
 
-class SemanticDiffReport(dict):
+class SemanticDiffReport(_JsonReport):
     """Separate dimensions, intentionally no aggregate PASS/FAIL."""
     @property
     def structure_equal(self):
@@ -63,15 +66,6 @@ class SemanticDiffReport(dict):
     @property
     def scope(self):
         return self["scope"]
-
-    def to_dict(self):
-        return json.loads(self.to_json())
-
-    def to_json(self):
-        return json.dumps(self,sort_keys=True,allow_nan=False)
-
-    def render(self):
-        return self.to_json()
 
 class SnapshotReport(_Report):
     """Explicit snapshot predicates; not circuit equivalence."""
