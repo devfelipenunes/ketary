@@ -36,3 +36,6 @@ assert_type(q.simon('101'),q.Circuit)
 
 angle=q.Circuit.parameter('angle')
 assert_type(q.Circuit.symbolic(2).rx(angle,0).bind({angle:.5}),q.Circuit)
+
+assert_type(q.Circuit.classical(2,2).h(0).measure(0,0).if_x(1,0).measure(1,1),q.Circuit)
+assert_type(q.teleportation(.3,.7),q.Circuit)

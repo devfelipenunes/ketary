@@ -14,7 +14,7 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 | SDK08 | native binding, explicit symbolic Circuit and full binding, copy, compose | partial binding and symbolic transforms deliberately excluded |
 | SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover, superdense, phase-gate QPE and Simon oracle iteration | generic QPE, Simon GF(2) solver and larger algorithms |
 | SDK10 | SVG histogram, Bloch coordinates, executed how-to/notebook, paired density and Pauli query benchmarks | full graphical circuit/Bloch sphere and dedicated machine benchmark |
-| SDK11 | terminal sampling of selected wires | classical registers, measurement/collapse/reset/control flow RFC |
+| SDK11 | terminal marginal sampling; explicit one-register dynamic Circuit, measure/reset, conditional X/Z, native shot results and teleportation | multi-register and general control flow deliberately excluded |
 | SDK12 | existing package CI and release checklist | owner review, dependency/license re-review, controlled benchmark, release authorization |
 
 ## Contracts and scope
@@ -44,10 +44,9 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 - [ ] Review dependency vulnerability/third-party license inventories and distribution obligations.
 - [ ] Decide compatibility and changelog; explicitly approve publication separately.
 
-Do not conflate terminal samples with mid-circuit measurement. Introduce a separate
-classical execution-result contract via RFC before expanding that scope.
+Do not conflate terminal samples with mid-circuit measurement. The explicit dynamic mode below returns a separate ShotResult.
 
-## Future classical execution RFC (SDK11)
+## Classical execution RFC (SDK11)
 
 Keep the existing Result as a pure-state snapshot. A distinct execution result for
 classical registers must specify shots, register ordering, conditional control,
@@ -55,7 +54,7 @@ reset and collapse semantics, random seed and simulator capability. No conversio
 from arbitrary classical outcomes into a pure Result. First validate terminal
 measurements and register mapping against the chosen native backend; only then
 consider dynamic circuits and mixed/noisy execution. Current marginal sampling
-does not implement this model. Do not ship it without the RFC and oracle tests.
+does not implement this model. The experimental implementation below is validated separately from the pure-state core; review is required before release.
 
 ## Developer visualization
 
@@ -72,3 +71,21 @@ MCX supports 1–7 closed controls (CX/CCX canonical for 1/2), distinct wires; r
 ### Symbolic lifecycle
 
 `Circuit.symbolic(n)` opts in to native Qiskit `ParameterExpression` angles. `Circuit.parameter(name)` creates a native parameter. `bind({parameter: real_value})` covers exactly the free parameters and returns an independent normal Circuit. Default builders reject symbolic angles; unbound execution, replay, inspect, optimization, operator checks and trace fail explicitly. No second IR; no implicit binding or partial binding.
+
+### Dynamic execution candidate
+
+Install the optional `ketary[dynamic]` extra (Qiskit Aer 0.18.4), leaving
+core dependencies unchanged. `Circuit.classical(n, num_clbits)` owns a native
+QuantumCircuit with one classical register; gates, measure, reset and bit-conditioned
+X/Z mutate. `run_shots(shots=...,seed=...)` uses native Aer, no second simulator.
+ShotResult contains immutable sorted counts and empirical frequencies; labels
+are highest classical bit first. No pure-state conversion or replay/transform
+of dynamic circuits. Bound 12 wires/bits, 1024 top-level operations and 10000 shots;
+payload budget is not a total process RSS bound. No hardware, arbitrary control
+flow, noisy execution, classical expressions or external dynamic imports.
+Teleportation prepares RZ(phi)RY(theta)|0>, measures both Bell wires, applies
+actual feedforward, measures output; verify=True first reverses preparation on
+output. CI tests multiple phases and amplitudes, reset and seeded counts.
+The optional dependency has its own inventory and vulnerability scan; passing
+metadata inventory is not license approval. See IBM Qiskit dynamic circuit docs
+(https://quantum.cloud.ibm.com/docs/en/qiskit/classical-feedforward-and-control-flow).

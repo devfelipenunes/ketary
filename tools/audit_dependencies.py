@@ -51,9 +51,9 @@ def inventory(roots=ROOTS):
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument("--scope",choices=["validation","runtime","build"],default="validation")
+    parser.add_argument("--scope",choices=["validation","runtime","build","dynamic"],default="validation")
     args=parser.parse_args()
-    roots={"validation":ROOTS,"runtime":("qiskit","numpy"),"build":("build","twine","setuptools","wheel")}[args.scope]
+    roots={"validation":ROOTS,"runtime":("qiskit","numpy"),"build":("build","twine","setuptools","wheel"),"dynamic":("qiskit","numpy","qiskit-aer")}[args.scope]
     data = inventory(roots)
     data["scope"]=args.scope
     prefix="" if args.scope=="validation" else args.scope+"-"

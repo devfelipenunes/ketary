@@ -171,3 +171,22 @@ def simon(secret):
             if i in active:
                 c.cx(pivot,n+i)
     return c.h_many(range(n))
+
+
+def teleportation(theta,phi,*,verify=False):
+    """Ideal three-wire teleportation with actual measurement and feedforward.
+
+    Prepare RZ(phi) RY(theta)|0> on wire 0. Output wire 2 is measured in
+    Z, or after inverse preparation if verify=True. Three classical bits:
+    c2=output, c1/c0=Bell measurement outcomes.
+    """
+    if type(verify) is not bool:
+        raise ValueError("verify must be bool")
+    from ._validation import _angle
+    theta,phi=_angle(theta),_angle(phi)
+    c=Circuit.classical(3,3).ry(theta,0).rz(phi,0).h(1).cx(1,2)
+    c.cx(0,1).h(0).measure(0,0).measure(1,1)
+    c.if_x(2,1).if_z(2,0)
+    if verify:
+        c.rz(-phi,2).ry(-theta,2)
+    return c.measure(2,2)

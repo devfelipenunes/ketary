@@ -15,6 +15,63 @@ class Circuit:
         self._qc=QC(_int(n,1))
 
     @classmethod
+    def classical(cls,n,num_clbits):
+        """Explicit local dynamic-circuit builder with one classical register."""
+        from ._validation import ResourceLimit
+        n,bits=_int(n,1),_int(num_clbits,1)
+        if n>12 or bits>12:
+            raise ResourceLimit("classical builder limited to 12 wires and bits")
+        QC,_=_sdk()
+        c=cls(n)
+        c._qc=QC(n,bits)
+        return c
+
+    @property
+    def num_clbits(self):
+        return self._qc.num_clbits
+
+    def _classical_bit(self,bit):
+        bit=_int(bit)
+        if not self.num_clbits:
+            raise UnsupportedOperation("use Circuit.classical for measurement/control")
+        if bit>=self.num_clbits:
+            raise ValueError("invalid classical bit")
+        return bit
+
+    def measure(self,wire,bit):
+        wire=self.gates._wire(wire)
+        bit=self._classical_bit(bit)
+        self._qc.measure(wire,bit)
+        return self
+
+    def reset(self,wire):
+        if not self.num_clbits:
+            raise UnsupportedOperation("use Circuit.classical for reset")
+        self._qc.reset(self.gates._wire(wire))
+        return self
+
+    def _conditional(self,gate,wire,bit,value):
+        wire=self.gates._wire(wire)
+        bit=self._classical_bit(bit)
+        value=_int(value)
+        if value not in (0,1):
+            raise ValueError("condition must be zero or one")
+        with self._qc.if_test((self._qc.clbits[bit],value)):
+            getattr(self._qc,gate)(wire)
+        return self
+
+    def if_x(self,wire,bit,*,value=1):
+        return self._conditional("x",wire,bit,value)
+
+    def if_z(self,wire,bit,*,value=1):
+        return self._conditional("z",wire,bit,value)
+
+    def run_shots(self,*,shots=1024,seed=None,max_bytes=64*1024**2):
+        """Explicit local execution using the optional Qiskit Aer extra."""
+        from ._classical import run_shots
+        return run_shots(self,shots=shots,seed=seed,max_bytes=max_bytes)
+
+    @classmethod
     def symbolic(cls,n):
         """Explicit opt-in to native symbolic gate parameters."""
         c=cls(n)
@@ -34,9 +91,13 @@ class Circuit:
 
     def bind(self,bindings):
         """Return an independent fully bound circuit; source is unchanged."""
+        if self.num_clbits:
+            raise UnsupportedOperation('symbolic classical binding is outside this subset')
         return self.from_parameterized(self._qc,bindings)
 
     def _require_bound(self):
+        if self.num_clbits:
+            raise UnsupportedOperation('classical circuit requires run_shots; unitary operations are unavailable')
         if self._qc.parameters:
             raise UnsupportedOperation("bind all symbolic parameters before this operation")
 
@@ -191,6 +252,10 @@ class Circuit:
 
     def copy(self):
         """Independent logical circuit with identical ordered operations."""
+        if self.num_clbits:
+            c=self.classical(self.num_qubits,self.num_clbits)
+            c._qc=self._qc.copy()
+            return c
         if getattr(self,"_symbolic",False):
             c=self.symbolic(self.num_qubits)
             c._qc=self._qc.copy()
