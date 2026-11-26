@@ -42,3 +42,5 @@ are provided. Use independent copies per caller and coordinate access
 externally. Results defensively own snapshot arrays; exported native
 objects and dictionaries are caller-owned copies, except report dicts
 themselves are mutable legacy records. No implicit cache or rerun.
+
+Repeated/placed composition preflights 10,000 placements and 100,000 appended operations on new expansion paths. This bounds instruction count, not native peak memory. Grouped math preflights 1..32 requests and unique-label state entries against max_work=64*1024**2 by default. This is a workload proxy, not a byte or timing guarantee. Legacy one-block application remains uncapped by the new expansion ceiling.

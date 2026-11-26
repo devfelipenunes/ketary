@@ -176,6 +176,43 @@ class _Math:
             raise ArithmeticError("invalid Hermitian Pauli expectation")
         return float(np.clip(value.real/self._r._norm_sq,-1,1))
 
+    def expectations(self,observables,*,max_work=64*1024**2):
+        """Ordered real expectations; validate first, reuse unique Pauli terms."""
+        from collections.abc import Mapping
+        from itertools import islice
+        from ._observable import Observable
+        from ._validation import _pauli_label
+        work=_int(max_work,1)
+        if isinstance(observables,(str,bytes,Mapping,set,frozenset)):
+            raise ValueError("expected an ordered iterable of observables")
+        try:
+            items=tuple(islice(iter(observables),33))
+        except TypeError as exc:
+            raise ValueError("expected an ordered iterable of observables") from exc
+        if not items or len(items)>32:
+            raise ResourceLimit("expectations requires 1..32 observables")
+        n=self._r._n
+        rows=[]
+        labels=set()
+        for item in items:
+            if isinstance(item,Observable):
+                terms=item.to_dict(n)
+            else:
+                label=_pauli_label(n,item)
+                if not isinstance(label,str) or len(label)!=n or any(p not in "IXYZ" for p in label):
+                    raise ValueError("expected a full-width uppercase I/X/Y/Z Pauli label")
+                terms={label:1.0}
+            row=tuple(terms.items())
+            rows.append(row)
+            labels.update(terms)
+        if len(labels)*self._r._data.size>work:
+            raise ResourceLimit("grouped expectation work exceeds Pauli-state entry budget")
+        cache={label:self.expectation(label) for label in sorted(labels)}
+        values=tuple(math.fsum(coefficient*cache[label] for label,coefficient in row) for row in rows)
+        if not all(math.isfinite(value) for value in values):
+            raise ArithmeticError("observable expectation is not finite")
+        return values
+
     def probabilities(self, *, max_outcomes=65536):
         if self._r._data.size>_int(max_outcomes,1):
             raise ResourceLimit("probability dictionary exceeds outcome limit")

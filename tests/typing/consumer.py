@@ -88,3 +88,8 @@ assert_type(r.verify(expectations={H:1.3,"XX":1}),q.SnapshotReport)
 assert_type(r.test.expectations({H:1.3}),q.VerificationReport)
 assert_type(r.test.expectation(H,1.3).render(),str)
 assert_type(c.contract(expectations={"XX":1}).verify(r).to_json(),str)
+
+assert_type(c.apply(q.bell(),times=3),q.Circuit)
+assert_type(c.apply_each(q.bell(),placements=[(0,1),(1,0)]),q.Circuit)
+assert_type(c.repeat(2),q.Circuit)
+assert_type(r.math.expectations([H,"XX",{0:"Z"}]),tuple[float,...])

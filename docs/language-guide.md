@@ -139,3 +139,32 @@ may exceed [-1,1]; single Pauli checks retain that interval. No automatic
 resimulation, no new state engine, no change to logical circuit replay.
 
 The [core API](core-api.md) is the recommended entry path. Aggregate expectations accept immutable Observable keys or legacy full-width strings; use an Observable rather than an unhashable local-wire mapping as a key. See the compatibility policy for retained aliases and report formats.
+
+
+## Expressive composition and grouped mathematics
+
+```python
+import ketary as q
+layer = q.Circuit(4).apply(q.bell(), wires=[0, 1]).h([2, 3])
+c = q.Circuit(8).apply_each(layer.repeat(3), placements=[(0,1,2,3), (4,5,6,7)])
+r = c.run()
+xx, zz = r.math.expectations([q.X(0) @ q.X(1), q.Z(0) @ q.Z(1)])
+```
+
+Use apply(block, times=k) for mutating sequential repetition, repeat(k) for
+an independent repeated circuit, apply_each for ordered placements. The
+block is not a live reference; self-application snapshots its original
+source once. Overlapping placements are applied in order, not in parallel.
+All mappings and expansion limits are checked before mutation. Counts must
+be positive integers. New expansion paths allow <=10,000 placements and
+100,000 appended operations; legacy single apply is unchanged. Existing
+replay, trace and simulation limits remain separate. Repetition is U^k,
+not k independently prepared states. A phase change at any intermediate
+placement invalidates target checkpoint names. repeat drops annotations.
+
+Grouped expectations return a tuple in caller order for 1..32 observable
+queries, accept strings/local maps/Observable, and evaluate each distinct
+full-width Pauli label once per call. The default max_work is 64*1024**2
+Pauli-state entries (unique labels times state dimension); it is not a
+runtime or RSS guarantee. No rerun, no global cache, no verdict. Use
+result.test.expectations for verification.

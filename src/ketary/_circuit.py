@@ -165,15 +165,57 @@ class Circuit:
         from ._contracts import Contract
         return Contract(self.num_qubits,probabilities=probabilities,expectations=expectations,normalized=normalized,atol=atol)
 
-    def apply(self,block,*,wires=None):
-        """Append a bound circuit atomically, preserving native global phase."""
-        from ._adapter import _append_bound_block
+    def apply(self,block,*,wires=None,times=1):
+        """Append a bound block sequentially, with a single source snapshot."""
+        count=_int(times,1)
         indices=self._composition_wires(block,wires)
-        phase=self._qc.global_phase
-        _append_bound_block(self._qc,block._qc,indices)
-        if self._qc.global_phase!=phase:
+        if count!=1:
+            self._check_expansion(block,count)
+        return self._apply_placements(block,(indices for _ in range(count)))
+
+    def apply_each(self,block,*,placements):
+        """Apply one bound block to each ordered placement, sequentially."""
+        from collections.abc import Mapping
+        from itertools import islice
+        from ._validation import ResourceLimit
+        if not isinstance(block,Circuit):
+            raise TypeError("expected Circuit")
+        self._require_bound()
+        block._require_bound()
+        if isinstance(placements,(str,bytes,set,frozenset,Mapping)):
+            raise ValueError("placements must be an ordered iterable")
+        try:
+            iterator=iter(placements)
+        except TypeError as exc:
+            raise ValueError("placements must be an ordered iterable") from exc
+        rows=[]
+        for wires in islice(iterator,10001):
+            self._check_expansion(block,len(rows)+1)
+            if wires is None:
+                raise ValueError("each placement must explicitly select wires")
+            rows.append(self._composition_wires(block,wires))
+        if not rows:
+            raise ValueError("expected at least one placement")
+        return self._apply_placements(block,rows)
+
+    @staticmethod
+    def _check_expansion(block,count):
+        from ._validation import ResourceLimit
+        if count>10000 or len(block._qc.data)*count>100000:
+            raise ResourceLimit("expansion supports <=10000 placements and 100000 appended operations")
+
+    def _apply_placements(self,block,placements):
+        from ._adapter import _append_bound_blocks
+        if _append_bound_blocks(self._qc,block._qc,placements):
             self._named_checkpoints={}
         return self
+
+    def repeat(self,times):
+        """Return an independent bound circuit with repeated ordered operations."""
+        count=_int(times,1)
+        self._require_bound()
+        self._check_expansion(self,count)
+        return Circuit(self.num_qubits).apply(self,times=count)
 
     def compute_action_uncompute(self,compute,action,*,compute_wires,action_wires):
         """Explicit U, V, U^-1 sequence; no claim that ancillas are cleared."""

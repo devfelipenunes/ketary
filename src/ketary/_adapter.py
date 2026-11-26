@@ -60,20 +60,29 @@ def _validate(qc):
         raise ValueError("invalid global phase")
 
 
-def _append_bound_block(target,block,wires):
-    """Append a validated bound logical block; rollback appended suffix on error.
+def _append_bound_blocks(target,block,placements):
+    """Append validated ordered placements in one suffix/phase transaction.
 
-    No concurrent mutation contract. Both circuits and the complete mapping
-    are validated by the caller. Only self-application copies the source.
+    The caller preflights mappings and bounds. No concurrent mutation
+    guarantee. Self-application uses one independent source snapshot.
+    Return whether any intermediate native global phase changed.
     """
     start=len(target.data)
     phase=target.global_phase
     source=block.copy() if target is block else block
+    changed=False
     try:
-        target.compose(source,qubits=list(wires),inplace=True)
+        for wires in placements:
+            before=target.global_phase
+            target.compose(source,qubits=list(wires),inplace=True)
+            changed=changed or target.global_phase!=before
     except Exception:
-        # Native compose appends to the instruction suffix. Preserve the
-        # original phase even if native validation fails after updating it.
         del target.data[start:]
         target.global_phase=phase
         raise
+    return changed
+
+
+def _append_bound_block(target,block,wires):
+    """Append one validated bound block; shared transaction implementation."""
+    return _append_bound_blocks(target,block,(wires,))

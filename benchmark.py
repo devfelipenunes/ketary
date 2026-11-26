@@ -196,6 +196,19 @@ def main(reps):
                 data["cases"].append({"operation":"repeated_"+kind+"_copy_baseline","n":4,"gates":count,
                     "native_label":"historical copy path","sdk_label":"candidate append path",
                     **paired(lambda:repeated(kind,count,"copy_baseline"),lambda:repeated(kind,count,"sdk"),reps)})
+    # Compare the new expression to equivalent current SDK loops.
+    layer=q.Circuit(4).apply(q.bell(),wires=[0,1]).h([2,3])
+    def loop_layers(count):
+        c=q.Circuit(4)
+        for _ in range(count):
+            c.apply(layer)
+        return c
+    for count in (25,250,2500):
+        direct=lambda:q.Circuit(4).apply(layer,times=count)
+        loop=lambda:loop_layers(count)
+        assert direct().to_qiskit()==loop().to_qiskit()
+        data["cases"].append({"operation":"expressive_repeat","n":4,"gates":count*4,
+            "native_label":"Ketary explicit loop","sdk_label":"Ketary apply times",**paired(loop,direct,reps)})
     variants=["native","sdk"]*3; random.Random(42).shuffle(variants)
     for variant in variants:
         raw=subprocess.check_output([sys.executable,__file__,"--rss-worker",variant],text=True)
