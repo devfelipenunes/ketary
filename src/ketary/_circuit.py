@@ -180,14 +180,27 @@ class Circuit:
         # Only internal circuits have the validated structure invariant.
         # Native assignment preserves it; check evaluated numeric values,
         # including expression overflow, without rechecking every gate kind.
+        from ._adapter import _validate_bound_values
         from ._validation import _angle
         if set(bindings)!=set(self._qc.parameters):
             raise ValueError("bindings must cover exactly the template parameters")
         numeric={key:_angle(value) for key,value in bindings.items()}
-        return self._bind_numeric(numeric)
+        try:
+            bound=self._qc.assign_parameters(numeric,inplace=False,flat_input=True)
+        except (ZeroDivisionError,OverflowError) as exc:
+            raise ValueError("parameter expression must evaluate to a finite real number") from exc
+        _validate_bound_values(bound)
+        c=Circuit.__new__(Circuit)
+        c._qc=bound
+        return c
 
     def _bind_numeric(self,numeric):
-        """Private assignment for complete, preflighted finite parameter rows."""
+        """Sweep-only assignment for complete, preflighted finite rows.
+
+        Keep the scalar public binding body unchanged: paired measurements
+        showed a regression with an extra shared dispatch. Both paths keep
+        native assignment, exception translation and bound-value validation.
+        """
         from ._adapter import _validate_bound_values
         try:
             bound=self._qc.assign_parameters(numeric,inplace=False,flat_input=True)
