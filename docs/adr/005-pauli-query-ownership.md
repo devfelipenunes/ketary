@@ -1,6 +1,6 @@
 # ADR 005 — Call-local native Pauli query ownership
 
-Status: candidate pending exact-head qualification. Refs #306 #307 #254.
+Status: integrated (#377 and #382), scoped research qualification complete; dedicated-host evidence remains outstanding. Refs #306 #307 #254.
 The integrated #376 diagnostic [job](https://github.com/devfelipenunes/ketary/actions/runs/45830454629/job/139945536432) compared nine bounded canonical-label workloads, with independent scalar oracles. Reused native handle median was lower than fresh native handle in all nine; for 32 labels at 8 wires 0.894624 vs 0.984778 ms. Maximum residual across variants 1.388e-16. Shared-runner data, not a general speedup.
 
 Decision: centralize the native numeric acceptance in _result and reuse a single
