@@ -37,14 +37,22 @@ def prepare_aer(c,state):
     work=QuantumCircuit(c.num_qubits)
     work.set_statevector(state)
     work.compose(c,inplace=True)
+    # set_statevector may overwrite Aer circuit phase. Make this contract
+    # explicit: evolve with phase zero and apply exactly once on export.
+    phase=float(work.global_phase)
+    work.global_phase=0.
     work.save_statevector()
-    return work
+    return work,phase
 
-def aer_execute(sim,work):
+def aer_execute(sim,prepared):
+    work,phase=prepared
     result=sim.run(work,shots=1).result()
     if not result.success:
         raise RuntimeError(str(result.status))
-    return np.array(result.data(0)["statevector"],dtype=np.complex128,copy=True)
+    output=np.array(result.data(0)["statevector"],dtype=np.complex128,copy=True)
+    if phase:
+        output *= np.exp(1j*phase)
+    return output
 
 def exact_checks(quest,sim):
     n=3
@@ -60,10 +68,10 @@ def exact_checks(quest,sim):
         for i in range(1<<n):
             state=np.eye(1<<n,dtype=np.complex128)[i]
             expected=Statevector(state).evolve(c).data
-            np.testing.assert_allclose(quest.execute(prog,state)[0],expected,atol=TOL,rtol=0)
-            np.testing.assert_allclose(aer_execute(sim,prepare_aer(c,state)),expected,atol=TOL,rtol=0)
+            np.testing.assert_allclose(quest.execute(prog,state)[0],expected,atol=TOL,rtol=0,err_msg=f'QuEST {name} basis {i}')
+            np.testing.assert_allclose(aer_execute(sim,prepare_aer(c,state)),expected,atol=TOL,rtol=0,err_msg=f'Aer {name} basis {i}')
     c=QuantumCircuit(2)
-    c.ccx if False else c.barrier()
+    c.barrier()
     try:
         pack(c)
     except ValueError:
