@@ -1,4 +1,4 @@
-"""Research-only structured read models over authoritative Qiskit / Result."""
+"""Bounded structured read models over authoritative Qiskit / Result."""
 from itertools import islice
 from collections.abc import Mapping
 from ._validation import _int, _tol, ResourceLimit

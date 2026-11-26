@@ -34,3 +34,9 @@ class _Visualize:
         if self._c.num_qubits>_int(max_qubits,1) or len(self._c._qc.data)>_int(max_gates):
             raise ResourceLimit("circuit drawing exceeds logical size limit")
         return str(self._c._qc.draw(output="text",fold=-1))
+
+
+    def svg(self,*,max_qubits=12,max_gates=64):
+        """Return a bounded ordered-wire schematic without execution."""
+        from ._visualization import circuit_svg
+        return circuit_svg(self._c,max_qubits=max_qubits,max_gates=max_gates)

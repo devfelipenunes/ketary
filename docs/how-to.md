@@ -79,3 +79,30 @@ c = q.qft(3)
 c.compose(q.qft(3, inverse=True)).test.equivalent(q.Circuit(3)).require()
 assert q.grover("101").run().math.probability("101") > 0.9
 ```
+
+
+## Bind a reusable symbolic circuit
+
+```python
+import ketary as q
+theta = q.Circuit.parameter("theta")
+template = q.Circuit.symbolic(1).ry(theta, 0)
+c = template.bind({theta: 3.141592653589793})
+assert c.run().math.probability("1") > 0.999999
+```
+
+## Phase estimation
+
+```python
+import ketary as q
+r = q.phase_estimation(3/8, 3).run()
+assert r.math.marginal_probabilities([2, 1, 0])["011"] > 0.999999
+```
+
+## Optional local dynamic execution
+
+Install `pip install -e '.[dynamic]'` in a Python 3.12 environment. Run
+`q.teleportation(.37, -.63, verify=True).run_shots(shots=256, seed=42)`
+after importing ketary as q. All output labels should start with 0 when
+inverse preparation is enabled; the two Bell measurement bits are random.
+This optional example is covered by the dynamic CI job, not the base docs suite.

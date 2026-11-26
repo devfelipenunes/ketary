@@ -158,7 +158,9 @@ jobs:
           python -m pip check
           python tools/audit_dependencies.py --scope dynamic
           python -m pip freeze > dynamic-environment.txt
-          python -m pytest -q -rs tests_dynamic
+          python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes tests_dynamic
+          python -m coverage report -m
+          python -m coverage json -o dynamic-coverage.json
       - name: Audit dynamic dependencies
         run: |
           python -m venv audit-venv
@@ -170,6 +172,7 @@ jobs:
           name: dynamic-validation
           path: |
             dynamic-environment.txt
+            dynamic-coverage.json
             dynamic-license-inventory.json
             dynamic-audited-requirements.txt
             dynamic-vulnerability-report.json

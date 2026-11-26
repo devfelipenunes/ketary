@@ -42,3 +42,11 @@ See [SDK roadmap](sdk-roadmap.md) for direct gate aliases, the expanded gate reg
 
 - `Result.visualize.histogram(k=8)` returns SVG text; bars are actual probabilities, with omitted mass shown. `bloch(wire=0)` returns reduced-state coordinates.
 - `Contract(n, probabilities=..., expectations=..., normalized=..., atol=...)` is immutable; `verify(result)` returns a typed report without simulation.
+
+### Advanced experimental extensions
+
+- `Circuit.symbolic(n)`, `Circuit.parameter(name)`, `parameters`, `bind(mapping)`: explicit native symbolic construction and complete binding, with unbound operations rejected.
+- `mcx(controls,target)`: 1–7 closed controls; CX/CCX canonical for one/two controls.
+- `phase_estimation(phase,precision=3)`, `simon(secret)`, `teleportation(theta,phi,verify=False)`: bounded teaching circuits, not general algorithm solvers.
+- `Circuit.classical(n,num_clbits)`, `measure(wire,bit)`, `reset(wire)`, `if_x/if_z(wire,bit,value=1)`, `run_shots(shots=1024,seed=None,max_bytes=...)`: local native Aer optional extra. One register, no unitary run, replay, trace or transform. `ShotResult.counts` defensive dict, `probabilities()` empirical frequencies.
+- `Circuit.visualize.svg()` and `Result.visualize.bloch_svg(wire=0)` return bounded SVG schematics. The former supports bound unitary circuits only.

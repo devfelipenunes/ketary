@@ -57,12 +57,12 @@ class Result:
         return _ResultVisualize(self)
 
     def evidence(self, *, bits=(), paulis=()):
-        """Research candidate: explicit evidence from this snapshot."""
+        """Explicit evidence from this snapshot."""
         from ._inspection import result_evidence
         return result_evidence(self,bits=bits,paulis=paulis)
 
     def verify(self, *, probabilities=None, expectations=None, normalized=False, atol=1e-9):
-        """Research candidate: aggregate named checks, never execute a circuit."""
+        """Aggregate named checks, never execute a circuit."""
         from ._inspection import verify_result
         return verify_result(self,probabilities=probabilities,expectations=expectations,normalized=normalized,atol=atol)
 
@@ -159,8 +159,9 @@ class _Math:
 
         For wires=[2,0], label "10" denotes q2=1 and q0=0.
         """
-        wires=tuple(_int(i) for i in wires)
+        from itertools import islice
         n=self._r._n
+        wires=tuple(_int(i) for i in islice(iter(wires),n+1))
         if not wires or len(set(wires))!=len(wires) or any(i>=n for i in wires):
             raise ValueError("invalid marginal wires")
         if (1<<len(wires))>_int(max_outcomes,1):
@@ -287,8 +288,9 @@ class _Math:
 
     def entropy(self, partition, *, max_rank=256, max_bytes=64*1024**2):
         # Pure-state bipartite entanglement entropy, q0 is LSB.
-        left,right = (tuple(_int(i) for i in side) for side in partition)
+        from itertools import islice
         n = self._r._n
+        left,right = (tuple(_int(i) for i in islice(iter(side),n+1)) for side in islice(iter(partition),3))
         if not left or not right or len(left)+len(right)!=n or set(left+right)!=set(range(n)):
             raise ValueError("partition must cover each qubit exactly once")
         if (1<<min(len(left),len(right)))>_int(max_rank,1):

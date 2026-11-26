@@ -136,3 +136,5 @@ The public import remains `import ketary as q`. Internal modules separate circui
 See [SDK roadmap and usage](docs/sdk-roadmap.md) for fluent gates, explicit initial states, mathematical reports, bounded algorithms and remaining boundaries.
 
 Try the [developer notebook](examples/quantum_engineering.ipynb) for a complete ideal-state workflow.
+
+The optional `dynamic` extra enables bounded local native Aer shot execution (`Circuit.classical`, `run_shots`, and teleportation). It is not part of the pure-state core. No hardware or package publication is authorized.

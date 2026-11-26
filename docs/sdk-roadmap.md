@@ -13,7 +13,7 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 | SDK07 | incremental aligned comparison, selected checkpoint, historical budget retained | nontrivial alignment |
 | SDK08 | native binding, explicit symbolic Circuit and full binding, copy, compose | partial binding and symbolic transforms deliberately excluded |
 | SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover, superdense, phase-gate QPE and Simon oracle iteration | generic QPE, Simon GF(2) solver and larger algorithms |
-| SDK10 | SVG histogram, Bloch coordinates, executed how-to/notebook, paired density and Pauli query benchmarks | full graphical circuit/Bloch sphere and dedicated machine benchmark |
+| SDK10 | SVG histogram, ordered circuit schematic and Bloch vector schematic, executed how-to/notebook, paired density and Pauli query benchmarks | dedicated machine benchmark and richer layout/interactive graphics |
 | SDK11 | terminal marginal sampling; explicit one-register dynamic Circuit, measure/reset, conditional X/Z, native shot results and teleportation | multi-register and general control flow deliberately excluded |
 | SDK12 | existing package CI and release checklist | owner review, dependency/license re-review, controlled benchmark, release authorization |
 
@@ -89,3 +89,7 @@ output. CI tests multiple phases and amplitudes, reset and seeded counts.
 The optional dependency has its own inventory and vulnerability scan; passing
 metadata inventory is not license approval. See IBM Qiskit dynamic circuit docs
 (https://quantum.cloud.ibm.com/docs/en/qiskit/classical-feedforward-and-control-flow).
+
+### Hardening
+
+The core and dynamic CI suites report branch coverage separately. Dynamic CI executes all core/probe tests plus native shot/teleportation tests. No coverage exclusion or oracle relaxation. SVG schematics are bounded to 12 wires/64 gates and display ordered operands by position (0 = first operand), not device routing. Bloch SVG is a 2D projection with exact coordinates labeled. Symbolic and dynamic circuits retain native text drawing; unitary SVG rejects those modes explicitly. Iterables in marginal/entropy queries are bounded before materialization.

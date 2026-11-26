@@ -25,3 +25,5 @@ mutable circuit model. Explicit calls may allocate temporary memory. Python
 Composition is closed over validated Circuit inputs: the native nonmutating composition result is adopted without a redundant full scan. Imports, appends and other transformations retain validation. Snapshot validation uses scalar absolute norm tolerance and retains defensive copying.
 
 The developer expansion centralizes supported gate specifications in `_gate_specs`, adds `_inspection` for bounded read models, and preserves the same native Circuit and snapshot model. Symbolic native templates are bound before entering the logical subset.
+
+Symbolic mode is explicit and retains a native QuantumCircuit; complete binding produces a normal bound Circuit. Dynamic mode uses one native classical register, local optional Aer execution and a separate immutable ShotResult; it cannot enter pure-state unitary operations or logical replay. The `_classical` module delegates execution, not a new simulator. SVG visualization is an optional call without graphical dependencies.
