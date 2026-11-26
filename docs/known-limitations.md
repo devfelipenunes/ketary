@@ -1,43 +1,50 @@
 # Known limitations (pre-alpha)
 
-- Python 3.12.x only; tested Linux CI, Qiskit pinned, no compatibility claim
-  for other platforms/versions. API is experimental; no stable 1.0 promise.
-- Bound unitary mode: standard allowlisted gates, closed controls, no arbitrary
-  native operations, metadata/layout, unbound imports or hardware. Logical
-  replay: 22 wires, 10000 operations, 1 MiB.
-- Symbolic mode: native parameter expressions; complete binding required
-  before execution. Explicit partial binding and symbolic import are available within limits; no symbolic replay.
-- Dynamic mode: optional Aer, one classical register, X/Z conditional operations,
-  12 wires/bits, 1024 top-level operations, 10000 shots. No generic control
-  flow or pure-state conversion; explicit bounded dynamic import is described below.
-  Logical resource summaries count top-level operations, not branch-expanded
-  costs. Text drawing is available; unitary SVG is not.
-- Result pure snapshots; explicit mixed-state execution returns native DensityMatrix. Dense operator
-  checks <=8 wires; witness comparison <=12 wires/256 gates; QCEC external
-  adapter <=22 wires/256 gates with explicit deadline. QCEC is installed
-  separately, not an automatically installed dependency.
-- Payload budgets are not process memory guarantees. Native allocations,
-  Python dictionaries, SVD workspaces and child processes can exceed them.
-- Checkpoint comparison is zero-input; explicit alignment is caller supplied.
-  Verification reports are numerical or statistical, not formal certificates.
-- CI benchmarks and small authored defect adaptations are initial evidence,
-  not independent research or proof of improved productivity.
-- No published distribution; use a verified checkout or build artifact.
+The [capability matrix](capability-matrix.md) consolidates current supported
+routes and their boundaries. [Resource contracts](resource-contracts.md)
+remain authoritative for detailed budgets, ownership and preflight.
+[Production qualification](production-fronts.md) tracks evidence separately.
 
-- Named selections/checkpoint annotations are local conveniences; logical replay preserves operators, not names. Bound controlled blocks up to five total wires are supported via checked synthesis; symbolic controlled blocks and automatic ancilla cleanup are not supported. Sweep plans are bounded zipped ideal simulations, not hardware jobs. Typed report dictionaries retain mutable legacy behavior.
-
-- Core designation is a recommended experimental entry path, not a stable 1.0 guarantee. Aggregate expressions require hashable Observable keys or full-width strings; no general symbolic predicate language. Named annotations remain local, not serialized.
-
-Explicit synthesis accepts trusted bound gate-only circuits up to five wires; direct native import remains strict. Noncommuting product evolution is explicitly approximate. Complex Pauli products and commutators return native SparsePauliOp; Observable stays real Hermitian. The original pure-state Result remains unchanged; explicit native density/noise modes are described below.
-
-Explicit from_dynamic supports a bounded native subset with multiple classical registers and gate-only conditional branches. run_density/run_noisy return native density matrices, not Result; local noise uses optional Aer. transpile_for accepts an explicit native target and returns a native circuit with layout; no job submission or verified hardware execution. Original pure/shot and strict import contracts unchanged.
-
-Explicit prepare_state/from_unitary and evolve_exact are bounded to five wires, with checked unitary lowering. Preparation guarantees the requested output only on the zero input; the complete synthesized unitary is independently checked against the native preparation definition. Hardware target handoff remains local-only qualified. Native metadata/barriers are rejected rather than discarded.
-
-Explicit native Kraus channel execution after ideal evolution (<=4 wires, 16 Kraus matrices) and complex Pauli expectation are separate bounded paths. General channel composition/noisy mid-circuit measurements are not implied. Existing pure Result and real Observable contracts remain intact.
-
-Native dynamic conditions may nest to three levels with gate-only leaves and top-level measurement/reset; loops, variables, stretches and conditional measurement/reset remain unsupported. Count budget includes both alternatives at every level. No hardware qualification.
-
-Local Kraus channels may be explicitly mapped to <=4 ordered wires on an <=8-wire ideal circuit after evolution. No noisy mid-circuit channels, implicit routing or hardware execution. Native composition is caller-owned and final Kraus map is validated.
-
-Explicit project_annotated allows mathematical analysis of annotated gate-only native input while returning a separate preserved native snapshot. Structural preservation applies to that native output, not to the logical projection or its subsequent transforms. Strict from_qiskit, synthesis, logical replay and target compilation rules remain unchanged.
+- Python 3.12.x only, Qiskit pinned. Linux is the routine CI target; earlier
+  full Linux/Windows/macOS qualification passed on #365, not the latest tree.
+  Experimental API; no stable 1.0 or published-distribution guarantee.
+- Strict from_qiskit admits bound standard logical gates, not arbitrary
+  instructions, layout, metadata or barriers. Explicit native synthesis,
+  symbolic import and annotated projection are different routes; no silent
+  lossy import. Logical replay: <=22 wires, <=10000 operations, <=1 MiB;
+  no general symbolic replay or arbitrary native-object serialization.
+- Dynamic mode requires optional Aer. Explicit from_dynamic accepts multiple
+  contiguous classical registers, gate-only conditional bodies to three
+  levels, top-level measurement/reset, <=12 wires/bits, <=1024 instructions
+  including all branches, <=10000 shots. No loops, arbitrary expression
+  conditions, variable capture, conditional measurement/reset or conversion
+  to a pure state. Logical resource summaries are not runtime cost estimates.
+- Result represents an ideal pure snapshot. run_density/run_noisy return
+  native DensityMatrix; run_channel applies a bounded final CPTP map after
+  ideal evolution. No arbitrary noisy mid-circuit channel execution.
+- Exact dense preparation, unitary/control synthesis and noncommuting
+  evolution are restricted to <=5 total wires and checked full operators
+  (component tolerance 1e-9). Native synthesis can fail; no silent tolerance
+  relaxation. Product evolution is an explicit approximation, not a
+  certified floating-point error guarantee.
+- Observable is a real Hermitian Pauli sum; complex products and commutators
+  return native SparsePauliOp. Complex expectation is an explicit separate
+  route. No arbitrary symbolic predicate language or general generator.
+- Dense operator comparisons <=8 wires; selected-input witness comparison
+  <=12 wires/256 gates; external QCEC <=22 wires/256 gates with deadline and
+  separate optional installation. Numerical or statistical reports are not
+  formal certificates. Witness minimization does not establish root cause
+  or global minimality.
+- Named selections/checkpoints are local; replay preserves supported logical
+  operations, not names. project_annotated returns two independent objects:
+  ideal logical projection and preserved native snapshot. No synchronization
+  or scheduling equivalence guarantee. Report dictionaries retain legacy
+  mutability; native exports and Result snapshots are defensive.
+- Payload budgets are not process RSS guarantees. Native scratch,
+  serialization, Python objects and child processes add costs. No thread
+  safety or concurrent mutation guarantee. Sweeps are bounded ideal local
+  simulations, not hardware jobs. transpile_for is a local native target
+  handoff, not physical execution or verified hardware compatibility.
+- CI benchmarks and authored defect/application corpora are preliminary
+  evidence. Dedicated-host benchmarking, independent participant studies,
+  legal/notice review and release approval remain outstanding.

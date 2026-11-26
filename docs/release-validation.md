@@ -44,8 +44,9 @@ run. No performance threshold is justified until baselines are reviewed.
 - Explicit owner decision on version, name availability and publishing.
 - No upload, tag or publication as part of validation.
 
-Optional local dynamic execution uses one classical register and limited
-feedforward; it is not a hardware, arbitrary-control-flow or noise SDK.
+Optional local dynamic execution supports the bounded multi-register and
+nested gate-only conditional subset in [capability matrix](capability-matrix.md).
+It is not a hardware or arbitrary-control-flow SDK.
 Advanced algorithms outside the documented reference examples are future work,
 not required to close the bounded pre-alpha engineering scope.
 
