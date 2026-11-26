@@ -1,0 +1,22 @@
+name: Agent readability research
+on:
+  push:
+    branches: [research/agent-readability]
+permissions:
+  contents: read
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: '.python-version'
+      - run: |
+          python -m pip install -c constraints/linux-py312.txt -r requirements.txt
+          python -m pip install --no-deps -e .
+          python -m pytest -q research/agent_readability/test_pilot.py
+          python research/agent_readability/test_pilot.py
