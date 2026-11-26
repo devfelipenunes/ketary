@@ -50,3 +50,37 @@ def test_decompose_swap():
     c=q.Circuit(2).gates.x(0).gates.swap(0,1); d=c.decompose()
     assert "swap" in c.to_qiskit().count_ops() and "swap" not in d.to_qiskit().count_ops()
     np.testing.assert_allclose(c.run().math.statevector(),d.run().math.statevector(),atol=1e-12)
+
+def test_open_control_rejected():
+    from qiskit.circuit.library import CXGate
+    raw=QuantumCircuit(2); raw.append(CXGate(ctrl_state=0),[0,1])
+    with pytest.raises(q.UnsupportedOperation):
+        q.from_qiskit(raw)
+
+def test_trace_qubit_limit():
+    with pytest.raises(q.ResourceLimit):
+        q.Circuit(9).debug.trace()
+
+def test_transform_source_isolation():
+    a=q.bell(); b=q.Circuit(1).gates.z(0)
+    for d in (a.compose(b,wires=[1]),a.inverse(),a.decompose()):
+        d.gates.x(0)
+        np.testing.assert_allclose(a.run().math.statevector(),BELL,atol=1e-12)
+    np.testing.assert_allclose(b.run().math.statevector(),[1,0],atol=1e-12)
+
+def test_trace_snapshot_independent():
+    c=q.bell(); steps=c.debug.trace(); c.gates.z(0)
+    np.testing.assert_allclose(steps[-1].result.math.statevector(),BELL,atol=1e-12)
+
+def test_reversed_wire_mapping():
+    a=q.Circuit(3); b=q.Circuit(2).gates.x(0).gates.cx(0,1)
+    d=a.compose(b,wires=[2,0])
+    expected=np.zeros(8); expected[5]=1
+    np.testing.assert_allclose(d.run().math.statevector(),expected,atol=1e-12)
+
+@pytest.mark.parametrize("bad",[-1,2,True,1.5])
+def test_invalid_wire_atomic(bad):
+    c=q.bell(); before=c.to_qiskit()
+    with pytest.raises(ValueError):
+        c.gates.h(bad)
+    assert c.to_qiskit()==before

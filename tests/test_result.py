@@ -45,3 +45,12 @@ def test_bad_parameters():
 def test_memory_guard():
     _limit(8,257,16*256*257)
     with pytest.raises(ResourceLimit): _limit(20,257,64*1024**2)
+
+def test_entropy_near_normalized_product():
+    r=Result([np.sqrt(1+5e-10),0,0,0])
+    assert abs(r.math.entropy(([0],[1])))<1e-12
+
+def test_asymmetric_partition():
+    r=Result([1/np.sqrt(2),0,0,0,0,1/np.sqrt(2),0,0])
+    assert r.math.entropy(([1],[0,2]))==pytest.approx(0,abs=1e-12)
+    assert r.math.entropy(([2],[0,1]))==pytest.approx(1,abs=1e-12)

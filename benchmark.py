@@ -1,42 +1,98 @@
-"""Preliminary timing only. Run after all required tests pass."""
+"""Paired diagnostic benchmark; not a release gate on shared CI hardware."""
+import argparse
 import json
+import os
 import platform
+import random
+import resource
+import statistics
+import subprocess
 import sys
 import time
-import statistics
 import numpy as np
 import qiskit
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 import ketary as q
 
-def make_native(n,gates):
-    c=QuantumCircuit(n)
-    for i in range(gates): c.h(i%n)
+def workload(n, count):
+    rng=random.Random(20261125+n+count)
+    ops=[]
+    for _ in range(count):
+        name=rng.choice(("h","x","z","cx","swap"))
+        wires=tuple(rng.sample(range(n),2 if name in ("cx","swap") else 1))
+        ops.append((name,wires))
+    return ops
+
+def build(n, ops, variant):
+    c=QuantumCircuit(n) if variant=="native" else q.Circuit(n)
+    gates=c if variant=="native" else c.gates
+    for name,wires in ops:
+        getattr(gates,name)(*wires)
     return c
 
-def make_wrapped(n,gates):
-    c=q.Circuit(n)
-    for i in range(gates): c.gates.h(i%n)
-    return c
+def execute(c,variant):
+    # Both return an independent complex128 vector. Ketary additionally validates
+    # normalization and preserves an independent Result; report this extra work.
+    return Statevector.from_instruction(c).data.copy() if variant=="native" else c.run().math.statevector()
 
-def measure(fn,repetitions=30):
-    for _ in range(3): fn()
-    values=[]
-    for _ in range(repetitions):
-        start=time.perf_counter_ns()
-        fn()
-        values.append((time.perf_counter_ns()-start)/1e6)
+def summarize(values):
     return {"median_ms":statistics.median(values),"p95_ms":float(np.percentile(values,95)),"raw_ms":values}
 
-def main():
-    results={"python":sys.version,"platform":platform.platform(),"qiskit":qiskit.__version__,"numpy":np.__version__,"cases":[]}
-    for n,gates in [(8,1000),(8,10000),(12,100)]:
-        raw=make_native(n,gates); wrapped=make_wrapped(n,gates)
-        np.testing.assert_allclose(Statevector.from_instruction(raw).data,wrapped.run().math.statevector(),atol=1e-9)
-        for case,base,trial in [("build",lambda:make_native(n,gates),lambda:make_wrapped(n,gates)),("statevector",lambda:Statevector.from_instruction(raw).data.copy(),lambda:wrapped.run().math.statevector())]:
-            a,b=measure(base),measure(trial)
-            results["cases"].append({"case":case,"n":n,"gates":gates,"native":a,"sdk":b,"overhead_percent":100*(b["median_ms"]/a["median_ms"]-1)})
-    print(json.dumps(results,indent=2))
+def paired(native,sdk,reps):
+    functions={"native":native,"sdk":sdk}
+    samples={k:[] for k in functions}
+    rng=random.Random(42)
+    for i in range(reps+3):
+        order=list(functions); rng.shuffle(order)
+        for label in order:
+            t=time.perf_counter_ns(); result=functions[label](); elapsed=(time.perf_counter_ns()-t)/1e6
+            del result
+            if i>=3: samples[label].append(elapsed)
+    a,b=(summarize(samples[k]) for k in ("native","sdk"))
+    return {"native":a,"sdk":b,"overhead_percent":100*(b["median_ms"]/a["median_ms"]-1),"delta_ms":b["median_ms"]-a["median_ms"]}
 
-if __name__=="__main__": main()
+def peak_kib():
+    peak=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    return peak/1024 if sys.platform=="darwin" else peak
+
+def rss_worker(variant):
+    # Separate processes so high water marks do not contaminate another variant.
+    # Peak includes interpreter, imports, circuit and simulator allocations.
+    n=20; ops=[("h",(0,)),("cx",(0,n-1)),("z",(n-1,))]
+    c=build(n,ops,variant); baseline=peak_kib()
+    state=execute(c,variant)
+    assert np.count_nonzero(abs(state)>1e-12)==2
+    assert np.isclose(np.linalg.norm(state),1)
+    return {"variant":variant,"n":n,"gates":len(ops),"baseline_peak_kib":baseline,"peak_kib":peak_kib(),"payload_bytes":state.nbytes}
+
+def main(reps):
+    data={"python":sys.version,"platform":platform.platform(),"qiskit":qiskit.__version__,"numpy":np.__version__,"cpu":platform.processor(),"repetitions":reps,"cases":[],"rss":[]}
+    for n,count in [(8,1000),(8,10000)]:
+        ops=workload(n,count)
+        native=build(n,ops,"native"); sdk=build(n,ops,"sdk")
+        assert native==sdk.to_qiskit()
+        result=paired(lambda:build(n,ops,"native"),lambda:build(n,ops,"sdk"),reps)
+        data["cases"].append({"operation":"build","n":n,"gates":count,**result})
+    for n,count in [(8,128),(12,128),(16,64)]:
+        ops=workload(n,count)
+        native=build(n,ops,"native"); sdk=build(n,ops,"sdk")
+        np.testing.assert_allclose(execute(native,"native"),execute(sdk,"sdk"),atol=1e-9,rtol=0)
+        result=paired(lambda:execute(native,"native"),lambda:execute(sdk,"sdk"),reps)
+        data["cases"].append({"operation":"statevector","n":n,"gates":count,**result})
+    variants=["native","sdk"]*3; random.Random(42).shuffle(variants)
+    for variant in variants:
+        raw=subprocess.check_output([sys.executable,__file__,"--rss-worker",variant],text=True)
+        data["rss"].append(json.loads(raw))
+    return data
+
+if __name__=="__main__":
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--repetitions",type=int,default=20)
+    parser.add_argument("--rss-worker",choices=["native","sdk"])
+    args=parser.parse_args()
+    if args.rss_worker: result=rss_worker(args.rss_worker)
+    else:
+        if args.repetitions<20: parser.error("at least 20 repetitions")
+        result=main(args.repetitions)
+    print(json.dumps(result,indent=2))

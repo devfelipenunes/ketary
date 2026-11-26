@@ -47,7 +47,7 @@ python -m pip freeze > environment.txt
 python benchmark.py > benchmark_results.json
 ```
 
-The preliminary benchmark measures timing only, after tests pass. Peak RSS, randomized paired measurements and broader workloads are future validation tasks. No performance claim is made.
+The diagnostic benchmark uses paired randomized timing, mixed gate workloads and isolated peak RSS processes. It runs after required tests in CI. Shared runner results are preliminary, not release guarantees; build and execution costs are reported separately. User ergonomics and broader workload coverage remain to be measured. No performance claim is made.
 
 ## Workflow
 

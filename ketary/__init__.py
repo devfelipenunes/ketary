@@ -113,6 +113,7 @@ class _Math:
         matrix = self._r._data.reshape((2,)*n).transpose(axes).reshape(2**len(left),-1)
         p = np.linalg.svd(matrix,compute_uv=False)**2
         p = p[p>0]
+        p /= p.sum()
         return float(-np.sum(p*np.log2(p)))
 
 class _Checks:
@@ -175,10 +176,10 @@ class Circuit:
         return self._qc.num_qubits
 
     @classmethod
-    def _from_native(cls,qc):
+    def _from_native(cls,qc,*,owned=False):
         _validate(qc)
         c=cls.__new__(cls)
-        c._qc=qc.copy()
+        c._qc=qc if owned else qc.copy()
         return c
 
     def to_qiskit(self):
@@ -190,14 +191,14 @@ class Circuit:
         indices=list(range(other.num_qubits)) if wires is None else [_int(i) for i in wires]
         if len(indices)!=other.num_qubits or len(set(indices))!=len(indices) or any(i>=self.num_qubits for i in indices):
             raise ValueError("invalid wire mapping")
-        return self._from_native(self._qc.compose(other._qc,qubits=indices,inplace=False))
+        return self._from_native(self._qc.compose(other._qc,qubits=indices,inplace=False),owned=True)
 
     def inverse(self):
-        return self._from_native(self._qc.inverse())
+        return self._from_native(self._qc.inverse(),owned=True)
 
     def decompose(self,*,reps=1):
         # Selective SWAP lowering: general decomposition leaves the whitelist.
-        return self._from_native(self._qc.decompose(gates_to_decompose=["swap"], reps=_int(reps,1)))
+        return self._from_native(self._qc.decompose(gates_to_decompose=["swap"], reps=_int(reps,1)),owned=True)
 
     def run(self,*,mode="statevector",max_bytes=64*1024**2):
         if mode!="statevector":
@@ -243,6 +244,8 @@ def _validate(qc):
     for item in qc.data:
         if item.operation.base_class not in allowed or item.operation.params or item.clbits:
             raise UnsupportedOperation(f"unsupported operation: {item.operation.name}")
+        if item.operation.base_class is CXGate and item.operation.ctrl_state != 1:
+            raise UnsupportedOperation("open-control CX is outside the PoC whitelist")
     if not math.isfinite(float(qc.global_phase)):
         raise ValueError("invalid global phase")
 
@@ -252,6 +255,8 @@ class _Debug:
 
     def trace(self,*,max_bytes=64*1024**2,max_steps=256):
         qc=self._c._qc
+        if qc.num_qubits > 8:
+            raise ResourceLimit("trace supports at most eight qubits in PoC")
         if len(qc.data)>_int(max_steps):
             raise ResourceLimit("trace step limit exceeded")
         _limit(qc.num_qubits,len(qc.data)+1,budget=max_bytes)
