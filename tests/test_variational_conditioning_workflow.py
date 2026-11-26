@@ -12,7 +12,7 @@ def test_expressive_variational_chain(eps,x,y):
     a,b=q.Circuit.parameter_vector("p",2)
     # One reusable symbolic block, disjoint placements, shared parameters.
     layer=q.Circuit.symbolic(1).ry(a+b,0)
-    c=q.Circuit.symbolic(3).apply_each(layer,wires=[0,2])
+    c=q.Circuit.symbolic(3).apply_each(layer,placements=[(0,),(2,)])
     c.ry(eps*b,1).evolve(q.I(2),time=a*a+b)
     before=c.to_qiskit()
     bindings={a:x,b:y}
@@ -61,7 +61,7 @@ def test_expressive_variational_chain(eps,x,y):
 def test_shared_parameter_wrong_identity_preflight(method,monkeypatch):
     a,b=q.Circuit.parameter_vector("p",2)
     layer=q.Circuit.symbolic(1).ry(a+b,0)
-    c=q.Circuit.symbolic(3).apply_each(layer,wires=[0,2])
+    c=q.Circuit.symbolic(3).apply_each(layer,placements=[(0,),(2,)])
     other=q.Circuit.parameter("p[0]")
     monkeypatch.setattr(q.Circuit,"run",lambda *args,**kwargs:pytest.fail("invalid parameter executed"))
     call=getattr(c,method)

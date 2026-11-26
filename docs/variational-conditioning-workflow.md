@@ -13,7 +13,7 @@ The expressive route is intentionally ordinary Python:
 import ketary as q
 a,b=q.Circuit.parameter_vector("p",2)
 layer=q.Circuit.symbolic(1).ry(a+b,0)
-c=q.Circuit.symbolic(3).apply_each(layer,wires=[0,2])
+c=q.Circuit.symbolic(3).apply_each(layer,placements=[(0,),(2,)])
 c.ry(.2*b,1)
 H=(q.Z(0)+q.Z(2))*.5
 K=q.Z(1)
