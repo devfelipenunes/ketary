@@ -112,3 +112,34 @@ Original term count, byte/work preflight, label and finite coefficient checks
 remain unchanged, including identity-only inputs. Identity-only variance is
 exactly zero after validation. This avoids cancellation from large scalar
 energy offsets; not a guarantee for all ill-conditioned nonidentity sums.
+
+
+## Snapshot-query admission audit
+
+Result.evidence accepts at most 32 distinct labels per basis/Pauli query.
+Validate every full-width label before the first amplitude or native Pauli
+evaluation, including a late malformed label. This preserves output order
+and the empty-query result. Marginal sampling validates shots, the outcome
+cap and seed before constructing marginal probabilities; the ordered-wire
+and output-cap checks remain in marginal_probabilities. Neither output cap
+is a bound on state-sized temporary probability arrays or native scratch.
+Invalid inputs never justify relaxing an existing cap or changing a schema.
+
+| Path family | Budget or admission check | Existing targeted evidence |
+| --- | --- | --- |
+| Ideal run, batch, snapshot export | State payload, aggregate retained results, bounded rows | test_alpha_parallel_preflight.py; test_resource_bounds.py; test_alpha_third_closure.py |
+| Selected/full probabilities, marginal sample, evidence | Output rows, full label/seed admission; state-sized scratch excluded | test_sampling_dispatch.py; test_preflight_verdict_hardening.py |
+| Density, entropy, Schmidt, variance | State/matrix payloads, rank and streamed work | test_math_resources.py; test_resource_bounds.py; test_alpha_third_closure.py |
+| Grouped expectations, complex Pauli | Request/term and work counts | test_alpha_third_closure.py; test_production_channels_complex.py |
+| QueryPlan, SweepPlan | State plus selected output payloads; bounded frozen rows | test_query_plan_snapshot.py; test_sweep_preparation.py |
+| Derivatives and QGT | Shift counts, active occurrences, retained states and finite preflight | test_derivative_staging_transaction.py; test_production_hessian.py; test_production_qgt.py |
+| Synthesis, composition and dynamic | Width/input/expanded-operation and iterable bounds | test_production_dense_and_dynamic.py; test_alpha_composition_preflight.py; test_production_nested_dynamic.py |
+| Noisy density and local Kraus | Density plus local matrices, width and shape admission | test_production_local_channels.py; test_dx_execution_coverage.py |
+| Trace, verification, replay | Snapshot budgets, gate/step limits, evidence byte/schema guards | test_alpha_third_closure.py; test_preflight_verdict_hardening.py; test_alpha_parallel_preflight.py |
+| External QCEC | Width/gates and deadline; observed child RSS separate | test_external_verifier.py; research/alpha_four_verification.py |
+
+This is a family-level traceability update, not a proof that every native
+allocation is preflighted or an exhaustive contract-level census. Existing
+public payload budgets, private storage and native temporary costs remain
+distinct. See the pinned retained-state and longitudinal diagnostics for
+matched measured output costs; do not infer a process-memory bound.
