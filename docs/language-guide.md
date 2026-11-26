@@ -168,3 +168,14 @@ full-width Pauli label once per call. The default max_work is 64*1024**2
 Pauli-state entries (unique labels times state dimension); it is not a
 runtime or RSS guarantee. No rerun, no global cache, no verdict. Use
 result.test.expectations for verification.
+
+## Ordered topology and rotation layers
+
+```python
+import ketary as q
+c = q.Circuit(4)
+c.ry([.1,.2,.3,.4], c.wires)
+c.apply_each(q.Circuit(2).cz(0,1), placements=q.ring(c.wires))
+```
+
+Topology helpers generate ordered logical pairs, not hardware couplings. `chain` uses adjacent pairs; `ring` closes the chain (at least 3 wires); `star` uses the first wire as center; `all_pairs` emits combinations in caller order (not both directions). At most 4096 distinct nonnegative indices and 10000 pairs. The target validates actual bounds. `rx/ry/rz/p` accept ordered sequences of angles aligned one-to-one with ordered wires, or the existing scalar broadcast. All values preflight before mutation; no implicit Cartesian product. See [circuit-writing study](circuit-writing-study.md).

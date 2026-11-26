@@ -145,3 +145,5 @@ These are diagnostics, not controlled hardware results or general speed claims.
 ## First implementation candidate
 
 ABS01/02/03/05/26 are implemented in the expressive composition PR, pending exact-head CI/review. Positive counts only; at most 10,000 placements and 100,000 appended operations for new expansion paths (legacy single apply unchanged). Independent repeat drops annotations. Grouped expectations allow 1..32 ordered queries with default 64 Mi-entry unique-Pauli state work budget; no RSS or speed guarantee. All other candidate items remain proposals.
+
+ABS06/09 and aligned rotation extension of ABS04: candidate topology helpers, Circuit.wires and one-to-one angle layers; see [source study](circuit-writing-study.md). No dynamic measurement or unbound block expansion in this slice.
