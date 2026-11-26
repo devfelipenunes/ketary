@@ -102,7 +102,8 @@ extern "C" int ketary_quest_batch(int n,int count,int runs,const int32_t* ops,
     if (!ready || n<1 || n>22 || count<0 || count>100000 || runs<1 || runs>256 ||
         !ops || !angles || !input || !output || !timings || !std::isfinite(phase)) return 2;
     const size_t size=size_t(1)<<n;
-    if (size*size_t(runs)>size_t(128)*1024*1024/sizeof(qcomp)) return 5;
+    if (size*size_t(runs)>size_t(128)*1024*1024/sizeof(qcomp) ||
+        size_t(count)*runs>size_t(64)*1024*1024/sizeof(double)) return 5;
     for(int i=0;i<count;++i) {
         int op=ops[3*i],a=ops[3*i+1],b=ops[3*i+2];
         bool two=op>=7 && op<=9;
