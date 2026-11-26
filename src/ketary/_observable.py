@@ -210,6 +210,21 @@ def _sum_complex(values):
     return complex(_real(real),_real(imag))
 
 
+def _pauli_masks(label):
+    """Symplectic X/Z masks in little-endian wire order."""
+    x=z=0
+    for axis in label:
+        x=(x<<1)|int(axis in ("X","Y"))
+        z=(z<<1)|int(axis in ("Z","Y"))
+    return x,z
+
+
+def _pauli_anticommutes(left,right):
+    x,z=left
+    u,v=right
+    return bool(((x&v)^(z&u)).bit_count()&1)
+
+
 def _pauli_product(left,right,*,mode="product"):
     if not isinstance(right,Observable):
         raise TypeError("expected Observable")
@@ -220,8 +235,17 @@ def _pauli_product(left,right,*,mode="product"):
     table={("X","Y"):("Z",1j),("Y","Z"):("X",1j),("Z","X"):("Y",1j),
            ("Y","X"):("Z",-1j),("Z","Y"):("X",-1j),("X","Z"):("Y",-1j)}
     out={}
+    # Paired profiles favored filtering commutators, but anticommutators
+    # regressed when nearly all pairs survived. Retain the original path
+    # for anticommutators and products until an adaptive route is qualified.
+    filtered=mode=="commutator"
+    am={p:_pauli_masks(p) for p in a} if filtered else {}
+    bm={q:_pauli_masks(q) for q in b} if filtered else {}
+    want=mode=="commutator"
     for p,x in a.items():
         for q,y in b.items():
+            if filtered and _pauli_anticommutes(am[p],bm[q])!=want:
+                continue
             phase=1+0j
             label=[]
             for u,v in zip(p,q,strict=True):

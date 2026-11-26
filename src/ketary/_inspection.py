@@ -14,9 +14,9 @@ def inspect_circuit(circuit, *, start=0, limit=32):
     # Index only the requested window; no full circuit copy, scan or run.
     for i in range(start,stop):
         item=raw.data[i]
-        operations.append({"index":i+1,"gate":item.operation.name,
+        operations.append({"index":i+1,"gate":item.name,
             "wires":[raw.find_bit(w).index for w in item.qubits],
-            "params":[float(p) for p in item.operation.params]})
+            "params":[float(p) for p in item.params]})
     return {"schema_version":1,"num_qubits":raw.num_qubits,"global_phase":float(raw.global_phase),
             "gate_count":total,"bit_order":"highest-wire-first","operations":operations,
             "start":start,"next_start":stop if stop<total else None,"omitted":total-len(operations)}
