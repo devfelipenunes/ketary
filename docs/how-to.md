@@ -106,3 +106,56 @@ Install `pip install -e '.[dynamic]'` in a Python 3.12 environment. Run
 after importing ketary as q. All output labels should start with 0 when
 inverse preparation is enabled; the two Bell measurement bits are random.
 This optional example is covered by the dynamic CI job, not the base docs suite.
+
+
+## Recover a Bernstein–Vazirani secret
+
+```python
+import ketary as q
+
+secret = "1011"
+c = q.Circuit(5).x(4).h(range(5))
+c.apply(q.parity_oracle(secret), wires=range(5)).h(range(4))
+report = q.decode_bernstein_vazirani(c.run())
+assert report["status"] == "PASS" and report["label"] == secret
+```
+
+The target is the highest wire; the secret uses highest-wire-first labels.
+This is a promised parity oracle, not arbitrary classical function synthesis.
+
+## Recover a Simon period from ideal support
+
+```python
+import ketary as q
+
+secret = "101"
+r = q.simon(secret).run()
+p = r.math.marginal_probabilities([2, 1, 0])
+support = [label for label, value in p.items() if value > 1e-12]
+assert q.recover_simon(support, 3) == secret
+```
+
+Ideal support is not sampled hardware evidence. For a shot-based workflow,
+record counts, seed and the possibility of insufficient independent rows.
+
+## GHZ parity and a bounded QAOA objective
+
+```python
+import ketary as q
+from math import pi
+
+ghz = q.Circuit(3).h(0).cx(0, 1).cx(0, 2)
+ghz.run().test.expectation(q.X(0) @ q.X(1) @ q.X(2), 1).require()
+
+# One-layer two-vertex MaxCut. Cost = (I - Z0 Z1) / 2.
+gamma, beta = pi/2, pi/8
+cost = .5*q.I() - .5*(q.Z(0) @ q.Z(1))
+trial = q.Circuit(2).h([0, 1]).evolve(cost, time=gamma)
+trial.rx(2*beta, [0, 1])
+assert abs(trial.run().math.expectation(cost) - 1) < 1e-9
+```
+
+These are authored, bounded examples, not an optimizer or performance
+guarantee for larger graphs. The cost phase is retained by evolve; all
+simulations are explicit. Use selected observables and existing resource
+limits rather than allocating full distributions for wide circuits.

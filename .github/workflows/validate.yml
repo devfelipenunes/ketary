@@ -111,6 +111,8 @@ jobs:
           python -m research.closure_physical_dynamics > closure-physical-dynamics.json
           python -m research.closure_reversible_logic > closure-reversible-logic.json
           python -m research.alpha_register_addition --reps 5 > alpha-register-addition.json
+          python -m research.alpha_controlled_profile --reps 5 > alpha-controlled-profile.json
+          python -m research.alpha_toy_h2 --reps 3 > alpha-toy-h2.json
           python -m research.priority_architecture_audit > closure-architecture.json
           python -m research.architecture_inventory > architecture-inventory.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -142,6 +144,8 @@ jobs:
             closure-physical-dynamics.json
             closure-reversible-logic.json
             alpha-register-addition.json
+            alpha-controlled-profile.json
+            alpha-toy-h2.json
             closure-architecture.json
             architecture-inventory.json
             environment.txt
@@ -212,6 +216,9 @@ jobs:
           cp examples/first_verification.py "$RUNNER_TEMP/first_verification.py"
           cd "$RUNNER_TEMP"
           "$RUNNER_TEMP/ketary-wheel/bin/python" "$RUNNER_TEMP/first_verification.py"
+          cp "$GITHUB_WORKSPACE/examples/run_documentation.py" "$GITHUB_WORKSPACE/README.md" "$RUNNER_TEMP/"
+          cp "$GITHUB_WORKSPACE/docs/getting-started.md" "$GITHUB_WORKSPACE/docs/core-api.md" "$GITHUB_WORKSPACE/docs/tutorial.md" "$GITHUB_WORKSPACE/docs/how-to.md" "$RUNNER_TEMP/"
+          (cd "$RUNNER_TEMP" && "$RUNNER_TEMP/ketary-wheel/bin/python" run_documentation.py)
           "$RUNNER_TEMP/ketary-wheel/bin/python" -c 'import ketary as q; from importlib.metadata import version; assert version("ketary") == "0.1.0.dev0"; from pathlib import Path; assert Path(q.__file__).with_name("py.typed").is_file(); assert Path(q.__file__).with_name("__init__.pyi").is_file(); assert q.bell().run().test.probability("00", 0.5).status == "PASS"; print(q.__file__)'
       - name: Install dynamic extra from wheel in clean environment
         run: |

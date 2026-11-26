@@ -26,6 +26,18 @@ def _unique_pairs(pairs):
         out[key]=value
     return out
 
+def _validate_producer(value,fields):
+    """Validate the small textual metadata shared by logical artifacts."""
+    _keys(value,fields)
+    for item in value.values():
+        if type(item) is not str or not item or len(item)>100:
+            raise ValueError("invalid producer metadata")
+        try:
+            item.encode("utf-8")
+        except UnicodeError as exc:
+            raise ValueError("invalid producer metadata") from exc
+
+
 def _reject_constant(value):
     raise ValueError("nonfinite JSON constant")
 
@@ -77,9 +89,7 @@ def _decode(payload):
     if type(data["schema_version"]) is not int or data["schema_version"]!=_SCHEMA:
         raise ValueError("unsupported replay schema version")
     producer=data["producer"]
-    _keys(producer,("ketary","qiskit","python"))
-    if any(type(v) is not str or not v or len(v)>100 for v in producer.values()):
-        raise ValueError("invalid replay producer metadata")
+    _validate_producer(producer,("ketary","qiskit","python"))
     n=data["num_qubits"]
     ops=data["operations"]
     if type(ops) is not list:
