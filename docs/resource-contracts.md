@@ -89,3 +89,9 @@ Derivative planners share a private call-local shifted-native-copy helper;
 all shifts retain the existing per-method preflight, full native validation
 and independent ownership. No additional state payload, caching, native
 execution or change to shift count, gate budget or formula.
+
+Builtin scalar fluent gates dispatch directly to the existing validated
+_Gates methods for exact int wires; one-angle rotations also require exact
+int/float angles. Other inputs retain the existing iterable, symbolic and
+numeric dispatch. No validation removed, no extra cache, no changed limits.
+See [fluent scalar dispatch diagnostic](fluent-scalar-dispatch.md).
