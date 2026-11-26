@@ -1,0 +1,1576 @@
+{
+  "schema_version": 1,
+  "baseline": "077462c8a3ea61f15d4a00428833a669aed8473c",
+  "note": "Lifecycle describes recommendation, not release stability or usage data; no public removal.",
+  "entries": {
+    "CheckResult": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "CheckResult.actual": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "CheckResult.detail": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "CheckResult.expected": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "CheckResult.render": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "CheckResult.require": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "CheckResult.status": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "CheckResult.tolerance": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Circuit": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.apply": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.apply_each": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.ccx": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.ch": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.contract": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.copy": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.cp": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.crx": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.cry": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.crz": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.cswap": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.cx": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.cy": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.cz": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.h": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.mcx": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.num_qubits": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.p": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.repeat": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.run": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.rx": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.rxx": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.ry": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.ryy": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.rz": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.rzz": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.s": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.sdg": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.swap": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.sx": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.sxdg": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.t": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.tdg": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.test": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.u": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.wires": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.x": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.y": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "Circuit.z": {
+      "category": "Core",
+      "group": "construction",
+      "lifecycle": "canonical"
+    },
+    "ComparisonReport": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "ComparisonReport.evidence": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Contract": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Contract.atol": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Contract.expectations": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Contract.normalized": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Contract.num_qubits": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Contract.probabilities": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Contract.verify": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Evidence": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "Evidence.reproduce": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "I": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "Observable": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "Observable.num_qubits": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "Result": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "Result.math": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "Result.num_qubits": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "Result.test": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "SnapshotReport": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "SnapshotReport.checks": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "VerificationReport": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "VerificationReport.checks": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "VerificationReport.render": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "VerificationReport.require": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "VerificationReport.scope": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "VerificationReport.status": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "X": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "Y": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "Z": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "_Checks.expectation": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "_Checks.probability": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "_CircuitChecks.compare": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "_Math.amplitude": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "_Math.expectation": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "_Math.expectations": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "_Math.probabilities": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "_Math.probability": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "_Math.variance": {
+      "category": "Core",
+      "group": "math",
+      "lifecycle": "canonical"
+    },
+    "_Report.render": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "_Report.require": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "_Report.status": {
+      "category": "Core",
+      "group": "verification",
+      "lifecycle": "canonical"
+    },
+    "all_pairs": {
+      "category": "Core",
+      "group": "topology",
+      "lifecycle": "canonical"
+    },
+    "bell": {
+      "category": "Core",
+      "group": "factories",
+      "lifecycle": "canonical"
+    },
+    "chain": {
+      "category": "Core",
+      "group": "topology",
+      "lifecycle": "canonical"
+    },
+    "ring": {
+      "category": "Core",
+      "group": "topology",
+      "lifecycle": "canonical"
+    },
+    "star": {
+      "category": "Core",
+      "group": "topology",
+      "lifecycle": "canonical"
+    },
+    "CheckResult.to_dict": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "CheckResult.to_json": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.bind": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.capabilities": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.checkpoint": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.checkpoints": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.classical": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.compose": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.compute_action_uncompute": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.debug": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.decompose": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.diff": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.evolve": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.from_json": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.if_x": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.if_z": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.inspect": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.inverse": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.measure": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.num_clbits": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.optimize": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.parameter": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.parameter_vector": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.parameters": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.plan": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.register": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.registers": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.reset": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.resources": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.run_many": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.run_shots": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.sweep": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.sweep_rows": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.symbolic": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.to_json": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.visualize": {
+      "category": "Advanced",
+      "group": "construction",
+      "lifecycle": "supported_advanced"
+    },
+    "Contract.to_dict": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "DiagnosticReport": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "Evidence.from_dict": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "Evidence.from_json": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "Evidence.minimize": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "Evidence.to_dict": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "Evidence.to_json": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "ExternalVerificationReport.external_equivalence": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "ModalOutcomeReport": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "ModalOutcomeReport.label": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "ModalOutcomeReport.peak_probability": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "Observable.to_dict": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "OperatorMetricsReport": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "OperatorMetricsReport.operator_norm": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "PhaseEstimateReport": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "PhaseEstimateReport.phase": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "QueryPlan": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "QueryPlan.bits": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "QueryPlan.estimate": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "QueryPlan.paulis": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "QueryPlan.run": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "QueryPlan.subsystems": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ResourceLimit": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ResourceReport": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ResourceReport.by_gate": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ResourceReport.depth": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ResourceReport.gate_count": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ResourceReport.num_qubits": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ResourceReport.three_plus_qubit_gates": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ResourceReport.two_qubit_gates": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "Result.evidence": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "Result.sample": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "Result.verify": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "Result.visualize": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "SemanticDiffReport": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "SemanticDiffReport.operator": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "SemanticDiffReport.render": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "SemanticDiffReport.scope": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "SemanticDiffReport.structure_equal": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "SemanticDiffReport.to_dict": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "SemanticDiffReport.to_json": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "SemanticDiffReport.zero_input": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.backend": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.backend_version": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.counts": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.measured_bits": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.measurements": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.num_clbits": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.probabilities": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.seed": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "ShotResult.shots": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
+    },
+    "StatisticalContract": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "StatisticalContract.confidence": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "StatisticalContract.margin": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "StatisticalContract.num_clbits": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "StatisticalContract.probabilities": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "StatisticalContract.verify": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "StatisticalReport": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "SweepPlan": {
+      "category": "Advanced",
+      "group": "parameters",
+      "lifecycle": "supported_advanced"
+    },
+    "SweepPlan.bindings": {
+      "category": "Advanced",
+      "group": "parameters",
+      "lifecycle": "supported_advanced"
+    },
+    "SweepPlan.run": {
+      "category": "Advanced",
+      "group": "parameters",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceComparison": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceComparison.actual_operation": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceComparison.actual_wires": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceComparison.check": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceComparison.reference_operation": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceComparison.reference_wires": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceComparison.step_index": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceComparison.to_dict": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceStep": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceStep.operation": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceStep.result": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "TraceStep.wires": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "UnsupportedOperation": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "VerificationReport.to_dict": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "VerificationReport.to_json": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Checks.distribution": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Checks.entangled": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Checks.expectations": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Checks.fidelity": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Checks.normalized": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Checks.state": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_CircuitChecks.equivalent": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_CircuitChecks.metrics": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Debug.checkpoint": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_Debug.compare": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_Debug.compare_checkpoints": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_Debug.trace": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_Debug.verify_checkpoints": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.conditional_probability": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.density_matrix": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.dirac": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.entropy": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.explain_probability": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.fidelity": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.marginal_probabilities": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.norm": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.observable_variance": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.observable_variance_streamed": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.purity": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.schmidt": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.statevector": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.table": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.top_probabilities": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Math.trace_distance": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "_Report.scope": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Report.to_dict": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Report.to_json": {
+      "category": "Advanced",
+      "group": "verification",
+      "lifecycle": "supported_advanced"
+    },
+    "_Resources.summary": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_ResultVisualize.bloch": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_ResultVisualize.bloch_svg": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_ResultVisualize.histogram": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_Visualize.svg": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "_Visualize.text": {
+      "category": "Advanced",
+      "group": "diagnostics",
+      "lifecycle": "supported_advanced"
+    },
+    "amplitude_amplification": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "ansatz": {
+      "category": "Advanced",
+      "group": "parameters",
+      "lifecycle": "supported_advanced"
+    },
+    "bernstein_vazirani": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "constant_oracle": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "decode_bernstein_vazirani": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "decode_phase_estimation": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "decode_teleportation": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "deutsch_jozsa": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "ghz": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "grover": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "maxcut_hamiltonian": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "parity_oracle": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "phase_estimation": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "phase_oracle": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "qft": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "recover_simon": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "simon": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "superdense": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "teleportation": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.append": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Circuit.from_parameterized": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Circuit.to_qiskit": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Circuit.transpile": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "ExternalVerificationReport": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Observable.from_qiskit": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Observable.to_qiskit": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "_CircuitChecks.external_equivalence": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "from_qiskit": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Circuit.analyze": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.run"
+    },
+    "Circuit.gates": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit"
+    },
+    "Circuit.h_many": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.h"
+    },
+    "_Gates.ccx": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.ccx"
+    },
+    "_Gates.ch": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.ch"
+    },
+    "_Gates.cp": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.cp"
+    },
+    "_Gates.crx": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.crx"
+    },
+    "_Gates.cry": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.cry"
+    },
+    "_Gates.crz": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.crz"
+    },
+    "_Gates.cswap": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.cswap"
+    },
+    "_Gates.cx": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.cx"
+    },
+    "_Gates.cy": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.cy"
+    },
+    "_Gates.cz": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.cz"
+    },
+    "_Gates.h": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.h"
+    },
+    "_Gates.mcx": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.mcx"
+    },
+    "_Gates.p": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.p"
+    },
+    "_Gates.rx": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.rx"
+    },
+    "_Gates.rxx": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.rxx"
+    },
+    "_Gates.ry": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.ry"
+    },
+    "_Gates.ryy": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.ryy"
+    },
+    "_Gates.rz": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.rz"
+    },
+    "_Gates.rzz": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.rzz"
+    },
+    "_Gates.s": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.s"
+    },
+    "_Gates.sdg": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.sdg"
+    },
+    "_Gates.swap": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.swap"
+    },
+    "_Gates.sx": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.sx"
+    },
+    "_Gates.sxdg": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.sxdg"
+    },
+    "_Gates.t": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.t"
+    },
+    "_Gates.tdg": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.tdg"
+    },
+    "_Gates.u": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.u"
+    },
+    "_Gates.x": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.x"
+    },
+    "_Gates.y": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.y"
+    },
+    "_Gates.z": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "Circuit.z"
+    },
+    "_Math.observable": {
+      "category": "Compatibility",
+      "group": "compatibility",
+      "lifecycle": "retained_compatibility",
+      "prefer": "_Math.expectation"
+    }
+  }
+}
