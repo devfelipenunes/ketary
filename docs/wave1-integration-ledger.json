@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "scope": "exact-head integration evidence, not release qualification",
+  "entries": [
+    {
+      "pr": 413,
+      "head": "1690e3153f4dae62188884123857416cc07f47ba",
+      "main": "98340324953673b4dc3fb9396f55defd4b44486c",
+      "sdk_run": 45856624203,
+      "workflows_passed": 20,
+      "core_pass": 4587,
+      "dynamic_pass": 4664,
+      "post_merge_run": null
+    },
+    {
+      "pr": 419,
+      "head": "76b91b19ca4a212c8f3bee20d54ec8eabbbc50f5",
+      "main": "bdec8ea030387edd74a17b4b093f6566e64b83d5",
+      "sdk_run": 45857421188,
+      "workflows_passed": 1,
+      "core_pass": 4616,
+      "dynamic_pass": 4693,
+      "post_merge_run": null
+    },
+    {
+      "pr": 420,
+      "head": "d66f76eaf99c923b3fa7a79edc5ee697934fbde6",
+      "main": "5c43ffd7b8d195ea73b9c4c089df9a3936780e03",
+      "sdk_run": 45858460546,
+      "rewrite_run": 45858460656,
+      "workflows_passed": 2,
+      "core_pass": 4619,
+      "dynamic_pass": 4696,
+      "post_merge_run": null
+    }
+  ],
+  "all_entries_same_file_tree": true,
+  "decisions": [
+    {
+      "classification": "confirmed_fixed",
+      "issue": 241,
+      "evidence": "PR 413: missing native counts QiskitError translated with cause",
+      "decision": "retain"
+    },
+    {
+      "classification": "inconclusive",
+      "issue": 302,
+      "evidence": "PR 419: two pairs per width on shared runner; 10-qubit median SDK 0.209 ms vs reference 0.184 ms; 12-qubit 0.291 vs 0.300 ms",
+      "decision": "no algorithm change; retain raw artifacts"
+    },
+    {
+      "classification": "unsupported",
+      "issue": 100,
+      "evidence": "No dedicated host qualification",
+      "decision": "retain blocker"
+    },
+    {
+      "classification": "negative",
+      "issue": 106,
+      "evidence": "docs/circuit-refinement-review.md: conjugation intent 51 vs fluent 27 lexical tokens",
+      "decision": "retain shorter existing spelling; no promotion on token count alone"
+    }
+  ],
+  "exclusions": [
+    "push CI not returned by connector",
+    "dedicated host",
+    "independent human/agent trials",
+    "legal and release authorization"
+  ]
+}
