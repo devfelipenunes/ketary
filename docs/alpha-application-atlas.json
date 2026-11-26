@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "target": 100,
+  "baseline": "f1191c91af0be5900f11696890c2b476c45792a1",
+  "scope": "Initial non-exhaustive index of distinct intended workflows. Source pointers checked, not complete paired benchmark or independent author qualification. Seeds, widths and coefficients are variants; no inflation.",
+  "rows": [
+    {
+      "id": "bernstein-vazirani",
+      "family": "oracle",
+      "path": "research/complete_workflows.py",
+      "symbol": "bv",
+      "scope": "full operator + decoded secret",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "phase-estimation-known-phase",
+      "family": "fourier",
+      "path": "research/complete_workflows.py",
+      "symbol": "qpe",
+      "scope": "analytic prepared state + decoded phase",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "grover-single-marked",
+      "family": "oracle",
+      "path": "research/complete_workflows.py",
+      "symbol": "grover",
+      "scope": "analytic marked probability",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "simon-period-recovery",
+      "family": "oracle",
+      "path": "research/complete_workflows.py",
+      "symbol": "simon",
+      "scope": "GF(2) support + recovery",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "parameter-sweep-bell",
+      "family": "variational",
+      "path": "research/complete_workflows.py",
+      "symbol": "variational_sweep",
+      "scope": "analytic expectation",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "checkpoint-phase-diagnosis",
+      "family": "verification",
+      "path": "research/complete_workflows.py",
+      "symbol": "diagnose",
+      "scope": "checkpoint and replay",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "ising-quench",
+      "family": "evolution",
+      "path": "research/closure_physical_dynamics.py",
+      "symbol": "evaluate",
+      "scope": "dense expm + native",
+      "selector": "ising_quench",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "xy-exchange",
+      "family": "evolution",
+      "path": "research/closure_physical_dynamics.py",
+      "symbol": "evaluate",
+      "scope": "dense expm + native",
+      "selector": "xy_exchange",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "heisenberg-chain",
+      "family": "evolution",
+      "path": "research/closure_physical_dynamics.py",
+      "symbol": "evaluate",
+      "scope": "dense expm + native",
+      "selector": "heisenberg_chain",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "diagonal-commuting-evolution",
+      "family": "evolution",
+      "path": "research/closure_physical_dynamics.py",
+      "symbol": "evaluate",
+      "scope": "dense expm + native",
+      "selector": "diagonal",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "piecewise-noncommuting-evolution",
+      "family": "evolution",
+      "path": "research/closure_physical_dynamics.py",
+      "symbol": "evaluate",
+      "scope": "ordered dense expm + native",
+      "selector": "piecewise",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "modular-increment",
+      "family": "reversible",
+      "path": "research/closure_reversible_logic.py",
+      "symbol": "evaluate",
+      "scope": "all basis columns + arbitrary complex input",
+      "selector": "increment",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "threshold-comparison",
+      "family": "reversible",
+      "path": "research/closure_reversible_logic.py",
+      "symbol": "evaluate",
+      "scope": "all basis columns; clean-work native comparator distinct scope",
+      "selector": "comparison",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "composed-boolean-predicates",
+      "family": "reversible",
+      "path": "research/closure_reversible_logic.py",
+      "symbol": "evaluate",
+      "scope": "all basis columns + arbitrary complex input",
+      "selector": "composition",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "teleportation-bloch",
+      "family": "protocols",
+      "path": "research/wave1_dynamic_protocols.py",
+      "symbol": "teleport_sdk",
+      "scope": "native measured route + analytic marginals",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "superdense-coding",
+      "family": "protocols",
+      "path": "research/wave1_dynamic_protocols.py",
+      "symbol": "dense_sdk",
+      "scope": "native measured route + deterministic output",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "spin-vqe",
+      "family": "variational",
+      "path": "tests/test_alpha_reference_variational.py",
+      "symbol": "test_alpha_vqe",
+      "scope": "dense eigensystem + native",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "weighted-maxcut",
+      "family": "variational",
+      "path": "tests/test_alpha_variational_graphs.py",
+      "symbol": "test_weighted_maxcut_workflow",
+      "scope": "bit enumeration + native; single-edge variant excluded",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "excited-state-penalty",
+      "family": "variational",
+      "path": "tests/test_alpha_variational_graphs.py",
+      "symbol": "test_excited_state_penalty_workflow",
+      "scope": "subspace eigensystem + native",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "strang-product-formula",
+      "family": "evolution",
+      "path": "tests/test_alpha_reference_verification_evolution.py",
+      "symbol": "test_alpha_noncommuting_product_formula",
+      "scope": "exact dense comparison + approximation",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "controlled-relative-phase",
+      "family": "fourier",
+      "path": "tests/test_alpha_control_oracle_corpus.py",
+      "symbol": "test_controlled_relative_phase",
+      "scope": "independent full operator",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "parity-bitflip-oracle",
+      "family": "oracle",
+      "path": "tests/test_alpha_control_oracle_corpus.py",
+      "symbol": "test_parity_truth_table",
+      "scope": "occupied target truth table",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "repetition-syndrome-recovery",
+      "family": "dynamic",
+      "path": "tests_dynamic/test_alpha_qec_syndrome.py",
+      "symbol": "test_repetition_code_syndrome",
+      "scope": "native measured route + analytic syndrome and Bloch marginals",
+      "status": "inventoried-authored"
+    }
+  ]
+}
