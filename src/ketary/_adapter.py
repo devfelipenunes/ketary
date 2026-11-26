@@ -72,11 +72,13 @@ def _bound_validation_indices(qc):
 
     Native assignment changes only symbolic slots and global phase. Validate
     unchanged numeric slots once; inspect every affected instruction per row.
-    Dense templates keep the sequential full scan to avoid indexed overhead.
+    Dense templates keep the original mapping/full scan. Abort discovery
+    as soon as more than half of the instructions are affected.
     No plan or mutable native circuit is cached between public calls.
     """
     data=qc.data
     affected=[]
+    threshold=len(data)//2
     for i,item in enumerate(data):
         symbolic=False
         for value in item.params:
@@ -86,7 +88,9 @@ def _bound_validation_indices(qc):
                 _angle(value)
         if symbolic:
             affected.append(i)
-    return tuple(affected) if len(affected)*2<=len(data) else None
+            if len(affected)>threshold:
+                return None
+    return tuple(affected)
 
 
 def _validate_bound_values(qc,indices=None):
