@@ -140,8 +140,18 @@ jobs:
           python -m venv "$RUNNER_TEMP/ketary-wheel"
           "$RUNNER_TEMP/ketary-wheel/bin/python" -m pip install dist/*.whl
           "$RUNNER_TEMP/ketary-wheel/bin/python" -m pip check
+          cp examples/first_verification.py "$RUNNER_TEMP/first_verification.py"
           cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/ketary-wheel/bin/python" "$RUNNER_TEMP/first_verification.py"
           "$RUNNER_TEMP/ketary-wheel/bin/python" -c 'import ketary as q; from importlib.metadata import version; assert version("ketary") == "0.1.0.dev0"; from pathlib import Path; assert Path(q.__file__).with_name("py.typed").is_file(); assert Path(q.__file__).with_name("__init__.pyi").is_file(); assert q.bell().run().test.probability("00", 0.5).status == "PASS"; print(q.__file__)'
+      - name: Install dynamic extra from wheel in clean environment
+        run: |
+          python -m venv "$RUNNER_TEMP/ketary-dynamic-wheel"
+          wheel=$(realpath dist/*.whl)
+          "$RUNNER_TEMP/ketary-dynamic-wheel/bin/python" -m pip install "$wheel[dynamic]"
+          "$RUNNER_TEMP/ketary-dynamic-wheel/bin/python" -m pip check
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/ketary-dynamic-wheel/bin/python" -c 'import ketary as q; c=q.Circuit.classical(1,1).x(0).measure(0,0); assert c.run_shots(shots=8,seed=1).counts == {"1":8}'
       - name: Install source distribution in clean environment
         run: |
           python -m venv "$RUNNER_TEMP/ketary-sdist"

@@ -53,3 +53,5 @@ MQT QCEC 3.12.0 is installed only in isolated validation, not a required or bund
 ### Validation tooling review
 
 The successful CI run 45747031061 recorded Qiskit Aer 0.18.4 (Apache 2.0 metadata), MQT Core and QCEC 3.12.0 (MIT metadata), build 1.6.1 (MIT), setuptools 84.2.1 (MIT), twine 7.0.0 (Apache-2.0), wheel 0.48.0 (MIT). Workflow action revisions and these direct build/audit tools are pinned to observed successful versions; resolved build dependencies now have a separate vulnerability scan. This is not a complete hash-locked transitive environment, nor a legal approval of redistribution. Upstream notices remain required when bundling third-party distributions.
+
+Pre-alpha artifact validation additionally checks metadata (name, version, Python requirement, SPDX license and extras), duplicate/path traversal entries, archive member types, clean wheel installation with and without the dynamic extra, and source install. These checks do not establish trademark clearance, name reservation or legal approval. PyPI name availability remains unconfirmed; recheck the official index immediately before any authorized release. No upload or reservation.

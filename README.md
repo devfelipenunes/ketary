@@ -1,10 +1,14 @@
 # Ketary
 
-An experimental Python SDK for quantum programming, built on Qiskit.
+An experimental developer-first Python SDK for quantum software engineering, built on Qiskit: construct circuits, understand mathematical results, verify properties and reproduce divergences.
 
 **Status: experimental SDK development.** The interface is not stable, the production gate is open, and no package release is available. Ketary is licensed under Apache-2.0 (see LICENSE). Third-party licenses remain applicable. No PyPI release is authorized.
 
-## Try the proof of concept
+## Start in five minutes
+
+See the [getting started guide](docs/getting-started.md) for installation and an executable relative-phase diagnosis. The current checkout is pre-alpha; no PyPI package is available.
+
+## Development validation
 
 ```bash
 python3.12 -m venv .venv
@@ -31,7 +35,11 @@ The result is a snapshot. The second operation does not change the earlier resul
 
 ## Documentation
 
+- [Getting started](docs/getting-started.md)
 - [Tutorial](docs/tutorial.md)
+- [Mathematical guide](docs/mathematical-guide.md)
+- [Verification guide](docs/verification-guide.md)
+- [Known limitations](docs/known-limitations.md)
 - [How-to guides](docs/how-to.md)
 - [API reference and limits](docs/reference.md)
 - [Explanation](docs/explanation.md)

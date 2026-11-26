@@ -145,6 +145,23 @@ def main(reps):
     sdk_pauli=lambda:sdk.math.expectation(pauli)
     np.testing.assert_allclose(native_pauli(),sdk_pauli(),atol=1e-9,rtol=0)
     data["cases"].append({"operation":"snapshot_pauli","n":8,"gates":8,**paired(native_pauli,sdk_pauli,reps)})
+    # Same mathematical variance, not different guarantees.
+    terms={"X"*8:.3,"Z"*8:.4,"Y"*8:-.2,"I"*8:1.0}
+    dense=lambda:sdk.math.observable_variance(terms)
+    streamed=lambda:sdk.math.observable_variance_streamed(terms)
+    np.testing.assert_allclose(dense(),streamed(),atol=1e-10,rtol=0)
+    data["cases"].append({"operation":"variance_dense_vs_streamed","n":8,"gates":8,
+                          "native_label":"Ketary dense","sdk_label":"Ketary streamed",**paired(dense,streamed,reps)})
+    ops=mixed_workload(8,1000)
+    # Precompute identical operations for both variants.
+    def fluent_fixed():
+        c=q.Circuit(8)
+        for name,args in ops:
+            getattr(c,name)(*args)
+        return c
+    assert build(8,ops,"native")==fluent_fixed().to_qiskit()
+    data["cases"].append({"operation":"fluent_build","n":8,"gates":1000,
+                          **paired(lambda:build(8,ops,"native"),fluent_fixed,reps)})
     variants=["native","sdk"]*3; random.Random(42).shuffle(variants)
     for variant in variants:
         raw=subprocess.check_output([sys.executable,__file__,"--rss-worker",variant],text=True)

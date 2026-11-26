@@ -50,3 +50,7 @@ Advanced algorithms outside the documented reference examples are future work,
 not required to close the bounded pre-alpha engineering scope.
 
 For verification engineering, additionally run `python research/public_defect_cases.py`, `python research/verification_scaling.py --repetitions 30` and, in the separately audited QCEC environment, `python research/verification_scaling.py --external --repetitions 30`. Capture artifacts and raw timing/RSS data. Different verification guarantees must not be used as interchangeable speed comparisons.
+
+## Pre-alpha stabilization
+
+The installed-wheel smoke now covers the complete phase-diagnosis and evidence reproduction workflow, plus a separate clean wheel installation with the dynamic extra. Stub signature parity is checked against runtime callables. Diagnostic timing includes fluent construction and dense/streamed variance with matched outputs. A separate authorized dedicated host is still required before public distribution; CI results do not satisfy that condition.
