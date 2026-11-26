@@ -17,8 +17,11 @@ def qcec_compare(a,b,*,deadline=10):
         from mqt import qcec
     except ImportError:
         return dict(report,status="UNSUPPORTED",reason="optional mqt.qcec dependency missing")
-    from importlib.metadata import version
-    report["backend_version"]=version("mqt.qcec")
+    from importlib.metadata import version, PackageNotFoundError
+    try:
+        report["backend_version"]=version("mqt.qcec")
+    except PackageNotFoundError:
+        return dict(report,status="UNSUPPORTED",reason="optional mqt.qcec distribution metadata missing")
     try:
         result=qcec.verify_with_hard_timeout(a.to_qiskit(),b.to_qiskit(),deadline=limit)
     except TimeoutError:
