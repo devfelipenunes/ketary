@@ -22,9 +22,9 @@ Keyword-only arguments follow the implementation signatures; byte sizes above ar
 
 - Bit labels and Pauli labels are ordered highest wire to lowest wire; marginal labels use the caller's wire order.
 - Numeric angles are finite real radians. Native import is limited to supported canonical standard gates, no classical bits, parameters, layout or metadata. Native Python objects are trusted input, not a sandbox.
-- Dense statevector payload is 16 * 2**n bytes. Trace covers at most 8 qubits and defaults to 256 steps. Equal-index comparison retains the conservative historical two-trace budget, but streams current checkpoints. Explicit alignment compares at most 32 supplied checkpoint pairs. Operator comparison covers at most 8 qubits and budgets two matrices (32 * 4**n bytes).
+- Dense statevector payload is 16 * 2**n bytes. Trace covers at most 8 qubits and defaults to 256 steps. Equal-index comparison retains the conservative historical two-trace budget, but streams current checkpoints. Explicit alignment compares at most 32 supplied checkpoint pairs. Legacy operator equivalence covers at most 8 qubits and budgets two matrices (32 * 4**n bytes); metrics budgets three (48 * 4**n bytes). Neither bounds all temporaries.
 - Dictionary materialization has an explicit default cap of 65,536 potential outcomes. Full sampling uses the smaller of shots and state dimension for this conservative bound; marginal sampling first bounds the selected probability dictionary. Callers may explicitly increase the cap. None of these estimates bounds total RSS or every temporary allocation.
-- Result retains accepted amplitudes within the normalization tolerance. Norm and amplitudes report stored values; Born probabilities, Pauli expectation, sampling, distribution distance, entropy and fidelity normalize their calculations by the state norm. State residuals compare stored amplitudes. No physical measurements or hardware support.
+- Result retains accepted amplitudes within the normalization tolerance. Norm and amplitudes report stored values; Born probabilities, Pauli expectation, sampling, distribution distance, entropy and fidelity normalize their calculations by the state norm. State residuals compare stored amplitudes. Pure Result has no intermediate measurements; optional dynamic execution is separate. No hardware support.
 - JSON replay: schema 1, 1 MiB, 22 qubits, 10,000 gates, strict keys. Producer metadata is informational; no cross-version deterministic guarantee.
 
 ## Typing
@@ -56,3 +56,7 @@ See [SDK roadmap](sdk-roadmap.md) for direct gate aliases, the expanded gate reg
 ### Experimental verification engineering
 
 See [R01–R15 contracts and limits](verification-roadmap.md) for capabilities, operator metrics, compare/diff, Evidence, checkpoint contracts, StatisticalContract, QueryPlan and the optional QCEC adapter. All costly operations are explicit.
+
+## Pre-alpha behavior guide
+
+See [verification guide](verification-guide.md), [mathematical conventions](mathematical-guide.md) and [known limitations](known-limitations.md). Canonical examples use fluent gates; `.gates` and `.analyze()` remain compatibility surfaces. `analyze()` executes the default zero-input simulation explicitly. `copy()` and bound transforms return independent circuits. `capabilities` describes structural eligibility, not installed backend availability or resource sufficiency.

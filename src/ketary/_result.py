@@ -188,6 +188,7 @@ class _Math:
         return (a@a.conj().T)/self._r._norm_sq
 
     def purity(self, wires=None, *, max_bytes=64*1024**2):
+        _int(max_bytes,1)
         if wires is None:
             return 1.0
         rho=self.density_matrix(wires,max_bytes=max_bytes)
