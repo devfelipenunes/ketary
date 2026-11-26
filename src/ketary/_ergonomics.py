@@ -13,7 +13,12 @@ def _selection(c,wires):
     if isinstance(wires,(str,bytes,Mapping,set,frozenset)):
         raise ValueError("expected an ordered iterable of wires")
     try:
-        selected=tuple(c.gates._wire(w) for w in islice(iter(wires),min(c.num_qubits,4096)+1))
+        from ._circuit import Circuit
+        if type(c) is Circuit:
+            gate=c.gates
+            selected=tuple(gate._wire(w) for w in islice(iter(wires),min(c.num_qubits,4096)+1))
+        else:
+            selected=tuple(c.gates._wire(w) for w in islice(iter(wires),min(c.num_qubits,4096)+1))
     except TypeError as exc:
         raise ValueError("expected an ordered iterable of wires") from exc
     if not selected or len(selected)>min(c.num_qubits,4096) or len(set(selected))!=len(selected):
@@ -87,9 +92,14 @@ def _pairs(c,name,a,b,pairs,*params):
     selected=[]
     try:
         for row in islice(iter(pairs),10001):
-            if isinstance(row,(str,bytes,Mapping,set,frozenset)):
-                raise ValueError("expected ordered wire pair")
-            pair=tuple(islice(iter(row),3))
+            # Exact immutable tuples need neither ABC dispatch nor iterator
+            # materialization. Keep bounded consumption for every other row.
+            if type(row) is tuple:
+                pair=row
+            else:
+                if isinstance(row,(str,bytes,Mapping,set,frozenset)):
+                    raise ValueError("expected ordered wire pair")
+                pair=tuple(islice(iter(row),3))
             if len(pair)!=2:
                 raise ValueError("each pair must contain two distinct wires")
             selected.append(gate._pair(*pair))

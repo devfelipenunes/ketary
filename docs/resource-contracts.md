@@ -100,3 +100,8 @@ Scalar native Pauli expectations retain finite/imaginary validation and
 normalize by the stored squared norm, then use scalar comparisons to clip
 to [-1,1] with signed zero preserved. No change to work, memory, native
 math or public contract. See [scalar Pauli clamp](scalar-pauli-clamp.md).
+
+Exact tuple pair rows avoid redundant materialization, retaining _pair wire
+validation. Exact Circuit ordered selections reuse a call-local _Gates
+wrapper, not a cached mutable circuit. All other input and subclass paths,
+preflight limits and suffix transaction remain unchanged.
