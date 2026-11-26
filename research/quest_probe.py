@@ -99,6 +99,8 @@ class QuestProbe:
         rows=np.asarray(rows)
         if rows.dtype!=np.int32 or rows.shape!=(len(angles),3) or not rows.flags.c_contiguous:
             raise ValueError("invalid topology")
+        if len(angle_rows)>256 or len(angle_rows)*len(rows)*8>64*1024**2 or len(angle_rows)*(1<<n)*16>128*1024**2:
+            raise ValueError("batch payload exceeds bounds")
         angle_rows=np.asarray(angle_rows,dtype=np.float64,order="C")
         if angle_rows.ndim!=2 or angle_rows.shape[1]!=len(rows) or not 1<=len(angle_rows)<=256:
             raise ValueError("invalid angle rows")
