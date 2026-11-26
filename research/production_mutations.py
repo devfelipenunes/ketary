@@ -51,7 +51,7 @@ MUTANTS=(
 ("replay_extra_field","_replay.py","set(value)!=set(expected)","not set(expected)<=set(value)","tests/test_production_semantic_mutants.py::test_replay_unknown_field"),
 ("replay_schema_version","_replay.py","data[\"schema_version\"]!=_SCHEMA","False","tests/test_production_semantic_mutants.py::test_replay_unknown_schema"),
 ("replay_boolean_schema","_replay.py","type(data[\"schema_version\"]) is not int","not isinstance(data[\"schema_version\"],int)","tests/test_production_semantic_mutants.py::test_replay_boolean_schema"),
-("replay_producer_length","_replay.py","len(v)>100","len(v)>1000","tests/test_production_semantic_mutants.py::test_replay_producer_cap"),
+("replay_producer_length","_replay.py","len(item)>100","len(item)>1000","tests/test_production_semantic_mutants.py::test_replay_producer_cap"),
 ("replay_width_cap","_replay.py","_MAX_QUBITS=22","_MAX_QUBITS=23","tests/test_production_semantic_mutants.py::test_replay_width_cap"),
 ("replay_gate_cap","_replay.py","_MAX_GATES=10000","_MAX_GATES=10001","tests/test_production_semantic_mutants.py::test_replay_gate_cap"),
 ("replay_byte_cap","_replay.py","_MAX_BYTES=1024*1024","_MAX_BYTES=2*1024*1024","tests/test_production_semantic_mutants.py::test_replay_byte_cap"),
