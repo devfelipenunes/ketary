@@ -155,9 +155,9 @@ class Result:
         if wires is not None:
             # Explicit final Z-basis sampling of selected wires, without collapse.
             cap=_int(max_outcomes,1)
-            probabilities=self.math.marginal_probabilities(wires,max_outcomes=cap)
             if seed is not None:
                 seed=_int(seed)
+            probabilities=self.math.marginal_probabilities(wires,max_outcomes=cap)
             p=np.array(list(probabilities.values()))
             p/=p.sum()
             counts=np.random.default_rng(seed).multinomial(shots,p)
