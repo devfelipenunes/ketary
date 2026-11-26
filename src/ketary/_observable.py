@@ -235,10 +235,10 @@ def _pauli_product(left,right,*,mode="product"):
     table={("X","Y"):("Z",1j),("Y","Z"):("X",1j),("Z","X"):("Y",1j),
            ("Y","X"):("Z",-1j),("Z","Y"):("X",-1j),("X","Z"):("Y",-1j)}
     out={}
-    # Reject identically zero commutator/anticommutator pairs before building
-    # their labels or multiplying coefficients. Preserve the original
-    # contribution order, floating-point arithmetic and resource checks.
-    filtered=mode in ("commutator","anticommutator")
+    # Paired profiles favored filtering commutators, but anticommutators
+    # regressed when nearly all pairs survived. Retain the original path
+    # for anticommutators and products until an adaptive route is qualified.
+    filtered=mode=="commutator"
     am={p:_pauli_masks(p) for p in a} if filtered else {}
     bm={q:_pauli_masks(q) for q in b} if filtered else {}
     want=mode=="commutator"
