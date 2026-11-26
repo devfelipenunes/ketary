@@ -92,6 +92,7 @@ jobs:
           python -m research.closure_sampling_pinned --quick > closure-sampling-pinned.json
           python -m research.closure_arithmetic_compare > closure-arithmetic.json
           python -m research.closure_qec_metrics > closure-qec.json
+          python -m research.alpha_sweep_rss --reps 3 > alpha-sweep-rss.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: benchmark-results
@@ -102,6 +103,7 @@ jobs:
             closure-sampling-pinned.json
             closure-arithmetic.json
             closure-qec.json
+            alpha-sweep-rss.json
             environment.txt
 
   dependency-review:
