@@ -5,7 +5,7 @@ import ketary as q
 
 def test_public_exports():
     assert set(q.__all__) == {
-        "Circuit", "Result", "CheckResult", "TraceStep",
+        "Circuit", "Result", "CheckResult", "TraceStep", "ResourceReport",
         "ResourceLimit", "UnsupportedOperation", "from_qiskit", "bell", "ghz",
     }
     assert type(q.bell()) is q.Circuit

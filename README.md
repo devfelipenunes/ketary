@@ -33,6 +33,7 @@ The result is a snapshot. The second operation does not change the earlier resul
 
 - One Circuit API: construction, H/X/Y/Z/S/T/SDG/TDG/RX/RY/RZ/CX/CZ/SWAP/CCX, Bell/GHZ, import/export, composition and inverse.
 - Ideal statevector execution, terminal sampling, pure-state math and checks.
+- Explicit amplitude/probability, Pauli expectation, deterministic Born-rule explanation, logical resource reports and native text drawing. No hardware cost estimate.
 - Rotation signatures are `gates.rx(theta, wire)`, `ry`, and `rz`; angles are finite real radians. `circuit.append(native_gate, wires)` accepts the same supported gate subset; unbound parameters and open controls are rejected.
 - Trace is explicit and bounded; decomposition only lowers SWAP in this spike.
 - No classical bits, mid-circuit measurement, reset, layout, metadata, unbound parameters, hardware, alternative SDK or independent compiler.

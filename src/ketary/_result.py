@@ -34,6 +34,10 @@ class Result:
         self._n = a.size.bit_length()-1
 
     @property
+    def num_qubits(self):
+        return self._n
+
+    @property
     def math(self):
         return _Math(self)
 
@@ -56,6 +60,32 @@ class _Math:
 
     def statevector(self):
         return self._r._data.copy()
+
+    def amplitude(self,bits):
+        """Amplitude of a computational basis ket, in q[n-1]...q[0] order."""
+        if not isinstance(bits,str) or len(bits)!=self._r._n or any(b not in "01" for b in bits):
+            raise ValueError("invalid bit string")
+        return complex(self._r._data[int(bits,2)])
+
+    def probability(self,bits):
+        return float(abs(self.amplitude(bits))**2)
+
+    def explain_probability(self,bits):
+        """Deterministic, numerical Born-rule explanation, not symbolic proof."""
+        a=self.amplitude(bits)
+        p=self.probability(bits)
+        return f"p(|{bits}>) = |{a.real:.12g}{a.imag:+.12g}j|^2 = {p:.12g}"
+
+    def expectation(self,pauli):
+        """Expectation of a Hermitian Pauli string, leftmost character is q[n-1]."""
+        if not isinstance(pauli,str) or len(pauli)!=self._r._n or any(p not in "IXYZ" for p in pauli):
+            raise ValueError("expected a full-width uppercase I/X/Y/Z Pauli label")
+        from qiskit.quantum_info import Pauli, Statevector
+        # Native Pauli evaluation operates on the snapshot, not a dense operator.
+        value=complex(Statevector(self._r._data).expectation_value(Pauli(pauli)))
+        if abs(value.imag)>1e-9 or not math.isfinite(value.real):
+            raise ArithmeticError("invalid Hermitian Pauli expectation")
+        return float(value.real)
 
     def probabilities(self):
         return {format(i,f"0{self._r._n}b"):float(p) for i,p in enumerate(np.abs(self._r._data)**2)}
@@ -94,11 +124,9 @@ class _Checks:
     def probability(self,bits,expected,*,atol=1e-9):
         t=_tol(atol)
         expected=float(expected)
-        if not isinstance(bits,str) or len(bits)!=self._r._n or any(b not in "01" for b in bits):
-            raise ValueError("invalid bit string")
         if not math.isfinite(expected) or not 0<=expected<=1:
             raise ValueError("invalid probability")
-        a=float(abs(self._r._data[int(bits,2)])**2)
+        a=self._r.math.probability(bits)
         return CheckResult("PASS" if abs(a-expected)<=t else "FAIL",a,expected,t)
 
     def fidelity(self,target,*,minimum=1-1e-9):
