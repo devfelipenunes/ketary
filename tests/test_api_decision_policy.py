@@ -90,7 +90,9 @@ def test_bad_parameter_inputs_never_rename_or_partially_bind():
     assert c.to_qiskit()==before
     with pytest.raises(ValueError):c.sweep_rows([[.1,.2],[.3]])
     with pytest.raises(ValueError):c.sweep(a=[.1,.2],b=[.3])
-    with pytest.raises(q.UnsupportedOperation):c.evolve(q.X(0),time=.1)
+    c.evolve(q.X(0),time=.1)
+    assert set(c.parameters)=={a,b}
+    with pytest.raises(q.UnsupportedOperation):c.run()
 
 def test_evolution_time_is_not_implicit_symbolic_binding():
     t=q.Circuit.parameter("t")
