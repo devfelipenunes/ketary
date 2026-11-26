@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ketary"
+version = "0.1.0.dev0"
+description = "Experimental Python SDK for quantum programming on Qiskit"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = [
+    "qiskit==2.6.2",
+    "numpy>=1.26,<3",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+
+[project.urls]
+Repository = "https://github.com/devfelipenunes/ketary"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["ketary*"]
+namespaces = false
