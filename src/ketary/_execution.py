@@ -26,10 +26,16 @@ def prepare_initial(n,initial_state):
 def execute_ideal(qc,initial_state,max_bytes):
     _,SV=_sdk()
     if initial_state is None:
-        return Result(SV.from_instruction(qc).data)
+        return Result._from_evolution(SV.from_instruction(qc).data)
     snapshot=prepare_initial(qc.num_qubits,initial_state)
     if isinstance(snapshot,str):
         state=SV.from_label(snapshot)
-    else:
-        state=SV(snapshot.math.statevector(max_bytes=max_bytes))
-    return Result(state.evolve(qc).data)
+        return Result._from_evolution(state.evolve(qc).data)
+    # Pinned Qiskit Statevector.evolve uses shallow copy + new contraction
+    # arrays, including out-of-place global phase. Read-only input is
+    # borrowed only for the duration of this trusted unitary evolution.
+    # Empty/identity outputs may alias; _from_evolution detects that case.
+    from ._validation import _limit
+    _limit(snapshot.num_qubits,budget=max_bytes)
+    return Result._from_evolution(SV(snapshot._data).evolve(qc).data,
+                                  borrowed=snapshot._data)

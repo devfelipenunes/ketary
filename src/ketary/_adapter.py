@@ -17,9 +17,14 @@ def _gate_classes():
     from qiskit.circuit import library
     return Gate,{getattr(library,spec[0]):(name,spec) for name,spec in SPECS.items()}
 
+@lru_cache(maxsize=1)
+def _mcx_class():
+    from qiskit.circuit.library import MCXGate
+    return MCXGate
+
 def _validate_gate(gate,*,allow_parameters=False):
     Gate,classes=_gate_classes()
-    from qiskit.circuit.library import MCXGate
+    MCXGate=_mcx_class()
     from ._gate_specs import MCX_MIN_WIRES,MCX_MAX_WIRES
     if isinstance(gate,Gate) and gate.base_class is MCXGate:
         if (gate.name!="mcx" or not MCX_MIN_WIRES<=gate.num_qubits<=MCX_MAX_WIRES
@@ -56,6 +61,22 @@ def _validate(qc,*,allow_parameters=False):
         if item.clbits:
             raise UnsupportedOperation("classical operands unsupported")
         _validate_gate(item.operation,allow_parameters=allow_parameters)
+    if not math.isfinite(float(qc.global_phase)):
+        raise ValueError("invalid global phase")
+
+
+def _validate_bound_values(qc):
+    """Assignment on an already validated, exclusively owned unitary circuit.
+
+    Native assign_parameters preserves instruction kind, operands and layout.
+    Evaluated expressions still require finite real checks. External native
+    imports must use the complete _validate gate/metadata allowlist.
+    """
+    if qc.parameters:
+        raise UnsupportedOperation("bind all symbolic parameters before this operation")
+    for item in qc.data:
+        for value in item.operation.params:
+            _angle(value)
     if not math.isfinite(float(qc.global_phase)):
         raise ValueError("invalid global phase")
 

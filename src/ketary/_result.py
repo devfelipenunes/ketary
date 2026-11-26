@@ -50,13 +50,26 @@ class Result:
 
     def __init__(self, amplitudes):
         a = np.asarray(amplitudes, dtype=np.complex128)
+        self._initialize(a, take_ownership=False)
+
+    @classmethod
+    def _from_evolution(cls, amplitudes, *, borrowed=None):
+        """Consume a private, fresh native evolution output, never public input."""
+        a=np.asarray(amplitudes,dtype=np.complex128)
+        owned=(type(a) is np.ndarray and a.flags.owndata and a.flags.c_contiguous
+               and a.flags.writeable and (borrowed is None or not np.shares_memory(a,borrowed)))
+        result=cls.__new__(cls)
+        result._initialize(a,take_ownership=owned)
+        return result
+
+    def _initialize(self,a,*,take_ownership):
         if a.ndim != 1 or a.size < 2 or a.size & (a.size-1):
             raise ValueError("state must have dimension 2**n, n>=1")
         norm_sq=float(np.vdot(a,a).real)
         if not np.isfinite(a).all() or not math.isclose(norm_sq,1,rel_tol=0,abs_tol=1e-9):
             raise ValueError("state must be finite and normalized")
         self._norm_sq = norm_sq
-        self._data = a.copy()
+        self._data = a if take_ownership else a.copy()
         self._data.flags.writeable = False
         self._n = a.size.bit_length()-1
 
@@ -230,7 +243,8 @@ class _Math:
             if any(not isinstance(label,str) or len(label)!=self._r._n or set(label)-{"0","1"}
                    for label in labels) or len(set(labels))!=len(labels):
                 raise ValueError("expected distinct valid basis labels")
-            return {label:self.probability(label) for label in labels}
+            data,norm=self._r._data,self._r._norm_sq
+            return {label:float(abs(complex(data[int(label,2)]))**2/norm) for label in labels}
         if self._r._data.size>cap:
             raise ResourceLimit("probability dictionary exceeds outcome limit")
         return {format(i,f"0{self._r._n}b"):float(p) for i,p in enumerate(np.abs(self._r._data)**2/self._r._norm_sq)}

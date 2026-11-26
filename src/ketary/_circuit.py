@@ -177,7 +177,19 @@ class Circuit:
                 if len(vals)!=len(params):
                     raise ValueError("ordered binding must cover exactly the native parameter order")
                 bindings=dict(zip(params,vals,strict=True))
-        return self.from_parameterized(self._qc,bindings)
+        # Only internal circuits have the validated structure invariant.
+        # Native assignment preserves it; check evaluated numeric values,
+        # including expression overflow, without rechecking every gate kind.
+        from ._adapter import _validate_bound_values
+        from ._validation import _angle
+        if set(bindings)!=set(self._qc.parameters):
+            raise ValueError("bindings must cover exactly the template parameters")
+        bound=self._qc.assign_parameters({key:_angle(value) for key,value in bindings.items()},
+                                         inplace=False,flat_input=True)
+        _validate_bound_values(bound)
+        c=Circuit.__new__(Circuit)
+        c._qc=bound
+        return c
 
     def sweep(self,**values):
         """Construct a bounded zipped parameter plan without execution."""

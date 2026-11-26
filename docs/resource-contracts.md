@@ -13,7 +13,7 @@ Python objects, serialization, allocator fragmentation and child processes.
 | Observable / aggregate | Up to 256 terms per observable, up to 32 predicates | Up to 8192 Pauli evaluations; no aggregate time guarantee |
 | Density / Schmidt | State-sized input and output, matrix work | Existing separate payload/rank bounds, not scratch/RSS |
 | QueryPlan | Exactly one simulation; selected dense outputs | Sum state and matrix payload estimate; Python real/imag lists add overhead |
-| SweepPlan | Up to 32 bound result snapshots | Aggregate snapshot payload preflight, not total peak RSS |
+| SweepPlan | Up to 32 privately retained bound native circuits and result snapshots | Aggregate snapshot payload preflight, not total peak RSS |
 | Trace / compare | Prefix state evolution, bounded retained states | Existing conservative budgets unchanged |
 | External QCEC | Optional backend worker | Deadline and width/gate limits, not child RSS |
 
@@ -44,3 +44,5 @@ objects and dictionaries are caller-owned copies, except report dicts
 themselves are mutable legacy records. No implicit cache or rerun.
 
 Repeated/placed composition preflights 10,000 placements and 100,000 appended operations on new expansion paths. This bounds instruction count, not native peak memory. Grouped math preflights 1..32 requests and unique-label state entries against max_work=64*1024**2 by default. This is a workload proxy, not a byte or timing guarantee. Legacy one-block application remains uncapped by the new expansion ceiling.
+
+PERF04–06: private trusted unitary evolution borrows read-only Result input and adopts only a fresh, owning contiguous native output; aliasing or view outputs are copied. Public construction/export remains defensive. Complete binding of a validated internal circuit checks bound numeric values; external from_parameterized continues full structural validation. SweepPlan freezes independent bound native circuits rather than serializing/replaying JSON; it retains the same row, width, operation and aggregate state-payload caps. No native simulator or public schema change.
