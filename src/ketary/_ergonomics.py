@@ -184,6 +184,13 @@ class SweepPlan:
         # Exact Circuit instances can reuse the complete finite row preflight.
         # Subclasses keep the public bind dispatch. No source snapshot is cached;
         # assignment and validation of evaluated values happen for every row.
+        # Iterating caller-owned rows/columns can also grow the source
+        # without changing parameter identities. Recheck the existing caps
+        # for the final source before creating any bound row.
+        if circuit.num_clbits:
+            raise UnsupportedOperation("sweep requires symbolic unitary circuit")
+        if circuit.num_qubits>12 or len(circuit._qc.data)>256 or len(params)>32:
+            raise ResourceLimit("sweep supports <=12 qubits, 256 operations, 32 parameters")
         if type(circuit) is Circuit:
             # Iterating caller-owned rows/columns can mutate the source.
             # Recheck completeness once after all user input is consumed,

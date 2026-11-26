@@ -406,16 +406,22 @@ def phase_oracle(marked):
     if any(len(label)!=n for label in labels) or len(set(labels))!=len(labels):
         raise ValueError("expected distinct equal-width labels")
     c=Circuit(n)
+    # Keep caller label order; cancel only adjacent X masks between marks.
+    # Every marked phase is conjugated by its own mask and the final mask
+    # is uncomputed. No assumption about the input state or clean ancillas.
+    current=set()
     for label in labels:
-        zeros=[i for i,b in enumerate(reversed(label)) if b=="0"]
-        if zeros:
-            c.x(zeros)
+        wanted={i for i,b in enumerate(reversed(label)) if b=="0"}
+        change=sorted(current^wanted)
+        if change:
+            c.x(change)
         if n==2:
             c.cz(0,1)
         else:
             c.h(n-1).mcx(range(n-1),n-1).h(n-1)
-        if zeros:
-            c.x(zeros)
+        current=wanted
+    if current:
+        c.x(sorted(current))
     return c
 
 
