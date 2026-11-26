@@ -256,7 +256,8 @@ def decode_phase_estimation(result,*,precision,atol=1e-9):
         raise ValueError("expected precision counting wires plus one eigenstate wire")
     report=_decode_peak(result,range(p-1,-1,-1),atol)
     report["phase"]=None if report["label"] is None else int(report["label"],2)/(1<<p)
-    return report
+    from ._reports import PhaseEstimateReport
+    return PhaseEstimateReport(report)
 
 def decode_bernstein_vazirani(result,*,atol=1e-9):
     """Decode the modal input label of the documented parity-oracle example."""
@@ -267,7 +268,8 @@ def decode_bernstein_vazirani(result,*,atol=1e-9):
     n=result.num_qubits-1
     if not 1<=n<=16:
         raise ResourceLimit("decoder supports 1..16 input wires plus target")
-    return _decode_peak(result,range(n-1,-1,-1),atol)
+    from ._reports import ModalOutcomeReport
+    return ModalOutcomeReport(_decode_peak(result,range(n-1,-1,-1),atol))
 
 def decode_teleportation(result):
     """Return empirical output-bit frequencies, not a fidelity estimate."""

@@ -56,7 +56,7 @@ class _Debug:
         """Explicit zero-input evolution through one requested checkpoint."""
         self._c._require_bound()
         qc=self._c._qc
-        index=_int(index)
+        index=self._c._checkpoint_index(index)
         if index>len(qc.data):
             raise ValueError("checkpoint outside circuit")
         if qc.num_qubits>8 or index>_int(max_steps):
@@ -142,6 +142,7 @@ class _Debug:
         may repeat on one side. Each requested prefix is explicitly evolved.
         """
         from itertools import islice
+        from collections.abc import Mapping
         from ._circuit import Circuit
         if not isinstance(reference,Circuit):
             raise TypeError("expected Circuit reference")
@@ -158,10 +159,12 @@ class _Debug:
             raise ValueError("expected 1..32 checkpoint pairs")
         alignment=[]
         for pair in raw:
+            if isinstance(pair,(str,bytes,set,frozenset,Mapping)):
+                raise ValueError("expected an ordered pair of checkpoint indices or names")
             values=tuple(islice(iter(pair),3))
             if len(values)!=2:
                 raise ValueError("checkpoint pair requires two indices")
-            i,j=map(_int,values)
+            i,j=a._checkpoint_index(values[0]),b._checkpoint_index(values[1])
             if i>len(a._qc.data) or j>len(b._qc.data):
                 raise ValueError("checkpoint outside circuit")
             if alignment and (i<alignment[-1][0] or j<alignment[-1][1] or (i,j)==alignment[-1]):
