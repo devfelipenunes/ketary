@@ -4,9 +4,7 @@ Status: candidate, requires exact-head CI and review.
 
 Use validated small blocks and native in-place composition for bound
 batch/apply, with suffix/phase rollback on ordinary native exceptions.
-Self-application copies the source. Keep symbolic/classical batch and
-compute-action-uncompute on the existing conservative paths until their
-semantics are independently validated. No concurrency guarantee.
+Self-application copies the source. Unitary symbolic gate batches now use suffix rollback after native parameter-table probes and public regression tests; symbolic composition, classical batches and compute-action-uncompute retain their conservative paths. No concurrency guarantee.
 Pure residual computation belongs beside snapshot checks, Pauli label
 validation in the foundation; remove two reverse import edges without
 moving public classes or changing schemas. Test all explicit import

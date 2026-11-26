@@ -317,7 +317,7 @@ angle sequence with the existing `pairs=` spelling. One angle per pair,
 sequential order including repeated pairs; no implicit Cartesian expansion.
 A scalar angle still broadcasts unchanged. All pair/angle inputs are bounded
 and validated before mutation, with the existing 10,000-pair cap and native
-suffix rollback or staged symbolic/classical copy. No execution or new gates.
+suffix rollback for unitary gate batches (including symbolic) or staged classical copy. No execution or new gates.
 
 ```python
 c=q.Circuit(4).cp([.1,.2,.3],pairs=[(2,3),(1,3),(0,3)])
