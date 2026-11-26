@@ -41,6 +41,7 @@
     "_algorithms->_classical": "Decoder validates existing ShotResult.",
     "_algorithms->_observable": "Algorithm factory constructs existing immutable Observable.",
     "_classical->_adapter": "Dynamic path delegates native gate admission.",
-    "_adapter->_gate_specs": "Native admission consults foundational gate registry."
+    "_adapter->_gate_specs": "Native admission consults foundational gate registry.",
+    "_verification->_result": "Explicit witness comparisons/minimization share a call-local validated immutable input snapshot; exact Circuit path only, no cached outputs or changed proof scope."
   }
 }
