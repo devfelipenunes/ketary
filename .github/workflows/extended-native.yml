@@ -1,0 +1,93 @@
+name: Extended native gate and hardware evidence
+on:
+  pull_request:
+    paths:
+      - 'research/quest_extended/**'
+      - 'research/quest_extended*.py'
+      - 'research/qiskit_capi/**'
+      - '.github/workflows/extended-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [1101,2202,3303]
+    env:
+      OMP_NUM_THREADS: 1
+      OPENBLAS_NUM_THREADS: 1
+      MKL_NUM_THREADS: 1
+      RAYON_NUM_THREADS: 1
+      QUEST_COMMIT: 9d7618d7263e3bfba433b88cf1eac0647f08fa0a
+      SEED: ${{ matrix.seed }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version-file: '.python-version'
+      - name: Prepare pinned native dependencies
+        run: |
+          python -m pip install -c constraints/linux-py312.txt -r requirements.txt
+          python -m pip install -c constraints/linux-py312.txt qiskit-aer==0.18.4
+          python -m pip install --no-deps -e .
+          python -m pip install 'setuptools>=77' wheel
+          python -m pip install --no-build-isolation --no-deps ./research/qiskit_capi
+          git init "$RUNNER_TEMP/quest"
+          git -C "$RUNNER_TEMP/quest" remote add origin https://github.com/QuEST-Kit/QuEST.git
+          git -C "$RUNNER_TEMP/quest" fetch --depth=1 origin "$QUEST_COMMIT"
+          git -C "$RUNNER_TEMP/quest" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/quest" rev-parse HEAD)" = "$QUEST_COMMIT"
+          lscpu > host.txt
+          lscpu -C >> host.txt
+          c++ --version >> host.txt
+          python -m pip freeze > environment.txt
+          git rev-parse HEAD > commit.txt
+          git -C "$RUNNER_TEMP/quest" rev-parse HEAD > quest-commit.txt
+      - name: Portable and host-native on the same runner
+        run: |
+          order="portable host-native"
+          if [ "$((SEED % 2))" = 0 ]; then order="host-native portable"; fi
+          echo "$order" > build-order.txt
+          for variant in $order; do
+            flags=""
+            if [ "$variant" = host-native ]; then flags="-march=native"; fi
+            cmake -S research/quest_extended -B "$RUNNER_TEMP/$variant" -DQUEST_SOURCE="$RUNNER_TEMP/quest" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="$flags"
+            cmake --build "$RUNNER_TEMP/$variant" --target ketary_quest_extended --parallel 2
+            lib="$RUNNER_TEMP/$variant/libketary_quest_extended.so"
+            python research/quest_extended_benchmark.py --library "$lib" --output "$variant.json" --seed "$SEED" --widths 4 8 12 --repetitions 10
+            objdump -d "$lib" > "$variant-bridge-assembly.txt"
+          done
+      - name: Optional CPU counters (separate process-wide diagnostic)
+        run: |
+          if ! command -v perf >/dev/null; then echo 'UNAVAILABLE: perf missing' > perf-status.txt; exit 0; fi
+          if ! perf stat -e cycles,instructions,cache-references,cache-misses -- true 2> perf-probe.txt; then
+            echo 'UNAVAILABLE: perf counter access denied or unsupported' > perf-status.txt
+            exit 0
+          fi
+          for variant in portable host-native; do
+            lib="$RUNNER_TEMP/$variant/libketary_quest_extended.so"
+            perf stat -e cycles,instructions,cache-references,cache-misses -o "$variant-perf.txt" -- python research/quest_extended_benchmark.py --library "$lib" --output "$variant-perf-run.json" --seed "$SEED" --widths 8 --repetitions 3
+          done
+          echo 'MEASURED: process-wide counters; not kernel-only' > perf-status.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: extended-native-${{ matrix.seed }}
+          path: |
+            *.json
+            *-assembly.txt
+            *-perf.txt
+            perf-probe.txt
+            perf-status.txt
+            host.txt
+            environment.txt
+            commit.txt
+            quest-commit.txt
+            build-order.txt
