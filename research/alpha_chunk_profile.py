@@ -36,7 +36,7 @@ def fixture(n,seed,operation):
 
 def calculate(operation,state,norm,wires,terms,chunk):
     if operation=="topk":
-        return topk_reference(state,32) if not chunk else topk_chunks(state,32,chunk)
+        return topk_reference(state,32) if not chunk else topk_chunks(state,32,abs(chunk),exact=chunk<0)
     if operation=="marginal":
         return marginal_reference(state,state.size.bit_length()-1,wires,norm) if not chunk else marginal_chunks(state,wires,norm,chunk)
     normalized=state/np.sqrt(norm)
@@ -60,11 +60,13 @@ def profile(seed,reps,quick=False):
         baseline=calculate(op,state,norm,wires,terms,0)
         sizes=(0,256,1024,4096,8192) if not quick else (0,64,256)
         sizes=tuple(s for s in sizes if s<=state.size)
+        if op=="topk":sizes+=tuple(-s for s in sizes if s>0)
         raw={s:[] for s in sizes};checks={s:[] for s in sizes}
         for _ in range(reps):
             for s in rng.sample(list(sizes),len(sizes)):
                 t=time.perf_counter_ns();actual=calculate(op,state,norm,wires,terms,s);dt=(time.perf_counter_ns()-t)/1e6
                 raw[s].append(dt);checks[s].append(compare(op,actual,baseline))
+                if op=="topk" and s<0:assert actual==baseline
         rows.append(dict(n=n,operation=op,seed=seed,state_bytes=state.nbytes,
             paths={str(s):dict(**stats(raw[s]),checks=checks[s]) for s in sizes}))
     return rows
@@ -80,11 +82,27 @@ def worker(n,seed,op,chunk):
     return dict(n=n,seed=seed,operation=op,chunk=chunk,before_peak_kib=before,
                 peak_kib=peak,elapsed_ms=elapsed,check=compare(op,actual,expected))
 
+def near_ties():
+    rows=[]
+    for seed in (1101,2202,3303):
+        rng=np.random.default_rng(seed)
+        state=np.exp(1j*rng.uniform(-np.pi,np.pi,1024))
+        state/=np.linalg.norm(state)
+        expected=topk_reference(state,32)
+        for chunk in (256,1024):
+            vector=topk_chunks(state,32,chunk)
+            exact=topk_chunks(state,32,chunk,exact=True)
+            assert exact==expected
+            rows.append(dict(seed=seed,chunk=chunk,vector_ordered_match=vector==expected,
+                vector_overlap=len(set(vector)&set(expected)),exact_ordered_match=True))
+    return rows
+
 def isolated():
     if platform.system()!="Linux":raise RuntimeError("ru_maxrss unit is KiB on Linux")
     env=dict(os.environ,OMP_NUM_THREADS="1",OPENBLAS_NUM_THREADS="1",MKL_NUM_THREADS="1")
     configurations=[(seed,op,chunk) for seed in (1101,2202,3303)
                     for op in ("topk","marginal","variance") for chunk in (0,1024,8192)]
+    configurations.extend((seed,"topk",-1024) for seed in (1101,2202,3303))
     random.Random(1101).shuffle(configurations)
     return [json.loads(subprocess.check_output([sys.executable,"-m","research.alpha_chunk_profile","--worker",
         "--n","18","--seed",str(seed),"--operation",op,"--chunk",str(chunk)],env=env,text=True))
@@ -95,12 +113,12 @@ if __name__=="__main__":
     p.add_argument("--quick",action="store_true");p.add_argument("--rss",action="store_true")
     p.add_argument("--worker",action="store_true");p.add_argument("--n",type=int,default=18,choices=(10,14,18))
     p.add_argument("--seed",type=int,default=1101);p.add_argument("--operation",choices=("topk","marginal","variance"),default="topk")
-    p.add_argument("--chunk",type=int,default=0,choices=(0,256,1024,4096,8192))
+    p.add_argument("--chunk",type=int,default=0,choices=(0,256,1024,4096,8192,-1024))
     a=p.parse_args()
     if a.reps<1:p.error("positive repetitions required")
     result=worker(a.n,a.seed,a.operation,a.chunk) if a.worker else dict(
-        scope="research kernels; baseline chunk 0 means existing route; peak RSS lifetime high-water, not incremental memory",
+        scope="research kernels; baseline chunk 0 means existing route; negative topk chunk uses exact scalar scoring; peak RSS lifetime high-water, not incremental memory",
         python=platform.python_version(),numpy=version("numpy"),qiskit=version("qiskit"),
         rows=[r for seed in (1101,2202,3303) for r in profile(seed,a.reps,a.quick)],
-        isolated_rss=isolated() if a.rss else [])
+        near_ties=near_ties(),isolated_rss=isolated() if a.rss else [])
     print(json.dumps(result,indent=2,allow_nan=False))

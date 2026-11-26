@@ -34,3 +34,15 @@ ranking equality. A large-state improvement cannot justify a regression
 or semantic change in small states. Test near-tie adversarial inputs before
 runtime promotion. No general speedup claim. Research should not compete
 with an unbounded number of additional PRs.
+
+## Near-tie negative control
+
+A preliminary local NumPy 2.3.5 experiment with identical scalar and vector
+ranking algorithms (not the pinned SDK environment) found mismatched
+ordering for all three seeded equal-magnitude complex-phase fixtures.
+Preserve this as a negative result. Add an exact scalar-scoring chunk
+variant: compute the same abs(v)**2 score as the current heap for every
+amplitude, then lexicographically select/merge by score and index. Negative
+chunk labels in the profile denote this variant, not negative block sizes.
+Require ordered equality on every measured exact-scoring route and all
+near-tie fixtures; vector scores are experimental even when faster.

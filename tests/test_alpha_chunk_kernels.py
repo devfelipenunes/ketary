@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit
 from research.alpha_chunk_kernels import topk_reference,topk_chunks,marginal_reference,marginal_chunks,wire_components
-from research.alpha_chunk_profile import profile
+from research.alpha_chunk_profile import profile,near_ties
 
 @pytest.mark.parametrize("chunk",[1,7,64,256])
 def test_topk_exact_real_ties_and_order(chunk):
@@ -11,6 +11,7 @@ def test_topk_exact_real_ties_and_order(chunk):
     state/=np.linalg.norm(state)
     for k in (1,4,8,256):
         assert topk_chunks(state,k,chunk)==topk_reference(state,k)
+        assert topk_chunks(state,k,chunk,exact=True)==topk_reference(state,k)
 
 @pytest.mark.parametrize("wires",[(3,0),(0,3),(2,1,0),(3,2,1,0)])
 def test_chunked_marginal_ordered_oracle(wires):
@@ -37,7 +38,12 @@ def test_component_partition_is_structural():
 def test_chunk_profile_smoke():
     rows=profile(1101,1,quick=True)
     assert len(rows)==3
-    assert all(len(r["paths"])==3 for r in rows)
+    assert all(len(r["paths"])==(5 if r["operation"]=="topk" else 3) for r in rows)
     # Record rank disagreements instead of silently accepting a vectorized
     # kernel as a drop-in replacement; this is an experiment only.
     assert all(r["paths"]["0"]["checks"][0]["ordered_match"] is True for r in rows if r["operation"]=="topk")
+
+
+def test_scalar_scores_preserve_near_ties():
+    rows=near_ties()
+    assert len(rows)==6 and all(r["exact_ordered_match"] for r in rows)

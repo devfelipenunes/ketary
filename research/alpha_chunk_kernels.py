@@ -10,7 +10,7 @@ def topk_reference(state,k):
     return tuple(heapq.nlargest(min(k,len(state)),range(len(state)),
                                 key=lambda i:(abs(state[i])**2,-i)))
 
-def topk_chunks(state,k,chunk):
+def topk_chunks(state,k,chunk,*,exact=False):
     # Keep at most k candidates plus one block. Order by descending
     # vectorized magnitude and ascending basis index. Scalar and vector
     # complex magnitude rounding can differ: explicitly qualify the ordered
@@ -20,7 +20,8 @@ def topk_chunks(state,k,chunk):
     for start in range(0,len(state),chunk):
         block=state[start:start+chunk]
         idx=np.arange(start,start+len(block),dtype=np.int64)
-        p=np.abs(block)**2
+        p=(np.fromiter((abs(v)**2 for v in block),dtype=np.float64,count=len(block))
+           if exact else np.abs(block)**2)
         order=np.lexsort((idx,-p))[:k]
         selected=np.concatenate((selected,idx[order]))
         scores=np.concatenate((scores,p[order]))
