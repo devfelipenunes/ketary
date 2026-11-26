@@ -4,6 +4,8 @@ on:
     paths:
       - 'research/native_stage_profile.py'
       - 'tests/test_native_stage_profile.py'
+      - 'research/angle_validation_cost.py'
+      - 'tests/test_angle_validation_cost.py'
       - '.github/workflows/native-stage-profile.yml'
       - 'src/ketary/**'
   workflow_dispatch:
@@ -36,14 +38,16 @@ jobs:
           python -m pip freeze > environment.txt
           lscpu > host.txt
           git rev-parse HEAD > revision.txt
-      - run: python -m pytest -q tests/test_native_stage_profile.py
+      - run: python -m pytest -q tests/test_native_stage_profile.py tests/test_angle_validation_cost.py
       - run: python -m research.native_stage_profile --output native-stages.json --seed "$SEED"
+      - run: python -m research.angle_validation_cost --output angle-validation.json --seed "$SEED"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: native-stages-${{ matrix.seed }}
           path: |
             native-stages.json
+            angle-validation.json
             environment.txt
             host.txt
             revision.txt
