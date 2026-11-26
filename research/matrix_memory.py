@@ -13,7 +13,9 @@ from algorithm_matrix import ghz_native,state_for
 def worker(n,variant):
     data=state_for(n,7100)
     c=ghz_native(n)
-    sdk=q.from_qiskit(c)
+    if variant not in ("native","ketary"):
+        raise ValueError("unknown RSS variant")
+    sdk=q.from_qiskit(c) if variant=="ketary" else None
     before=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     out=Statevector(data).evolve(c).data.copy() if variant=="native" else sdk.run(initial_state=data).math.statevector()
     after=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -31,4 +33,4 @@ if __name__=="__main__":
                 for rep in range(3):
                     raw=subprocess.check_output([sys.executable,__file__,"--worker",str(n),"--variant",variant],text=True)
                     rows.append({"rep":rep,**json.loads(raw)})
-        a.output.write_text(json.dumps({"scope":"isolated process high-water RSS; includes input preparation/imports, not allocation delta","revision":a.label,"rows":rows},indent=2))
+        a.output.write_text(json.dumps({"scope":"isolated process high-water RSS; includes shared imports and variant-specific input preparation, not allocation delta","revision":a.label,"rows":rows},indent=2))
