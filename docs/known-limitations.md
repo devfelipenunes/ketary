@@ -39,3 +39,5 @@ Explicit native Kraus channel execution after ideal evolution (<=4 wires, 16 Kra
 Native dynamic conditions may nest to three levels with gate-only leaves and top-level measurement/reset; loops, variables, stretches and conditional measurement/reset remain unsupported. Count budget includes both alternatives at every level. No hardware qualification.
 
 Local Kraus channels may be explicitly mapped to <=4 ordered wires on an <=8-wire ideal circuit after evolution. No noisy mid-circuit channels, implicit routing or hardware execution. Native composition is caller-owned and final Kraus map is validated.
+
+Explicit project_annotated allows mathematical analysis of annotated gate-only native input while returning a separate preserved native snapshot. Structural preservation applies to that native output, not to the logical projection or its subsequent transforms. Strict from_qiskit, synthesis, logical replay and target compilation rules remain unchanged.
