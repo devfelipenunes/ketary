@@ -151,6 +151,10 @@ class SweepPlan:
         params={p.name:p for p in circuit.parameters}
         if len(params)!=len(circuit.parameters):
             raise ValueError("sweep requires unique parameter names")
+        self._initialize_rows(circuit,rows,params)
+
+    def _initialize_rows(self,circuit,rows,params):
+        # Private path only: callers preflight complete, finite, bounded rows.
         # Native assignment returns independent circuits; JSON remains an
         # external replay format, not an in-memory execution transport.
         payloads=tuple(circuit.bind({params[name]:v for name,v in row}) for row in rows)
@@ -192,8 +196,14 @@ def _sweep_rows(circuit,rows):
         raise ValueError("expected ordered parameter rows") from exc
     if not 1<=len(parsed)<=32:
         raise ResourceLimit("sweep requires 1..32 rows")
-    return SweepPlan(circuit,{p.name:tuple(row[i] for row in parsed)
-                              for i,p in enumerate(params)})
+    names={p.name:p for p in params}
+    if len(names)!=len(params):
+        raise ValueError("sweep requires unique parameter names")
+    # Already validated row-major input. Do not transpose to columns only
+    # to validate and transpose it back; retain the same immutable rows.
+    plan=SweepPlan.__new__(SweepPlan)
+    plan._initialize_rows(circuit,tuple(tuple(zip(names,row,strict=True)) for row in parsed),names)
+    return plan
 
 
 def _evolve(c,observable,time):
