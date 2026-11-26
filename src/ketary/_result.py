@@ -213,8 +213,25 @@ class _Math:
             raise ArithmeticError("observable expectation is not finite")
         return values
 
-    def probabilities(self, *, max_outcomes=65536):
-        if self._r._data.size>_int(max_outcomes,1):
+    def probabilities(self, *, bits=None, max_outcomes=65536):
+        """All or selected basis probabilities, without an implicit rerun."""
+        cap=_int(max_outcomes,1)
+        if bits is not None:
+            from collections.abc import Mapping
+            from itertools import islice
+            if isinstance(bits,(str,bytes,Mapping,set,frozenset)):
+                raise ValueError("expected ordered basis labels")
+            try:
+                labels=tuple(islice(iter(bits),min(cap,65536)+1))
+            except TypeError as exc:
+                raise ValueError("expected ordered basis labels") from exc
+            if not 1<=len(labels)<=min(cap,65536):
+                raise ResourceLimit("selected probability query exceeds outcome limit")
+            if any(not isinstance(label,str) or len(label)!=self._r._n or set(label)-{"0","1"}
+                   for label in labels) or len(set(labels))!=len(labels):
+                raise ValueError("expected distinct valid basis labels")
+            return {label:self.probability(label) for label in labels}
+        if self._r._data.size>cap:
             raise ResourceLimit("probability dictionary exceeds outcome limit")
         return {format(i,f"0{self._r._n}b"):float(p) for i,p in enumerate(np.abs(self._r._data)**2/self._r._norm_sq)}
 
