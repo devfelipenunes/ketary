@@ -124,6 +124,7 @@ def test_external_rejects_invalid_deadline_and_width():
 @pytest.mark.parametrize("counts",[
     (("0",50),("0",50)),(("0",99),),(("2",100),),
     (("0",101),("1",-1)),(("0",True),("1",99)),
+    (("0","100"),), (("0",None),), ((0,100),),
 ])
 def test_statistical_rejects_malformed_measured_counts(counts):
     r=q.ShotResult(100,1,1,counts,((1,0,0),))
