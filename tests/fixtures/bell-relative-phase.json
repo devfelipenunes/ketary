@@ -1,0 +1,66 @@
+{
+  "reference": {
+    "schema_version": 1,
+    "num_qubits": 2,
+    "global_phase": 0,
+    "producer": {
+      "ketary": "0.1.0.dev0",
+      "qiskit": "2.6.2",
+      "python": "3.12"
+    },
+    "operations": [
+      {
+        "gate": "h",
+        "wires": [
+          0
+        ],
+        "params": []
+      },
+      {
+        "gate": "cx",
+        "wires": [
+          0,
+          1
+        ],
+        "params": []
+      }
+    ]
+  },
+  "observed": {
+    "schema_version": 1,
+    "num_qubits": 2,
+    "global_phase": 0,
+    "producer": {
+      "ketary": "0.1.0.dev0",
+      "qiskit": "2.6.2",
+      "python": "3.12"
+    },
+    "operations": [
+      {
+        "gate": "h",
+        "wires": [
+          0
+        ],
+        "params": []
+      },
+      {
+        "gate": "cx",
+        "wires": [
+          0,
+          1
+        ],
+        "params": []
+      },
+      {
+        "gate": "z",
+        "wires": [
+          0
+        ],
+        "params": []
+      }
+    ]
+  },
+  "distribution": "PASS",
+  "state": "FAIL",
+  "seed": 42
+}

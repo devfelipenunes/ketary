@@ -85,6 +85,16 @@ print(c.resources.summary(), optimized.resources.summary())
 
 This explicit, nonmutating optimization cancels adjacent inverse pairs on identical ordered wires. It preserves global phase, does not apply approximate rotation cancellation or commute gates, and never runs a simulation. It is not device-aware transpilation. Reduced gate count is not a measured hardware speedup.
 
+## Circuit replay
+
+```python
+payload = q.bell().gates.z(0).to_json()
+restored = q.Circuit.from_json(payload)
+restored.test.equivalent(q.bell().gates.z(0)).require()
+```
+
+The version-1 JSON format records producer versions, global phase, width and the supported ordered gate sequence. It preserves logical semantics, not native register names or annotations. Parsing is strict, allowlisted and bounded to 1 MiB, 22 qubits and 10,000 gates. No execution, pickle, eval, filesystem access or callable deserialization occurs. Producer versions are recorded for reproduction, not a cross-version numerical guarantee. Run and sampling remain explicit; store seeds alongside replay cases.
+
 ## Validation
 
 Run all tests, including upstream Qiskit probes. Missing Qiskit is a failure, not a passing skip. Historical local PoC results are not evidence of this branch's CI.
