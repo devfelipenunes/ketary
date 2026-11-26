@@ -48,3 +48,5 @@ Optional local dynamic execution uses one classical register and limited
 feedforward; it is not a hardware, arbitrary-control-flow or noise SDK.
 Advanced algorithms outside the documented reference examples are future work,
 not required to close the bounded pre-alpha engineering scope.
+
+For verification engineering, additionally run `python research/public_defect_cases.py`, `python research/verification_scaling.py --repetitions 30` and, in the separately audited QCEC environment, `python research/verification_scaling.py --external --repetitions 30`. Capture artifacts and raw timing/RSS data. Different verification guarantees must not be used as interchangeable speed comparisons.

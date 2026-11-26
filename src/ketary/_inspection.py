@@ -51,11 +51,10 @@ def verify_result(result, *, probabilities, expectations, normalized, atol):
         labels=_labels(values)
         for label in labels: requested.append((name,label,values[label]))
     if len(requested)+int(normalized)>32: raise ResourceLimit("aggregate check cap exceeded")
-    records={}
-    if normalized: records["normalized"]=result.test.normalized(atol=t).to_dict()
-    for kind,label,expected in requested:
-        check=getattr(result.test,kind)(label,expected,atol=t)
-        records[f"{kind}:{label}"]=check.to_dict()
-    statuses=[v["status"] for v in records.values()]
-    status="FAIL" if "FAIL" in statuses else "UNSUPPORTED" if not statuses or "UNSUPPORTED" in statuses else "PASS"
-    return {"schema_version":1,"scope":"explicit ideal snapshot checks only","status":status,"checks":records}
+    from ._contracts import _evaluate
+    p=[(label,value) for kind,label,value in requested if kind=="probability"]
+    e=[(label,value) for kind,label,value in requested if kind=="expectation"]
+    report=_evaluate(result,p,e,normalized,t).to_dict()
+    # Preserve the existing public dictionary scope and empty-check behavior.
+    report["scope"]="explicit ideal snapshot checks only"
+    return report

@@ -9,6 +9,14 @@ class ShotResult:
     seed: int | None
     _counts: tuple[tuple[str,int], ...]
 
+    measurements: tuple[tuple[int,int,int], ...] = ()
+    backend: str = "unknown"
+    backend_version: str = "unknown"
+
+    @property
+    def measured_bits(self):
+        return tuple(sorted({bit for _,_,bit in self.measurements}))
+
     @property
     def counts(self):
         return dict(self._counts)
@@ -46,4 +54,8 @@ def run_shots(circuit,*,shots,seed,max_bytes):
     if (sum(counts.values())!=shots or any(len(label)!=qc.num_clbits or set(label)-{"0","1"}
         or type(count) is not int or count<=0 for label,count in counts.items())):
         raise RuntimeError("unexpected native count schema")
-    return ShotResult(shots,qc.num_clbits,seed,tuple(sorted(counts.items())))
+    from importlib.metadata import version
+    measurements=tuple((i+1,qc.find_bit(item.qubits[0]).index,qc.find_bit(item.clbits[0]).index)
+                       for i,item in enumerate(qc.data) if item.operation.name=="measure")
+    return ShotResult(shots,qc.num_clbits,seed,tuple(sorted(counts.items())),measurements,
+                      "qiskit-aer/statevector",version("qiskit-aer"))

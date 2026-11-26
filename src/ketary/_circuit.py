@@ -27,6 +27,17 @@ class Circuit:
         return c
 
     @property
+    def capabilities(self):
+        """Runtime capability report, not a second circuit model."""
+        classical=bool(self.num_clbits)
+        unbound=bool(self._qc.parameters)
+        return {"mode":"classical" if classical else "symbolic" if getattr(self,"_symbolic",False) else "unitary",
+                "run_statevector":not classical and not unbound,
+                "run_shots":classical and not unbound,
+                "bound_transforms":not classical and not unbound,
+                "bind":not classical,"logical_replay":not classical and not unbound}
+
+    @property
     def num_clbits(self):
         return self._qc.num_clbits
 
@@ -152,6 +163,15 @@ class Circuit:
             raise ValueError("bindings must cover exactly the template parameters")
         bound=template.assign_parameters({key:_angle(value) for key,value in bindings.items()},inplace=False)
         return cls._from_native(bound,owned=True)
+
+    def plan(self,*,bits=(),paulis=(),subsystems=()):
+        from ._plan import QueryPlan
+        return QueryPlan(self,bits=bits,paulis=paulis,subsystems=subsystems)
+
+    def diff(self,other,*,atol=1e-9,max_bytes=64*1024**2):
+        """Explicit structural, snapshot and operator comparison."""
+        from ._verification import semantic_diff
+        return semantic_diff(self,other,atol=atol,max_bytes=max_bytes)
 
     def inspect(self, *, start=0, limit=32):
         """Bounded logical operations, no copy or execution."""

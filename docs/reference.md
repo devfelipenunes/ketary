@@ -52,3 +52,7 @@ See [SDK roadmap](sdk-roadmap.md) for direct gate aliases, the expanded gate reg
 - `Circuit.visualize.svg()` and `Result.visualize.bloch_svg(wire=0)` return bounded SVG schematics. The former supports bound unitary circuits only.
 
 - `Result.math.observable_variance(terms,max_bytes=...)`: real weighted Pauli sum, dense native matrix, eight-wire cap; variance is the squared norm of the centered operator applied to the normalized snapshot. Not a general mixed-state calculation.
+
+### Experimental verification engineering
+
+See [R01–R15 contracts and limits](verification-roadmap.md) for capabilities, operator metrics, compare/diff, Evidence, checkpoint contracts, StatisticalContract, QueryPlan and the optional QCEC adapter. All costly operations are explicit.

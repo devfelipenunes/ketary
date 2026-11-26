@@ -170,12 +170,72 @@ class _Debug:
             _limit(a.num_qubits,2,budget=budget)
         except ResourceLimit as exc:
             return dict(report,status="UNSUPPORTED",reason=str(exc))
+        left=_Cursor(a)
+        right=_Cursor(b)
         for i,j in alignment:
-            actual=a.debug.checkpoint(i,max_bytes=budget,max_steps=steps)
-            expected=b.debug.checkpoint(j,max_bytes=budget,max_steps=steps)
+            actual=left.at(i)
+            expected=right.at(j)
             check=actual.result.test.state(expected.result,ignore_global_phase=ignore_global_phase,atol=tolerance)
             report["checks"].append({"observed_index":i,"reference_index":j,"check":check.to_dict()})
             if check.status=="FAIL":
                 report["status"]="FAIL"
                 break
         return report
+
+
+    def verify_checkpoints(self,contracts,*,max_bytes=64*1024**2,max_steps=256):
+        """Verify named-by-index contracts on the zero-input trajectory."""
+        from collections.abc import Mapping
+        from ._contracts import Contract
+        self._c._require_bound()
+        if not isinstance(contracts,Mapping) or not 1<=len(contracts)<=32:
+            raise ValueError("expected 1..32 checkpoint contracts")
+        qc=self._c._qc
+        if qc.num_qubits>8:
+            raise ResourceLimit("checkpoint width exceeds eight")
+        _limit(qc.num_qubits,2,budget=max_bytes)
+        steps=min(_int(max_steps),256)
+        requested=[]
+        for index,contract in contracts.items():
+            index=_int(index)
+            if index>len(qc.data):
+                raise ValueError("checkpoint outside circuit")
+            if index>steps:
+                raise ResourceLimit("checkpoint step limit exceeded")
+            if not isinstance(contract,Contract) or contract.num_qubits!=qc.num_qubits:
+                raise ValueError("expected width-matched Contract")
+            requested.append((index,contract))
+        cursor=_Cursor(self._c)
+        rows=[]
+        for index,contract in sorted(requested):
+            step=cursor.at(index)
+            report=contract.verify(step.result)
+            rows.append({"index":index,"operation":step.operation,"wires":list(step.wires),
+                         "contract":contract.to_dict(),"report":report.to_dict()})
+            if report.status!="PASS":
+                return {"schema_version":1,"status":report.status,"scope":"zero-input requested checkpoints",
+                        "first_nonpass":index,"checks":rows}
+        return {"schema_version":1,"status":"PASS","scope":"zero-input requested checkpoints",
+                "first_nonpass":None,"checks":rows}
+
+
+class _Cursor:
+    """Private, call-local monotonic native state evolution."""
+    def __init__(self,c):
+        self.qc=c._qc
+        _,SV=_sdk()
+        a=np.zeros(1<<c.num_qubits,dtype=complex)
+        a[0]=np.exp(1j*float(self.qc.global_phase))
+        self.state=SV(a)
+        self.index=0
+        self.operation="initial (global phase applied)"
+        self.wires=()
+
+    def at(self,index):
+        while self.index<index:
+            item=self.qc.data[self.index]
+            self.wires=tuple(self.qc.find_bit(w).index for w in item.qubits)
+            self.operation=item.operation.name
+            self.state=self.state.evolve(item.operation,qargs=list(self.wires))
+            self.index+=1
+        return TraceStep(self.operation,self.wires,Result(self.state.data))

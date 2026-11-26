@@ -285,6 +285,39 @@ class _Math:
             raise ArithmeticError("observable variance is not finite")
         return value
 
+    def observable_variance_streamed(self,terms,*,max_bytes=64*1024**2,max_work=1<<25):
+        """Apply native Pauli terms to one snapshot without dense operators."""
+        from collections.abc import Mapping
+        from qiskit.quantum_info import Statevector
+        if not isinstance(terms,Mapping) or not 1<=len(terms)<=256:
+            raise ValueError("expected 1..256 Pauli terms")
+        n=self._r._n
+        _limit(n,4,budget=max_bytes)
+        if len(terms)*n*self._r._data.size>_int(max_work,1):
+            raise ResourceLimit("Pauli application work limit exceeded")
+        validated=[]
+        for label,coefficient in terms.items():
+            if type(label) is not str or len(label)!=n or set(label)-set("IXYZ"):
+                raise ValueError("invalid Pauli label")
+            validated.append((label,_real(coefficient)))
+        # Statevector.evolve(Pauli) is not assumed matrix-free; apply native
+        # one-wire gates instead, preserving Y and tensor ordering.
+        from qiskit.circuit.library import XGate,YGate,ZGate
+        gates={"X":XGate(),"Y":YGate(),"Z":ZGate()}
+        state=self._r._data/math.sqrt(self._r._norm_sq)
+        result=np.zeros_like(state)
+        for label,coefficient in validated:
+            term=Statevector(state)
+            for wire,axis in enumerate(reversed(label)):
+                if axis!="I":
+                    term=term.evolve(gates[axis],qargs=[wire])
+            result+=coefficient*term.data
+        delta=result-np.vdot(state,result)*state
+        value=float(np.vdot(delta,delta).real)
+        if not math.isfinite(value):
+            raise ArithmeticError("observable variance is not finite")
+        return value
+
     def variance(self,pauli):
         """Variance of a Hermitian Pauli string, whose square is identity."""
         expectation=self.expectation(pauli)
