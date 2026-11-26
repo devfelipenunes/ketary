@@ -301,7 +301,7 @@ outputs = q.bell().run_many(["00", "01", "10", "11"])
 
 Rows align to `template.parameters` (native parameter order), at most 32
 rows and parameters, 12 wires, 256 operations. The existing frozen sweep
-plan owns bound replay payloads; no execution during planning. The same
+plan owns independent bound native circuits; no execution during planning. The same
 bound circuit can explicitly execute 1..32 ordered independent inputs
 via `run_many`; all inputs and conservative aggregate state payload
 (2*m+1 snapshots) preflight before evolution, with no parallelism or

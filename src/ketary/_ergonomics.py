@@ -105,7 +105,7 @@ def _pairs(c,name,a,b,pairs,*params):
 
 
 class SweepPlan:
-    """Frozen bound circuit payloads, zipped rows, never an implicit simulation."""
+    """Private independent native bound circuits; no implicit simulation."""
     def __init__(self,circuit,values):
         from ._circuit import Circuit
         if not isinstance(circuit,Circuit):
@@ -131,7 +131,7 @@ class SweepPlan:
         params={p.name:p for p in circuit.parameters}
         if len(params)!=len(circuit.parameters):
             raise ValueError("sweep requires unique parameter names")
-        payloads=tuple(circuit.bind({params[name]:v for name,v in row}).to_json() for row in rows)
+        # Native assignment returns independent circuits; JSON remains an\n        # external replay format, not an in-memory execution transport.\n        payloads=tuple(circuit.bind({params[name]:v for name,v in row}) for row in rows)
         self._rows=rows
         self._payloads=payloads
         self._width=circuit.num_qubits
@@ -141,9 +141,8 @@ class SweepPlan:
         return tuple(dict(row) for row in self._rows)
 
     def run(self,*,max_bytes=64*1024**2):
-        from ._circuit import Circuit
         _limit(self._width,len(self._payloads)+1,budget=max_bytes)
-        return tuple(Circuit.from_json(payload).run(max_bytes=max_bytes) for payload in self._payloads)
+        return tuple(payload.run(max_bytes=max_bytes) for payload in self._payloads)
 
 
 def _sweep_rows(circuit,rows):
