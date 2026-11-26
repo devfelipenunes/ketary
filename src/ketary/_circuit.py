@@ -48,6 +48,71 @@ class Circuit:
         c._qc=qc if owned else qc.copy()
         return c
 
+    def inspect(self, *, start=0, limit=32):
+        """Research candidate: bounded logical operations, no copy or run."""
+        from ._inspection import inspect_circuit
+        return inspect_circuit(self,start=start,limit=limit)
+
+    # Research-only syntax aliases. Existing gates namespace stays unchanged.
+    def h(self,q):
+        return self.gates.h(q)
+
+    def x(self,q):
+        return self.gates.x(q)
+
+    def y(self,q):
+        return self.gates.y(q)
+
+    def z(self,q):
+        return self.gates.z(q)
+
+    def s(self,q):
+        return self.gates.s(q)
+
+    def sdg(self,q):
+        return self.gates.sdg(q)
+
+    def t(self,q):
+        return self.gates.t(q)
+
+    def tdg(self,q):
+        return self.gates.tdg(q)
+
+    def rx(self,theta,q):
+        return self.gates.rx(theta,q)
+
+    def ry(self,theta,q):
+        return self.gates.ry(theta,q)
+
+    def rz(self,theta,q):
+        return self.gates.rz(theta,q)
+
+    def cx(self,c,t):
+        return self.gates.cx(c,t)
+
+    def cz(self,c,t):
+        return self.gates.cz(c,t)
+
+    def swap(self,a,b):
+        return self.gates.swap(a,b)
+
+    def ccx(self,c1,c2,t):
+        return self.gates.ccx(c1,c2,t)
+
+    def copy(self):
+        """Independent logical circuit with identical ordered operations."""
+        return self._from_native(self._qc.copy(),owned=True)
+
+    def h_many(self,wires):
+        """Apply H on distinct wires after validating the entire batch."""
+        from itertools import islice
+        indices=[self.gates._wire(w) for w in islice(iter(wires),self.num_qubits+1)]
+        if not indices or len(indices)>self.num_qubits or len(set(indices))!=len(indices):
+            raise ValueError("expected nonempty distinct wires")
+        for w in indices:
+            self.h(w)
+        return self
+
     def to_qiskit(self):
         return self._qc.copy()
 
@@ -106,12 +171,23 @@ class Circuit:
         # Selective SWAP lowering: general decomposition leaves the whitelist.
         return self._from_native(self._qc.decompose(gates_to_decompose=["swap"], reps=_int(reps,1)),owned=True)
 
-    def run(self,*,mode="statevector",max_bytes=64*1024**2):
+    def run(self,*,mode="statevector",max_bytes=64*1024**2,initial_state=None):
         if mode!="statevector":
             raise UnsupportedOperation("only ideal statevector in PoC")
         _limit(self.num_qubits,budget=max_bytes)
         _,SV=_sdk()
-        return Result(SV.from_instruction(self._qc).data)
+        if initial_state is None:
+            return Result(SV.from_instruction(self._qc).data)
+        if isinstance(initial_state,str):
+            if len(initial_state)!=self.num_qubits or set(initial_state)-{"0","1"}:
+                raise ValueError("invalid initial basis label")
+            state=SV.from_label(initial_state)
+        else:
+            snapshot=initial_state if isinstance(initial_state,Result) else Result(initial_state)
+            if snapshot.num_qubits!=self.num_qubits:
+                raise ValueError("initial state width mismatch")
+            state=SV(snapshot.math.statevector(max_bytes=max_bytes))
+        return Result(state.evolve(self._qc).data)
 
 class _Gates:
     def __init__(self,c):
