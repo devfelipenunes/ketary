@@ -6,7 +6,7 @@ The public import is `import ketary as q`. All factories return Circuit.
 |---|---|
 | Factories | Circuit(n), bell(), ghz(n), constant_oracle(n,value=0), parity_oracle(mask,offset=0), deutsch_jozsa(oracle), from_qiskit(qc) |
 | Circuit.gates | h,x,y,z,s,sdg,t,tdg(q); rx,ry,rz(theta,q); cx,cz,swap(a,b); ccx(c1,c2,t). Mutate and return Circuit. |
-| Circuit | num_qubits, append(gate,wires) mutates; compose(other,wires=None), inverse(), decompose(reps=1), optimize(), to_qiskit(), to_json(), Circuit.from_json(payload) do not mutate source. Decompose only lowers SWAP. |
+| Circuit | num_qubits, append(gate,wires) mutates; compose(other,wires=None), inverse(), decompose(reps=1), optimize(), transpile(basis_gates,seed=42), to_qiskit(), to_json(), Circuit.from_json(payload) do not mutate source. Decompose only lowers SWAP. |
 | Execution | run(mode="statevector",max_bytes=64 MiB), analyze() experimental alias |
 | Result | num_qubits, sample(shots,seed=None,max_outcomes=65536) |
 | Result.math | statevector(max_bytes=64 MiB), amplitude(bits), probability(bits), probabilities(max_outcomes=65536), marginal_probabilities(wires,max_outcomes=65536), explain_probability(bits), table(bits=None,max_rows=16), norm(), fidelity(target), entropy(partition,max_rank=256,max_bytes=64 MiB), expectation(pauli) |
@@ -31,3 +31,5 @@ Keyword-only arguments follow the implementation signatures; byte sizes above ar
 The installed package ships a PEP 561 marker and public API stubs. CI checks a strict typed consumer, including intentional invalid calls. Runtime checks still reject invalid values that static types cannot distinguish (e.g. bool as an integer).
 
 Additional guards: exporting a dense snapshot copy is bounded by its payload; entropy bounds the smaller Schmidt dimension and matrix payload before SVD; drawings have logical gate/qubit caps; sampling rejects shot counts above signed 64-bit range. These are not guarantees about LAPACK workspace, drawing output length, native temporaries or RSS.
+
+Experimental logical transpilation delegates to Qiskit at optimization level 0 with only a supported basis and seed. No target, coupling map or backend; rejects layout/unsupported output and verifies strict full-operator equivalence up to 8 qubits. This can be expensive and is not a QPU optimization guarantee.

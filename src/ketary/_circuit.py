@@ -85,6 +85,15 @@ class Circuit:
         from ._replay import _decode
         return cls._from_native(_decode(payload),owned=True)
 
+    def transpile(self, *, basis_gates, seed=42):
+        """Experimental logical-only Qiskit lowering, verified by full operators.
+
+        No backend, target, coupling map or layout is accepted. Limited to
+        eight qubits because strict phase-preserving equivalence is checked.
+        """
+        from ._transpilation import _lower
+        return _lower(self,basis_gates=basis_gates,seed=seed)
+
     def optimize(self):
         """Return a new circuit after conservative adjacent inverse cancellation."""
         from ._optimization import _cancel_adjacent
