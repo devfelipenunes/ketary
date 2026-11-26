@@ -5,6 +5,7 @@ from ._validation import _int, _limit, _angle, UnsupportedOperation
 from ._result import Result
 from ._trace import _Debug
 from ._resources import _Resources, _Visualize
+from ._checks import _CircuitChecks
 
 class Circuit:
     """One builder, one authoritative Qiskit circuit (strict PoC subset)."""
@@ -20,6 +21,10 @@ class Circuit:
     @property
     def debug(self):
         return _Debug(self)
+
+    @property
+    def test(self):
+        return _CircuitChecks(self)
 
     @property
     def resources(self):

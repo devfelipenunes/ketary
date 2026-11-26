@@ -1,0 +1,45 @@
+"""Explicit checks of quantum states and complete small operators."""
+from __future__ import annotations
+import numpy as np
+from ._validation import _int, _tol
+from ._result import CheckResult
+
+def _residual(actual,expected,ignore_global_phase,atol):
+    t=_tol(atol)
+    if type(ignore_global_phase) is not bool:
+        raise ValueError("ignore_global_phase must be bool")
+    if actual.shape!=expected.shape:
+        raise ValueError("dimension mismatch")
+    if ignore_global_phase:
+        overlap=np.vdot(expected,actual)
+        if abs(overlap)>0:
+            actual=actual*(np.conj(overlap)/abs(overlap))
+    error=float(np.max(np.abs(actual-expected)))
+    return CheckResult("PASS" if error<=t else "FAIL",error,0,t,
+                       "max absolute residual; phase "+("ignored" if ignore_global_phase else "preserved"))
+
+class _CircuitChecks:
+    def __init__(self,circuit):
+        self._c=circuit
+
+    def equivalent(self,other,*,ignore_global_phase=False,atol=1e-9,max_bytes=16*1024**2):
+        """Compare complete operators (not just their action on |0...0>).
+
+        Strict phase comparison by default. Ignoring phase is only appropriate
+        for standalone unitary equivalence, not arbitrary controlled contexts.
+        The byte budget counts the two dense complex128 matrix payloads only.
+        """
+        from ._circuit import Circuit
+        t=_tol(atol)
+        budget=_int(max_bytes,1)
+        if type(ignore_global_phase) is not bool:
+            raise ValueError("ignore_global_phase must be bool")
+        if not isinstance(other,Circuit):
+            raise TypeError("expected Circuit")
+        n=self._c.num_qubits
+        if n!=other.num_qubits:
+            return CheckResult("FAIL",None,None,t,"different qubit counts")
+        if n>8 or 32*(1<<(2*n))>budget:
+            return CheckResult("UNSUPPORTED",None,None,t,"operator payload or eight-qubit limit exceeded")
+        from qiskit.quantum_info import Operator
+        return _residual(Operator(self._c._qc).data,Operator(other._qc).data,ignore_global_phase,t)

@@ -8,13 +8,14 @@ from ._validation import _int, _tol
 @dataclass(frozen=True)
 class CheckResult:
     status: str
-    actual: float
-    expected: float
+    actual: float | None
+    expected: float | None
     tolerance: float
+    detail: str = ""
 
     def require(self):
         if self.status != "PASS":
-            raise AssertionError(f"{self.status}: actual={self.actual}, expected={self.expected}, tolerance={self.tolerance}")
+            raise AssertionError(f"{self.status}: actual={self.actual}, expected={self.expected}, tolerance={self.tolerance}; {self.detail}")
         return self
 
     def __bool__(self):
@@ -140,3 +141,29 @@ class _Checks:
         t=_tol(atol)
         a=self._r.math.entropy(partition)
         return CheckResult("PASS" if a>t else "FAIL",a,t,t)
+
+    def distribution(self,target,*,atol=1e-9):
+        """Total variation distance between ideal Z-basis distributions."""
+        t=_tol(atol)
+        if not isinstance(target,Result):
+            raise TypeError("expected Result")
+        if target.num_qubits!=self._r.num_qubits:
+            raise ValueError("dimension mismatch")
+        p=np.abs(self._r._data)**2
+        q=np.abs(target._data)**2
+        distance=float(.5*np.sum(np.abs(p/p.sum()-q/q.sum())))
+        return CheckResult("PASS" if distance<=t else "FAIL",distance,0,t,"total variation distance")
+
+    def expectation(self,pauli,expected,*,atol=1e-9):
+        t=_tol(atol)
+        expected=float(expected)
+        if not math.isfinite(expected) or not -1<=expected<=1:
+            raise ValueError("expected Pauli value must be in [-1,1]")
+        a=self._r.math.expectation(pauli)
+        return CheckResult("PASS" if abs(a-expected)<=t else "FAIL",a,expected,t,f"Pauli {pauli}")
+
+    def state(self,target,*,ignore_global_phase=True,atol=1e-9):
+        """Maximum amplitude residual after optional phase alignment."""
+        from ._checks import _residual
+        other=target if isinstance(target,Result) else Result(target)
+        return _residual(self._r._data,other._data,ignore_global_phase,atol)
