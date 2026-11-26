@@ -190,3 +190,40 @@ def teleportation(theta,phi,*,verify=False):
     if verify:
         c.rz(-phi,2).ry(-theta,2)
     return c.measure(2,2)
+
+
+def recover_simon(samples,n):
+    """Recover the unique nonzero binary secret from orthogonal sample labels.
+
+    Returns None for rank below n-1; full rank violates Simon's promise.
+    This is bounded classical GF(2) elimination, not circuit execution.
+    """
+    from itertools import islice
+    from ._validation import ResourceLimit
+    n=_int(n,1)
+    if n>10:
+        raise ResourceLimit("Simon recovery limited to ten input bits")
+    rows={}
+    for k,label in enumerate(islice(iter(samples),4097)):
+        if k==4096:
+            raise ResourceLimit("Simon sample limit exceeded")
+        if type(label) is not str or len(label)!=n or set(label)-{"0","1"}:
+            raise ValueError("invalid Simon sample label")
+        value=int(label,2)
+        while value:
+            pivot=value.bit_length()-1
+            if pivot in rows:
+                value^=rows[pivot]
+            else:
+                rows[pivot]=value
+                break
+    if len(rows)==n:
+        raise ValueError("samples violate the nonzero-secret promise")
+    if len(rows)<n-1:
+        return None
+    free=next(i for i in range(n) if i not in rows)
+    answer=1<<free
+    for pivot in sorted(rows):
+        if (rows[pivot]&answer).bit_count()%2:
+            answer|=1<<pivot
+    return format(answer,f"0{n}b")

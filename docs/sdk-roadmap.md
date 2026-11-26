@@ -4,15 +4,15 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 
 | Stage | Delivered in proposed SDK PRs | Remaining |
 |---|---|---|
-| SDK01 | strict numeric expectation checks | broader edge and resource audit |
-| SDK02 | direct gates, copy, atomic H batch | canonical syntax review; analyze compatibility alias |
+| SDK01 | strict numeric expectation checks, bounded inputs and edge tests | continuous regression testing |
+| SDK02 | direct gates, copy, atomic H batch; retain .gates/analyze compatibility | owner API review |
 | SDK03 | inspect/evidence/verify, immutable Contract and VerificationReport | report schema review |
 | SDK04 | explicit basis, array or Result initial state | broader resource tests |
 | SDK05 | 29 fixed gate types plus bounded MCX; central registry | broader multi-control synthesis and backend boundary |
 | SDK06 | reduced density, purity, weighted Pauli expectation, Dirac, conditional probability, Schmidt, pure-state trace distance, Pauli variance, top-k | general mixed-state metrics and observable variance |
-| SDK07 | incremental aligned comparison, selected checkpoint, historical budget retained | nontrivial alignment |
+| SDK07 | incremental aligned comparison, selected checkpoint, explicit cross-length alignment | automatic alignment deliberately excluded |
 | SDK08 | native binding, explicit symbolic Circuit and full binding, copy, compose | partial binding and symbolic transforms deliberately excluded |
-| SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover, superdense, phase-gate QPE and Simon oracle iteration | generic QPE, Simon GF(2) solver and larger algorithms |
+| SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover, superdense, phase-gate QPE, Simon oracle iteration and GF(2) recovery, teleportation | generic QPE and larger algorithms as later work |
 | SDK10 | SVG histogram, ordered circuit schematic and Bloch vector schematic, executed how-to/notebook, paired density and Pauli query benchmarks | dedicated machine benchmark and richer layout/interactive graphics |
 | SDK11 | terminal marginal sampling; explicit one-register dynamic Circuit, measure/reset, conditional X/Z, native shot results and teleportation | multi-register and general control flow deliberately excluded |
 | SDK12 | existing package CI and release checklist | owner review, dependency/license re-review, controlled benchmark, release authorization |
@@ -66,7 +66,7 @@ are exercised by pytest. Query benchmarks compare equal outputs separately
 from construction and execution. Existing process RSS measurements remain
 statevector scenarios, not a bound on every query.
 
-MCX supports 1–7 closed controls (CX/CCX canonical for 1/2), distinct wires; replay accepts bounded variable width. `phase_estimation(phase, precision)` estimates a known phase-gate eigenvalue on |1>, not arbitrary unitary. `simon(secret)` constructs one iteration with a known two-to-one oracle, yielding orthogonal samples; classical recovery remains external.
+MCX supports 1–7 closed controls (CX/CCX canonical for 1/2), distinct wires; replay accepts bounded variable width. `phase_estimation(phase, precision)` estimates a known phase-gate eigenvalue on |1>, not arbitrary unitary. `simon(secret)` constructs one iteration with a known two-to-one oracle, yielding orthogonal samples; `recover_simon(samples,n)` performs bounded GF(2) elimination; insufficient rank returns None, full rank rejects the promise.
 
 ### Symbolic lifecycle
 
@@ -93,3 +93,5 @@ metadata inventory is not license approval. See IBM Qiskit dynamic circuit docs
 ### Hardening
 
 The core and dynamic CI suites report branch coverage separately. Dynamic CI executes all core/probe tests plus native shot/teleportation tests. No coverage exclusion or oracle relaxation. SVG schematics are bounded to 12 wires/64 gates and display ordered operands by position (0 = first operand), not device routing. Bloch SVG is a 2D projection with exact coordinates labeled. Symbolic and dynamic circuits retain native text drawing; unitary SVG rejects those modes explicitly. Iterables in marginal/entropy queries are bounded before materialization.
+
+Explicit `debug.compare_checkpoints(reference, pairs)` accepts 1–32 monotonic pairs of indices, including circuits with different lengths. It checks zero-input states, not operators or inferred causal alignment. Prefix evolution is explicit and bounded to eight qubits and 256 steps per index.

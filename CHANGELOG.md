@@ -7,8 +7,8 @@
 - 29 fixed logical gates plus bounded MCX, native symbolic templates and complete binding.
 - Reduced density matrices, purity, Schmidt values, weighted Pauli observables,
   conditional probabilities, pure-state trace distance, Pauli variance and top-k.
-- Incremental aligned diagnostics and selected checkpoints.
-- Bernstein-Vazirani, QFT, small Grover, superdense, phase-gate QPE, Simon iteration.
+- Incremental aligned diagnostics and selected checkpoints and explicit cross-length alignment.
+- Bernstein-Vazirani, QFT, small Grover, superdense, phase-gate QPE, Simon iteration and GF(2) recovery.
 - Optional native Aer classical shots, reset, bit-conditioned X/Z and teleportation.
 - SVG schematics, notebook, documentation, mathematical query benchmarks and CI.
 

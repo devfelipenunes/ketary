@@ -1,7 +1,7 @@
 # Experimental modular architecture
 
 QuantumCircuit is the authoritative mutable program. Result owns an independent
-ideal-state snapshot. No parallel mutable IR, second simulator or backend.
+ideal-state snapshot. No parallel mutable IR or simulator implemented by Ketary. Execution delegates to Qiskit, including optional native Aer for dynamic shots.
 
 | Module | Responsibility |
 |---|---|
@@ -12,7 +12,7 @@ ideal-state snapshot. No parallel mutable IR, second simulator or backend.
 | _checks | residuals and bounded complete operator checks |
 | _trace | explicit state evolution and aligned checkpoint diagnosis |
 | _resources | logical resource reports and text drawing |
-| _algorithms | Bell, GHZ and explicit Deutsch-Jozsa oracle factories |
+| _algorithms | bounded state-preparation and algorithm factories; GF(2) sample recovery |
 | _optimization | exact adjacent inverse cancellation |
 | _replay | bounded logical JSON artifacts |
 

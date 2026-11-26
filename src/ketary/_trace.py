@@ -126,3 +126,56 @@ class _Debug:
                 return TraceComparison(check,i,x.operation,y.operation,x.wires,y.wires)
         return TraceComparison(CheckResult("PASS",largest,0,t,
             "all aligned zero-input checkpoints match"))
+
+
+    def compare_checkpoints(self,reference,pairs,*,ignore_global_phase=True,atol=1e-9,
+                            max_bytes=64*1024**2,max_steps=256):
+        """Compare explicitly supplied (observed, reference) checkpoint indices.
+
+        Different circuit lengths are allowed. Alignment is caller-provided,
+        not inferred. At most 32 strictly increasing index pairs; an index
+        may repeat on one side. Each requested prefix is explicitly evolved.
+        """
+        from itertools import islice
+        from ._circuit import Circuit
+        if not isinstance(reference,Circuit):
+            raise TypeError("expected Circuit reference")
+        a,b=self._c,reference
+        a._require_bound()
+        b._require_bound()
+        tolerance=_tol(atol)
+        budget=_int(max_bytes,1)
+        steps=min(_int(max_steps),256)
+        if type(ignore_global_phase) is not bool:
+            raise ValueError("ignore_global_phase must be bool")
+        raw=list(islice(iter(pairs),33))
+        if not raw or len(raw)>32:
+            raise ValueError("expected 1..32 checkpoint pairs")
+        alignment=[]
+        for pair in raw:
+            values=tuple(islice(iter(pair),3))
+            if len(values)!=2:
+                raise ValueError("checkpoint pair requires two indices")
+            i,j=map(_int,values)
+            if i>len(a._qc.data) or j>len(b._qc.data):
+                raise ValueError("checkpoint outside circuit")
+            if alignment and (i<alignment[-1][0] or j<alignment[-1][1] or (i,j)==alignment[-1]):
+                raise ValueError("checkpoint pairs must progress monotonically")
+            alignment.append((i,j))
+        report={"schema_version":1,"scope":"explicit aligned zero-input checkpoints, not root cause",
+                "status":"PASS","checks":[]}
+        try:
+            if a.num_qubits!=b.num_qubits or a.num_qubits>8 or max(max(p) for p in alignment)>steps:
+                raise ResourceLimit("checkpoint widths or step limit unsupported")
+            _limit(a.num_qubits,2,budget=budget)
+        except ResourceLimit as exc:
+            return dict(report,status="UNSUPPORTED",reason=str(exc))
+        for i,j in alignment:
+            actual=a.debug.checkpoint(i,max_bytes=budget,max_steps=steps)
+            expected=b.debug.checkpoint(j,max_bytes=budget,max_steps=steps)
+            check=actual.result.test.state(expected.result,ignore_global_phase=ignore_global_phase,atol=tolerance)
+            report["checks"].append({"observed_index":i,"reference_index":j,"check":check.to_dict()})
+            if check.status=="FAIL":
+                report["status"]="FAIL"
+                break
+        return report
