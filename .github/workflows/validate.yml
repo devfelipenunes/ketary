@@ -35,6 +35,7 @@ jobs:
           python -m coverage report -m --precision=2
           python -m coverage report --precision=6 --fail-under=95
           python -m coverage json -o coverage.json
+          python -m research.coverage_evidence coverage.json --scope core --baseline docs/coverage-count-baseline.json --output core-coverage-gaps.json
       - name: Verification calibration against native Qiskit
         run: |
           python research/verification_comparison.py > verification-comparison.json
@@ -52,6 +53,7 @@ jobs:
           name: coverage-report
           path: |
             coverage.json
+            core-coverage-gaps.json
             core-test-results.xml
             verification-comparison.json
             public-defects.json
@@ -206,6 +208,7 @@ jobs:
           python -m coverage report -m --precision=2
           python -m coverage report --precision=6 --fail-under=95
           python -m coverage json -o dynamic-coverage.json
+          python -m research.coverage_evidence dynamic-coverage.json --scope dynamic --baseline docs/coverage-count-baseline.json --output dynamic-coverage-gaps.json
       - name: Audit dynamic dependencies
         run: |
           python -m venv audit-venv
@@ -218,6 +221,7 @@ jobs:
           path: |
             dynamic-environment.txt
             dynamic-coverage.json
+            dynamic-coverage-gaps.json
             dynamic-test-results.xml
             dynamic-license-inventory.json
             dynamic-audited-requirements.txt
