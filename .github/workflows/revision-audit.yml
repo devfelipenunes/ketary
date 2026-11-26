@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'research/revision_comparison.py'
+      - 'research/high_level_benchmark.py'
       - 'research/longitudinal_benchmark.py'
       - 'research/agent_task_suite.py'
       - '.github/workflows/revision-audit.yml'
@@ -68,6 +69,7 @@ jobs:
           done
           "$RUNNER_TEMP/after-env/bin/python" research/revision_comparison.py before.json after.json > comparison.json
           cat comparison.json
+          "$RUNNER_TEMP/after-env/bin/python" research/high_level_benchmark.py --seed "$SEED" --repetitions 30 > high-level.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -76,6 +78,7 @@ jobs:
             before.json
             after.json
             comparison.json
+            high-level.json
             before-environment.txt
             after-environment.txt
             host.txt

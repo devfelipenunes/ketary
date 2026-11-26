@@ -70,3 +70,7 @@ publication has been performed.
   simulation, replay, tracing or full-operator verification support.
 - Dedicated-host validation, real agent/human study, hardware/noise,
   generalized control-flow and public release remain separate and pending.
+
+## High-level runtime diagnostics
+
+Separate candidate-only matched workloads exercise native ansatz construction and binding, weighted Hamiltonians, phase oracles, independent input evolution, end-to-end sweep rows and selected probabilities. Each checks semantic equality before timing. The native comparison returns independent equivalent outputs; Ketary may include extra validation, snapshot or replay costs. No claims of quantum algorithm speedups or universal performance. Retain high-level.json in each revision artifact.
