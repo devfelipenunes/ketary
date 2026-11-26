@@ -285,3 +285,27 @@ bits and at most 256 distinct marked labels. Amplitude amplification is
 the explicit uniform-input Grover iterate for a caller-promised phase
 oracle, with 0..64 iterations and bounded expansion; no automatic oracle
 verification, choice of iteration count or optimizer. No hidden execution.
+
+
+## Explicit experiment batches
+
+```python
+theta = q.Circuit.parameter("theta")
+template = q.Circuit.symbolic(2).ry(theta, 0).cx(0,1)
+plan = template.sweep_rows([[0.0], [0.5], [1.0]])
+for binding, result in zip(plan.bindings, plan.run()):
+    print(binding, result.math.probabilities(bits=["00", "11"]))
+
+outputs = q.bell().run_many(["00", "01", "10", "11"])
+```
+
+Rows align to `template.parameters` (native parameter order), at most 32
+rows and parameters, 12 wires, 256 operations. The existing frozen sweep
+plan owns bound replay payloads; no execution during planning. The same
+bound circuit can explicitly execute 1..32 ordered independent inputs
+via `run_many`; all inputs and conservative aggregate state payload
+(2*m+1 snapshots) preflight before evolution, with no parallelism or
+backend selection. Selected probabilities use distinct ordered full-width
+basis labels and return only those labels, without full dictionary
+enumeration or conditional renormalization. The old no-argument
+probability call is unchanged. No hidden runs.

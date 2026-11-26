@@ -144,3 +144,32 @@ class SweepPlan:
         from ._circuit import Circuit
         _limit(self._width,len(self._payloads)+1,budget=max_bytes)
         return tuple(Circuit.from_json(payload).run(max_bytes=max_bytes) for payload in self._payloads)
+
+
+def _sweep_rows(circuit,rows):
+    """Transpose explicit parameter rows to the existing bounded sweep plan."""
+    from ._validation import _angle
+    if circuit.num_clbits:
+        raise UnsupportedOperation("sweep requires symbolic unitary circuit")
+    params=circuit.parameters
+    if circuit.num_qubits>12 or len(circuit._qc.data)>256 or len(params)>32:
+        raise ResourceLimit("sweep supports <=12 qubits, 256 operations, 32 parameters")
+    if not params:
+        raise ValueError("sweep requires at least one parameter")
+    if isinstance(rows,(str,bytes,Mapping,set,frozenset)):
+        raise ValueError("expected ordered parameter rows")
+    parsed=[]
+    try:
+        for row in islice(iter(rows),33):
+            if isinstance(row,(str,bytes,Mapping,set,frozenset)):
+                raise ValueError("expected ordered numeric parameter row")
+            values=tuple(islice(iter(row),len(params)+1))
+            if len(values)!=len(params):
+                raise ValueError("row must cover exactly the native parameter order")
+            parsed.append(tuple(_angle(v) for v in values))
+    except TypeError as exc:
+        raise ValueError("expected ordered parameter rows") from exc
+    if not 1<=len(parsed)<=32:
+        raise ResourceLimit("sweep requires 1..32 rows")
+    return SweepPlan(circuit,{p.name:tuple(row[i] for row in parsed)
+                              for i,p in enumerate(params)})
