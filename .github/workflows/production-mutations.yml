@@ -11,6 +11,7 @@ on:
       - 'tests/test_production_controlled_gradient.py'
       - 'tests/test_production_pauli_robustness.py'
       - 'tests/test_production_channels_complex.py'
+      - 'tests/test_production_nested_dynamic.py'
   workflow_dispatch:
 permissions:
   contents: read

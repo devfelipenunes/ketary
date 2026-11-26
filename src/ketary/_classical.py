@@ -96,47 +96,54 @@ def _validate_dynamic(template):
         raise UnsupportedOperation("dynamic import requires bound logical input without metadata/layout")
     if [bit for reg in template.cregs for bit in reg]!=list(template.clbits):
         raise UnsupportedOperation("classical registers must form an ordered disjoint bit partition")
-    _angle(template.global_phase)
     work=0
-    for item in template.data:
-        op=item.operation
-        work+=1
-        if work>1024:
-            raise ResourceLimit("dynamic execution exceeds 1024 expanded instructions")
-        if isinstance(op,Gate):
-            _validate_gate(op)
-        elif type(op) in (Measure,Reset) or getattr(op,"base_class",None) in (Measure,Reset):
-            pass
-        elif isinstance(op,IfElseOp):
-            condition=op.condition
-            if not isinstance(condition,tuple) or len(condition)!=2:
-                raise UnsupportedOperation("only bit/register equality conditions are supported")
-            target,value=condition
-            if isinstance(target,Clbit):
-                width=1
-                if target not in template.clbits:
-                    raise UnsupportedOperation("condition must reference source classical bits")
-            elif isinstance(target,ClassicalRegister):
-                width=len(target)
-                if target not in template.cregs:
-                    raise UnsupportedOperation("condition must reference source register")
+    def visit(block,depth):
+        nonlocal work
+        _angle(block.global_phase)
+        if block.parameters or block.metadata or block.layout is not None:
+            raise UnsupportedOperation("conditional block must be bound and logical")
+        if block.num_qubits>12 or block.num_clbits>12:
+            raise ResourceLimit("dynamic block exceeds 12 wires/bits")
+        # No variable/expression-based control or captures in this subset.
+        if getattr(block,"num_vars",0) or getattr(block,"num_stretches",0):
+            raise UnsupportedOperation("dynamic variables and stretches are unsupported")
+        for item in block.data:
+            work+=1
+            if work>1024:
+                raise ResourceLimit("dynamic execution exceeds 1024 expanded instructions")
+            op=item.operation
+            if isinstance(op,Gate):
+                if item.clbits:
+                    raise UnsupportedOperation("unitary gate cannot have classical operands")
+                _validate_gate(op)
+            elif isinstance(op,IfElseOp):
+                if depth>=3:
+                    raise ResourceLimit("dynamic conditional depth exceeds three")
+                condition=op.condition
+                if not isinstance(condition,tuple) or len(condition)!=2:
+                    raise UnsupportedOperation("only bit/register equality conditions are supported")
+                target,value=condition
+                if isinstance(target,Clbit):
+                    width=1
+                    if target not in block.clbits or target not in item.clbits:
+                        raise UnsupportedOperation("condition must reference local instruction classical bits")
+                elif isinstance(target,ClassicalRegister):
+                    width=len(target)
+                    if target not in block.cregs or any(bit not in item.clbits for bit in target):
+                        raise UnsupportedOperation("condition must reference local instruction register")
+                else:
+                    raise UnsupportedOperation("unsupported condition target")
+                if not isinstance(value,int) or not 0<=value<1<<width:
+                    raise ValueError("invalid condition value")
+                for body in op.blocks:
+                    if body.num_qubits!=len(item.qubits) or body.num_clbits!=len(item.clbits):
+                        raise UnsupportedOperation("conditional body operand width mismatch")
+                    visit(body,depth+1)
+            elif depth==0 and getattr(op,"base_class",None) in (Measure,Reset):
+                pass
             else:
-                raise UnsupportedOperation("unsupported condition target")
-            if not isinstance(value,int) or not 0<=value<1<<width:
-                raise ValueError("invalid condition value")
-            for body in op.blocks:
-                _angle(body.global_phase)
-                if body.parameters or body.metadata or body.layout is not None:
-                    raise UnsupportedOperation("conditional block must be bound and logical")
-                work+=len(body.data)
-                if work>1024:
-                    raise ResourceLimit("dynamic import exceeds 1024 expanded instructions")
-                for row in body.data:
-                    if not isinstance(row.operation,Gate) or row.clbits:
-                        raise UnsupportedOperation("conditional branches support only standard unitary gates")
-                    _validate_gate(row.operation)
-        else:
-            raise UnsupportedOperation("unsupported native dynamic instruction")
+                raise UnsupportedOperation("unsupported native dynamic instruction or conditional measurement/reset")
+    visit(template,0)
     return None
 
 
