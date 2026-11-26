@@ -222,7 +222,13 @@ class _Math:
         value=complex(state.expectation_value(Pauli(label)))
         if not math.isfinite(value.real) or not math.isfinite(value.imag) or abs(value.imag)>1e-9:
             raise ArithmeticError("invalid Hermitian Pauli expectation")
-        return float(np.clip(value.real/self._r._norm_sq,-1,1))
+        normalized=value.real/self._r._norm_sq
+        # Scalar only: preserve clipping and signed zero without a NumPy ufunc.
+        if normalized>1:
+            return 1.0
+        if normalized< -1:
+            return -1.0
+        return float(normalized)
 
     def _native_pauli_values(self,labels):
         """Call-local native handle, only after complete caller preflight."""

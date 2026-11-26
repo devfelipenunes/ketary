@@ -95,3 +95,8 @@ _Gates methods for exact int wires; one-angle rotations also require exact
 int/float angles. Other inputs retain the existing iterable, symbolic and
 numeric dispatch. No validation removed, no extra cache, no changed limits.
 See [fluent scalar dispatch diagnostic](fluent-scalar-dispatch.md).
+
+Scalar native Pauli expectations retain finite/imaginary validation and
+normalize by the stored squared norm, then use scalar comparisons to clip
+to [-1,1] with signed zero preserved. No change to work, memory, native
+math or public contract. See [scalar Pauli clamp](scalar-pauli-clamp.md).
