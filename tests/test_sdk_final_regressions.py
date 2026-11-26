@@ -18,7 +18,7 @@ def test_bounded_iterables_atomic():
 
 
 def test_initial_shape_preflight(monkeypatch):
-    import ketary._circuit as module
+    import ketary._execution as module
     class UnexpectedResult:
         def __init__(self,*args):
             pytest.fail("invalid dimension reached Result constructor")
