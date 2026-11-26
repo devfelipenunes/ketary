@@ -45,6 +45,8 @@ MUTANTS=(
 ("synthesis_wrong_operator_accepted","_transpilation.py","if not float(abs(Operator(raw).data-reference.data).max())<=1e-9:","if False:","tests/test_production_native_faults.py::test_synthesis_wrong_operator_never_accepted"),
 ("synthesis_noncanonical_accepted","_transpilation.py","if any(item.operation.name not in (\"u\",\"cx\") for item in raw.data):","if False:","tests/test_production_native_faults.py::test_synthesis_noncanonical_output"),
 ("synthesis_output_cap","_transpilation.py","if len(raw.data)>10000:","if len(raw.data)>20000:","tests/test_production_native_faults.py::test_synthesis_output_limit"),
+("local_channel_wrong_wire_order","_classical.py","result=state.evolve(owned,qargs=list(selected))","result=state.evolve(owned,qargs=list(reversed(selected)))","tests/test_production_local_channels.py::test_local_channel_dense_oracle"),
+("local_channel_ignored","_classical.py","result=state.evolve(owned,qargs=list(selected))","result=state","tests/test_production_local_channels.py::test_local_channel_dense_oracle"),
 )
 
 def read_evidence(path):
