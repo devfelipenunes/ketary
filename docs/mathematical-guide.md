@@ -61,3 +61,5 @@ for the fixtures; they are not a universal forward-error bound. See
 Controlled rotations have generator eigenvalues 0, +1/2, -1/2. Their expectation derivative uses 1/2 times the difference at theta +/- pi/2 plus (1-sqrt(2))/4 times the difference at theta +/- pi. The two nonzero frequency gaps 1/2 and 1 satisfy this identity exactly in the ideal model; chain rule sums occurrences. No finite-difference approximation for these gates.
 
 For duplicate Pauli labels and bounded pairwise products, finite rounded real and imaginary contributions are aggregated using compensated fsum independently. No numerical truncation or Hermitian tolerance is applied to imported imaginary residuals. This reduces cancellation error, but is not arbitrary precision: individual products still round and overflow is explicitly rejected.
+
+Local channel application embeds K_r on the ordered selected wires, leaving other bits untouched. The complete state evolves by sum_r K_r rho K_r^dagger. The input native Kraus map is validated before execution; composition of maps may be constructed explicitly through native Kraus composition, subject to existing final input caps.
