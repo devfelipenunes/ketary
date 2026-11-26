@@ -108,3 +108,18 @@ documentation and issue maintenance. Breaking API, new default engine,
 new platform guarantees, publication/tagging, external research
 participation and deployment require separate acceptance. See AGENTS.md,
 release-validation.md and compatibility.md.
+
+## Integrated evidence follow-up (#88/#114)
+
+The machine-readable [integration ledger](integration-evidence.json) records
+baseline e12895cd, the exact validated candidate, historical run IDs and
+legacy issue state reconciliation. Its offline regression checks shape and
+consistency, not live GitHub provenance. The push workflow for that baseline
+is not confirmed; dedicated-host, legal and independent evaluation gates
+remain open. Historical run IDs are retained as reported, not revalidated.
+
+Native shot boundary (#241/#121/#122): when a successful backend result
+cannot supply counts and raises QiskitError, translate to RuntimeError with
+the original cause, consistent with native failed-result/schema errors.
+Valid counts and statistical intervals remain unchanged. Synthetic fault
+injection is not Aer hardware or noise qualification.
