@@ -34,3 +34,5 @@ p95, variation and isolated process high-water marks across runs. Record
 aggregate process memory separately if evaluating multiprocessing; the
 parallel experiment reports retained output payload only. No release
 approval, host access, or benchmark result is implied by this protocol.
+
+For the expanded, repeatable protocol use [dedicated host harness](dedicated-performance-host.md). This includes subsequent suffix, warm-pool, trace-terminal, process-tree RSS and explicit SIMD diagnostics. No dedicated host has yet been used.
