@@ -196,22 +196,20 @@ class Circuit:
         return Contract(self.num_qubits,probabilities=probabilities,expectations=expectations,normalized=normalized,atol=atol)
 
     def apply(self,block,*,wires=None,times=1):
-        """Append a bound block sequentially, with a single source snapshot."""
+        """Append a block sequentially; unbound blocks require a symbolic target."""
         count=_int(times,1)
-        indices=self._composition_wires(block,wires)
+        self._require_application(block)
+        indices=self._mapping_wires(block,wires)
         if count!=1:
             self._check_expansion(block,count)
         return self._apply_placements(block,(indices for _ in range(count)))
 
     def apply_each(self,block,*,placements):
-        """Apply one bound block to each ordered placement, sequentially."""
+        """Apply one block to each ordered placement, sequentially."""
         from collections.abc import Mapping
         from itertools import islice
         from ._validation import ResourceLimit
-        if not isinstance(block,Circuit):
-            raise TypeError("expected Circuit")
-        self._require_bound()
-        block._require_bound()
+        self._require_application(block)
         if isinstance(placements,(str,bytes,set,frozenset,Mapping)):
             raise ValueError("placements must be an ordered iterable")
         try:
@@ -223,7 +221,7 @@ class Circuit:
             self._check_expansion(block,len(rows)+1)
             if wires is None:
                 raise ValueError("each placement must explicitly select wires")
-            rows.append(self._composition_wires(block,wires))
+            rows.append(self._mapping_wires(block,wires))
         if not rows:
             raise ValueError("expected at least one placement")
         return self._apply_placements(block,rows)
@@ -234,18 +232,51 @@ class Circuit:
         if count>10000 or len(block._qc.data)*count>100000:
             raise ResourceLimit("expansion supports <=10000 placements and 100000 appended operations")
 
+
+    def _require_application(self,block):
+        if not isinstance(block,Circuit):
+            raise TypeError("expected Circuit")
+        if not getattr(self,"_symbolic",False):
+            self._require_bound()
+            block._require_bound()
+            return
+        if self.num_clbits or block.num_clbits:
+            raise UnsupportedOperation("symbolic composition requires unitary circuits")
+        # Same native parameter may be shared, but a distinct UUID with the
+        # same name is ambiguous. Never silently rename or bind a parameter.
+        existing={p.name:p for p in self.parameters}
+        for p in block.parameters:
+            if p.name in existing and existing[p.name]!=p:
+                raise ValueError("conflicting parameter name; reuse the same native Parameter")
+
     def _apply_placements(self,block,placements):
         from ._adapter import _append_bound_blocks
-        if _append_bound_blocks(self._qc,block._qc,placements):
+        if getattr(self,"_symbolic",False) and (self._qc.parameters or block._qc.parameters):
+            # Isolate the native parameter table as well as the instruction
+            # stream. Source stays unchanged, including self-application.
+            candidate=self._qc.copy()
+            changed=False
+            for wires in placements:
+                phase=candidate.global_phase
+                candidate.compose(block._qc,qubits=list(wires),inplace=True)
+                changed=changed or candidate.global_phase!=phase
+            self._qc=candidate
+        else:
+            changed=_append_bound_blocks(self._qc,block._qc,placements)
+        if changed:
             self._named_checkpoints={}
         return self
 
     def repeat(self,times):
-        """Return an independent bound circuit with repeated ordered operations."""
+        """Return an independent repeated circuit; unbound mode stays symbolic."""
         count=_int(times,1)
-        self._require_bound()
+        if self._qc.parameters and getattr(self,"_symbolic",False):
+            target=Circuit.symbolic(self.num_qubits)
+        else:
+            self._require_bound()
+            target=Circuit(self.num_qubits)
         self._check_expansion(self,count)
-        return Circuit(self.num_qubits).apply(self,times=count)
+        return target.apply(self,times=count)
 
     def compute_action_uncompute(self,compute,action,*,compute_wires,action_wires):
         """Explicit U, V, U^-1 sequence; no claim that ancillas are cleared."""
@@ -479,6 +510,9 @@ class Circuit:
             raise TypeError("expected Circuit")
         self._require_bound()
         other._require_bound()
+        return self._mapping_wires(other,wires)
+
+    def _mapping_wires(self,other,wires):
         from itertools import islice
         from collections.abc import Mapping
         if isinstance(wires,(str,bytes,set,frozenset,Mapping)):
