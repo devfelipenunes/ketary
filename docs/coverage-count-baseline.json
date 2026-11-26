@@ -1,0 +1,330 @@
+{
+  "schema_version": 1,
+  "revision": "e0f9b5a50961eed0e1161ed9ba2dd34ac378ceb1",
+  "run": 45849251933,
+  "scope": "baseline counts from exact CI text report; partial branches are not all missing arcs; raw current JSON retained separately",
+  "scopes": {
+    "core": {
+      "job": 140010957478,
+      "modules": {
+        "__init__.py": {
+          "statements": 16,
+          "missing_lines": 0,
+          "branches": 0,
+          "partial_branches": 0
+        },
+        "_adapter.py": {
+          "statements": 155,
+          "missing_lines": 11,
+          "branches": 96,
+          "partial_branches": 10
+        },
+        "_algorithms.py": {
+          "statements": 340,
+          "missing_lines": 1,
+          "branches": 170,
+          "partial_branches": 2
+        },
+        "_checks.py": {
+          "statements": 60,
+          "missing_lines": 0,
+          "branches": 18,
+          "partial_branches": 0
+        },
+        "_circuit.py": {
+          "statements": 790,
+          "missing_lines": 4,
+          "branches": 198,
+          "partial_branches": 0
+        },
+        "_classical.py": {
+          "statements": 218,
+          "missing_lines": 11,
+          "branches": 118,
+          "partial_branches": 11
+        },
+        "_contracts.py": {
+          "statements": 112,
+          "missing_lines": 3,
+          "branches": 52,
+          "partial_branches": 3
+        },
+        "_ergonomics.py": {
+          "statements": 521,
+          "missing_lines": 15,
+          "branches": 278,
+          "partial_branches": 9
+        },
+        "_execution.py": {
+          "statements": 30,
+          "missing_lines": 1,
+          "branches": 16,
+          "partial_branches": 1
+        },
+        "_external.py": {
+          "statements": 33,
+          "missing_lines": 0,
+          "branches": 8,
+          "partial_branches": 0
+        },
+        "_gate_specs.py": {
+          "statements": 3,
+          "missing_lines": 0,
+          "branches": 0,
+          "partial_branches": 0
+        },
+        "_inspection.py": {
+          "statements": 50,
+          "missing_lines": 0,
+          "branches": 28,
+          "partial_branches": 0
+        },
+        "_observable.py": {
+          "statements": 199,
+          "missing_lines": 7,
+          "branches": 90,
+          "partial_branches": 4
+        },
+        "_optimization.py": {
+          "statements": 27,
+          "missing_lines": 0,
+          "branches": 12,
+          "partial_branches": 0
+        },
+        "_plan.py": {
+          "statements": 49,
+          "missing_lines": 0,
+          "branches": 16,
+          "partial_branches": 0
+        },
+        "_replay.py": {
+          "statements": 87,
+          "missing_lines": 3,
+          "branches": 40,
+          "partial_branches": 3
+        },
+        "_reports.py": {
+          "statements": 70,
+          "missing_lines": 3,
+          "branches": 2,
+          "partial_branches": 0
+        },
+        "_resources.py": {
+          "statements": 28,
+          "missing_lines": 0,
+          "branches": 2,
+          "partial_branches": 0
+        },
+        "_result.py": {
+          "statements": 514,
+          "missing_lines": 13,
+          "branches": 190,
+          "partial_branches": 11
+        },
+        "_statistical.py": {
+          "statements": 48,
+          "missing_lines": 0,
+          "branches": 18,
+          "partial_branches": 0
+        },
+        "_topology.py": {
+          "statements": 29,
+          "missing_lines": 1,
+          "branches": 8,
+          "partial_branches": 0
+        },
+        "_trace.py": {
+          "statements": 186,
+          "missing_lines": 11,
+          "branches": 66,
+          "partial_branches": 6
+        },
+        "_transpilation.py": {
+          "statements": 186,
+          "missing_lines": 12,
+          "branches": 72,
+          "partial_branches": 6
+        },
+        "_validation.py": {
+          "statements": 67,
+          "missing_lines": 2,
+          "branches": 28,
+          "partial_branches": 2
+        },
+        "_verification.py": {
+          "statements": 194,
+          "missing_lines": 12,
+          "branches": 74,
+          "partial_branches": 11
+        },
+        "_visualization.py": {
+          "statements": 70,
+          "missing_lines": 0,
+          "branches": 24,
+          "partial_branches": 0
+        }
+      }
+    },
+    "dynamic": {
+      "job": 140010957865,
+      "modules": {
+        "__init__.py": {
+          "statements": 16,
+          "missing_lines": 0,
+          "branches": 0,
+          "partial_branches": 0
+        },
+        "_adapter.py": {
+          "statements": 155,
+          "missing_lines": 11,
+          "branches": 96,
+          "partial_branches": 10
+        },
+        "_algorithms.py": {
+          "statements": 340,
+          "missing_lines": 1,
+          "branches": 170,
+          "partial_branches": 1
+        },
+        "_checks.py": {
+          "statements": 60,
+          "missing_lines": 0,
+          "branches": 18,
+          "partial_branches": 0
+        },
+        "_circuit.py": {
+          "statements": 790,
+          "missing_lines": 4,
+          "branches": 198,
+          "partial_branches": 0
+        },
+        "_classical.py": {
+          "statements": 218,
+          "missing_lines": 11,
+          "branches": 118,
+          "partial_branches": 11
+        },
+        "_contracts.py": {
+          "statements": 112,
+          "missing_lines": 3,
+          "branches": 52,
+          "partial_branches": 3
+        },
+        "_ergonomics.py": {
+          "statements": 521,
+          "missing_lines": 15,
+          "branches": 278,
+          "partial_branches": 9
+        },
+        "_execution.py": {
+          "statements": 30,
+          "missing_lines": 1,
+          "branches": 16,
+          "partial_branches": 1
+        },
+        "_external.py": {
+          "statements": 33,
+          "missing_lines": 0,
+          "branches": 8,
+          "partial_branches": 0
+        },
+        "_gate_specs.py": {
+          "statements": 3,
+          "missing_lines": 0,
+          "branches": 0,
+          "partial_branches": 0
+        },
+        "_inspection.py": {
+          "statements": 50,
+          "missing_lines": 0,
+          "branches": 28,
+          "partial_branches": 0
+        },
+        "_observable.py": {
+          "statements": 199,
+          "missing_lines": 7,
+          "branches": 90,
+          "partial_branches": 4
+        },
+        "_optimization.py": {
+          "statements": 27,
+          "missing_lines": 0,
+          "branches": 12,
+          "partial_branches": 0
+        },
+        "_plan.py": {
+          "statements": 49,
+          "missing_lines": 0,
+          "branches": 16,
+          "partial_branches": 0
+        },
+        "_replay.py": {
+          "statements": 87,
+          "missing_lines": 3,
+          "branches": 40,
+          "partial_branches": 3
+        },
+        "_reports.py": {
+          "statements": 70,
+          "missing_lines": 3,
+          "branches": 2,
+          "partial_branches": 0
+        },
+        "_resources.py": {
+          "statements": 28,
+          "missing_lines": 0,
+          "branches": 2,
+          "partial_branches": 0
+        },
+        "_result.py": {
+          "statements": 514,
+          "missing_lines": 13,
+          "branches": 190,
+          "partial_branches": 11
+        },
+        "_statistical.py": {
+          "statements": 48,
+          "missing_lines": 0,
+          "branches": 18,
+          "partial_branches": 0
+        },
+        "_topology.py": {
+          "statements": 29,
+          "missing_lines": 1,
+          "branches": 8,
+          "partial_branches": 0
+        },
+        "_trace.py": {
+          "statements": 186,
+          "missing_lines": 11,
+          "branches": 66,
+          "partial_branches": 6
+        },
+        "_transpilation.py": {
+          "statements": 186,
+          "missing_lines": 12,
+          "branches": 72,
+          "partial_branches": 6
+        },
+        "_validation.py": {
+          "statements": 67,
+          "missing_lines": 2,
+          "branches": 28,
+          "partial_branches": 2
+        },
+        "_verification.py": {
+          "statements": 194,
+          "missing_lines": 12,
+          "branches": 74,
+          "partial_branches": 11
+        },
+        "_visualization.py": {
+          "statements": 70,
+          "missing_lines": 0,
+          "branches": 24,
+          "partial_branches": 0
+        }
+      }
+    }
+  }
+}
