@@ -298,7 +298,8 @@
     "Circuit.run_noisy",
     "Circuit.transpile_for",
     "Circuit.run_channel",
-    "_Math.expectation_complex"
+    "_Math.expectation_complex",
+    "Circuit.project_annotated"
   ],
   "Compatibility": [
     "Circuit.analyze",
