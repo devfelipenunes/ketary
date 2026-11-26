@@ -42,7 +42,7 @@ def test_jacobian_supported_generator(gate):
 
 def test_jacobian_phase_only_and_preflight(monkeypatch):
     t=q.Circuit.parameter("t");phase=q.Circuit.symbolic(1).h(0).evolve(q.I(),time=t)
-    bad=q.Circuit.symbolic(2).crx(t,0,1)
+    bad=q.Circuit.symbolic(2).u(t,.2,.3,0)
     monkeypatch.setattr(q.Circuit,"run",lambda *a,**k:pytest.fail("unexpected evolution"))
     assert phase.expectation_jacobian({t:.3},[q.X(0)])==((0.,),)
     with pytest.raises(q.UnsupportedOperation):bad.expectation_jacobian({t:.3},[q.Z(0)])

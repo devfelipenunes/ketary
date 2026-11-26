@@ -161,7 +161,7 @@ def test_failure_preflight_and_phase_semantics(monkeypatch):
     with pytest.raises(q.UnsupportedOperation):
         c.evolve(q.X(0)+q.Z(0),time=.5)
     assert c.to_qiskit()==before
-    t=q.Circuit.parameter("t");s=q.Circuit.symbolic(2).crx(t,0,1)
+    t=q.Circuit.parameter("t");s=q.Circuit.symbolic(2).u(t,.2,.3,0)
     monkeypatch.setattr(q.Circuit,"run",lambda *a,**kw:pytest.fail("invalid input executed"))
     with pytest.raises(q.UnsupportedOperation):
         s.expectation_jacobian({t:.1},[q.Z(0)])
