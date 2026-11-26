@@ -261,3 +261,27 @@ parameter in Circuit.parameters order; mappings and named binding remain
 supported. Binding returns a new bound circuit; no hidden execution or
 classical optimizer. This is an experimental convenience for a subset of
 n_local, not all Qiskit variational capabilities.
+
+
+## Hamiltonian and oracle composition
+
+```python
+H = q.maxcut_hamiltonian(4, q.ring(range(4)))
+energy = q.ghz(4).run().math.expectation(H)
+oracle = q.phase_oracle(["001", "110"])
+search = q.amplitude_amplification(oracle, iterations=1)
+result = search.run()
+```
+
+MaxCut constructs the weighted cut-value observable, with positive or
+negative finite real weights aligned to distinct undirected edges; it does
+not optimize a graph or perform measurement. At most 62 wires and 255
+edges. `Observable.from_qiskit(SparsePauliOp)` accepts canonical native Pauli
+labels, combines duplicates (including complex cancellations) and requires
+exactly real aggregate coefficients. It accepts <=4096 input and <=256
+nonzero output terms, with no tolerance truncation.
+Phase-oracle labels use native highest-wire-first basis ordering, 2..8
+bits and at most 256 distinct marked labels. Amplitude amplification is
+the explicit uniform-input Grover iterate for a caller-promised phase
+oracle, with 0..64 iterations and bounded expansion; no automatic oracle
+verification, choice of iteration count or optimizer. No hidden execution.

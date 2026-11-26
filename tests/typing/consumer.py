@@ -111,3 +111,8 @@ assert_type(q.Circuit.symbolic(2).crx(angle,pairs=[(0,1)]),q.Circuit)
 assert_type(q.ansatz(4,reps=2).bind([0.1]*12),q.Circuit)
 params=q.Circuit.parameter_vector("weight",2)
 assert_type(q.Circuit.symbolic(2).ry(params,[0,1]).bind([.1,.2]),q.Circuit)
+
+
+assert_type(q.Observable.from_qiskit(H.to_qiskit()),q.Observable)
+assert_type(q.maxcut_hamiltonian(4,q.ring(range(4))),q.Observable)
+assert_type(q.amplitude_amplification(q.phase_oracle(["001","110"]),iterations=1),q.Circuit)

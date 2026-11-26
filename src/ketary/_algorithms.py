@@ -319,3 +319,114 @@ def ansatz(n,*,rotations=("ry",),entanglement="linear",reps=1,prefix="theta"):
     if parameters>4096 or parameters+reps*edges>10000:
         raise ResourceLimit("ansatz exceeds 4096 parameters or 10000 instructions")
     return Circuit._native_ansatz(n,rotations,entanglement,reps,prefix)
+
+
+def maxcut_hamiltonian(n,edges,*,weights=None):
+    """C = sum w_ij (I-Z_i Z_j)/2 in absolute native wire order."""
+    from collections.abc import Mapping
+    from itertools import islice
+    from math import fsum
+    from ._validation import _real,ResourceLimit
+    from ._observable import Observable
+    n=_int(n,2)
+    if n>62:
+        raise ResourceLimit("MaxCut observable limited to 62 wires")
+    if isinstance(edges,(str,bytes,Mapping,set,frozenset)):
+        raise ValueError("expected ordered edges")
+    rows=[]
+    seen=set()
+    try:
+        for raw in islice(iter(edges),256):
+            if isinstance(raw,(str,bytes,Mapping,set,frozenset)):
+                raise ValueError("expected ordered edge endpoints")
+            pair=tuple(_int(w) for w in islice(iter(raw),3))
+            if len(pair)!=2 or pair[0]==pair[1] or max(pair)>=n:
+                raise ValueError("invalid edge")
+            key=tuple(sorted(pair))
+            if key in seen:
+                raise ValueError("duplicate undirected edge")
+            rows.append(key)
+            seen.add(key)
+    except TypeError as exc:
+        raise ValueError("expected ordered edges") from exc
+    if not 1<=len(rows)<=255:
+        raise ResourceLimit("MaxCut requires 1..255 edges")
+    if weights is None:
+        values=(1.,)*len(rows)
+    else:
+        if isinstance(weights,(str,bytes,Mapping,set,frozenset)):
+            raise ValueError("expected ordered edge weights")
+        try:
+            values=tuple(_real(v) for v in islice(iter(weights),len(rows)+1))
+        except TypeError as exc:
+            raise ValueError("expected ordered edge weights") from exc
+        if len(values)!=len(rows):
+            raise ValueError("one weight per edge required")
+    terms={"I"*n:_real(fsum(v/2 for v in values))}
+    for (a,b),value in zip(rows,values,strict=True):
+        label=["I"]*n
+        label[n-1-a]=label[n-1-b]="Z"
+        terms["".join(label)]=-value/2
+    return Observable(terms)
+
+
+def phase_oracle(marked):
+    """Apply -1 exactly to selected basis labels; no classical oracle synthesis."""
+    from collections.abc import Mapping
+    from itertools import islice
+    from ._validation import ResourceLimit
+    if isinstance(marked,str):
+        labels=(marked,)
+    else:
+        if isinstance(marked,(bytes,Mapping,set,frozenset)):
+            raise ValueError("expected one label or ordered labels")
+        try:
+            labels=tuple(islice(iter(marked),257))
+        except TypeError as exc:
+            raise ValueError("expected one label or ordered labels") from exc
+    if not 1<=len(labels)<=256:
+        raise ResourceLimit("phase oracle requires 1..256 labels")
+    if any(type(label) is not str or not 2<=len(label)<=8 or set(label)-set("01") for label in labels):
+        raise ValueError("expected basis labels with 2..8 bits")
+    n=len(labels[0])
+    if any(len(label)!=n for label in labels) or len(set(labels))!=len(labels):
+        raise ValueError("expected distinct equal-width labels")
+    c=Circuit(n)
+    for label in labels:
+        zeros=[i for i,b in enumerate(reversed(label)) if b=="0"]
+        if zeros:
+            c.x(zeros)
+        if n==2:
+            c.cz(0,1)
+        else:
+            c.h(n-1).mcx(range(n-1),n-1).h(n-1)
+        if zeros:
+            c.x(zeros)
+    return c
+
+
+def amplitude_amplification(oracle,*,iterations):
+    """Uniform-input Grover iterate for an explicit bound phase-oracle promise.
+
+    Caller promises a diagonal sign oracle. No promise verification or
+    automatic iteration selection; the returned circuit does not execute.
+    """
+    from math import pi
+    from ._validation import ResourceLimit
+    if not isinstance(oracle,Circuit):
+        raise TypeError("expected Circuit phase oracle")
+    oracle._require_bound()
+    n=oracle.num_qubits
+    count=_int(iterations)
+    if not 2<=n<=8 or count>64:
+        raise ResourceLimit("amplification supports 2..8 wires and 0..64 iterations")
+    # Bound total logical expansion before allocating or mutating a circuit.
+    if count*(len(oracle._qc.data)+4*n+3)>100000:
+        raise ResourceLimit("amplification exceeds 100000 estimated instructions")
+    c=Circuit(n).h(range(n))
+    if count==0:
+        return c
+    diffusion=Circuit(n).h(range(n)).apply(phase_oracle("0"*n)).h(range(n))
+    diffusion._qc.global_phase += pi
+    layer=Circuit(n).apply(oracle).apply(diffusion)
+    return c.apply(layer,times=count)

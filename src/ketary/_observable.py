@@ -34,6 +34,34 @@ class Observable:
         object.__setattr__(self,"_width",width)
         object.__setattr__(self,"_terms",tuple(sorted(cleaned.items())) or (("I"*width,0.0),))
 
+    @classmethod
+    def from_qiskit(cls,operator):
+        """Import a bounded real Hermitian native Pauli sum, without execution."""
+        from qiskit.quantum_info import SparsePauliOp
+        if not isinstance(operator,SparsePauliOp):
+            raise TypeError("expected SparsePauliOp")
+        if not 1<=operator.num_qubits<=_MAX_WIDTH or operator.size>4096:
+            raise ResourceLimit("native observable exceeds width or input-term limit")
+        # Native conversion includes Pauli phases. Aggregate duplicates before
+        # checking Hermiticity; use no numerical truncation or imaginary tolerance.
+        terms={}
+        for label,value in operator.to_list():
+            if type(label) is not str or set(label)-set("IXYZ"):
+                raise ValueError("expected canonical native Pauli labels")
+            try:
+                coefficient=complex(value)
+            except (ValueError,TypeError,OverflowError) as exc:
+                raise ValueError("native coefficients must be finite numeric values") from exc
+            real,imag=_real(coefficient.real),_real(coefficient.imag)
+            prev=terms.get(label,0j)
+            terms[label]=complex(_real(prev.real+real),_real(prev.imag+imag))
+        if any(value.imag!=0 for value in terms.values()):
+            raise ValueError("native observable must have real aggregate coefficients")
+        cleaned={label:value.real for label,value in terms.items() if value.real}
+        if len(cleaned)>_MAX_TERMS:
+            raise ResourceLimit("observable term limit exceeded")
+        return cls(cleaned or {"I"*operator.num_qubits:0.0})
+
     @property
     def num_qubits(self):
         """Minimum embedding width, including explicitly declared identities."""
