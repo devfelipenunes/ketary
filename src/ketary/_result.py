@@ -119,10 +119,13 @@ class Result:
             raise ResourceLimit("potential sample dictionary exceeds outcome limit")
         if seed is not None:
             seed = _int(seed)
-        p = np.abs(self._data)**2
+        p = np.abs(self._data)
+        np.square(p,out=p)
         p /= p.sum()
         counts = np.random.default_rng(seed).multinomial(shots, p)
-        return {format(i,f"0{self._n}b"):int(v) for i,v in enumerate(counts) if v}
+        # Same seeded native multinomial; enumerate only populated bins in
+        # ascending order. Output index allocation is bounded by max_outcomes.
+        return {format(i,f"0{self._n}b"):int(counts[i]) for i in np.flatnonzero(counts)}
 
 class _Math:
     def __init__(self, result):
