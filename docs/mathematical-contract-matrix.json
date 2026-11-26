@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "baseline": "6f1e8a8bbd25882fbdfaa4dc8d7152891dc0450b",
+  "scope": "Initial family-level traceability; linked tests are examples, not proof of complete per-entry oracle coverage",
+  "families": [
+    {
+      "id": "born",
+      "entries": [
+        "_Math.probability",
+        "_Math.probabilities",
+        "_Math.expectation",
+        "_Math.variance"
+      ],
+      "contract": "Born rule and Hermitian expectation/variance; normalized pure state",
+      "positive": "tests/test_production_math_oracles.py::test_born_and_pauli_expectation_variance",
+      "negative": "tests/test_production_math_oracles.py::test_semantic_sentinels_detect_wrong_results",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "reduced",
+      "entries": [
+        "_Math.density_matrix",
+        "_Math.schmidt",
+        "_Math.entropy",
+        "_Math.purity"
+      ],
+      "contract": "Partial trace, Schmidt singular values, base-two entropy and purity; ordered subsystem",
+      "positive": "tests/test_production_math_oracles.py::test_reduced_density_schmidt_entropy",
+      "negative": "tests/test_resource_bounds.py::test_svd_limits_before_allocation",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "algebra",
+      "entries": [
+        "Observable.product",
+        "Observable.commutator",
+        "Observable.anticommutator"
+      ],
+      "contract": "Complex Pauli products; compensated aggregation; bounded terms",
+      "positive": "tests/test_production_pauli_robustness.py::test_pauli_algebra_dense_oracle",
+      "negative": "tests/test_production_pauli_robustness.py::test_overflow_not_silently_accepted",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "embedding",
+      "entries": [
+        "Observable.on"
+      ],
+      "contract": "Ordered absolute wire embedding with unchanged source",
+      "positive": "tests/test_production_final_mutants.py::test_asymmetric_embedding",
+      "negative": "tests/test_production_final_mutants.py::test_overlapping_tensor",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "commuting",
+      "entries": [
+        "Circuit.evolve"
+      ],
+      "contract": "Strict exp(-itH) for commuting real Pauli sum",
+      "positive": "tests/test_production_math_oracles.py::test_exact_commuting_evolution_strict_phase",
+      "negative": "tests/test_dx_coverage_promotions.py::test_product_formula_rollback",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "dense_evolution",
+      "entries": [
+        "Circuit.evolve_exact"
+      ],
+      "contract": "Full operator equality, including phase; <=5 wires",
+      "positive": "tests/test_production_workflow_batch2.py::test_two_site_hubbard_number_conservation",
+      "negative": "tests/test_production_workflow_batch2.py::test_dense_hamiltonian_bad_native_output_fails_atomically",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "product",
+      "entries": [
+        "Circuit.evolve_product"
+      ],
+      "contract": "Ordered finite Lie/Strang approximation; no implicit accuracy guarantee",
+      "positive": "research/probes/test_commutator_bound_study.py::test_seeded_multiterm_commutator_bound",
+      "negative": "tests/test_dx_coverage_promotions.py::test_product_formula_rollback",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "jacobian",
+      "entries": [
+        "Circuit.expectation_jacobian"
+      ],
+      "contract": "Occurrence chain rule for supported ideal generators",
+      "positive": "tests/test_production_math_oracles.py::test_shared_jacobian_against_closed_form",
+      "negative": "tests/test_production_exact_coverage.py::test_differential_preflight",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "hessian",
+      "entries": [
+        "Circuit.expectation_hessian"
+      ],
+      "contract": "Observable/parameter/parameter tensor; second-order chain rule",
+      "positive": "tests/test_production_hessian.py::test_nonlinear_shared_hessian",
+      "negative": "tests/test_production_hessian.py::test_hessian_invalid_preflight",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "qgt",
+      "entries": [
+        "Circuit.quantum_geometric_tensor"
+      ],
+      "contract": "Projected pure-state Gram tensor; phase gauge, singular directions",
+      "positive": "tests/test_production_qgt.py::test_qgt_controlled_shared_and_phase",
+      "negative": "tests/test_production_qgt.py::test_qgt_preflight_no_execution",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "channel",
+      "entries": [
+        "Circuit.run_channel"
+      ],
+      "contract": "Finite local CPTP map; ordered wires and budget",
+      "positive": "tests/test_production_local_channels.py::test_local_channel_dense_oracle",
+      "negative": "tests/test_production_local_channels.py::test_local_channel_budget_and_invalid_before_execution",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "complex",
+      "entries": [
+        "_Math.expectation_complex"
+      ],
+      "contract": "Finite complex expectation without dense matrix",
+      "positive": "tests/test_production_channels_complex.py::test_complex_pauli_expectation",
+      "negative": "tests/test_production_channels_complex.py::test_complex_expectation_preflight_and_cancellation",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "preparation",
+      "entries": [
+        "Circuit.prepare_state"
+      ],
+      "contract": "Requested normalized vector on zero input; full native synthesis checked",
+      "positive": "tests/test_production_dense_and_dynamic.py::test_arbitrary_state_preparation",
+      "negative": "tests/test_production_dense_and_dynamic.py::test_preparation_invalid",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "unitary",
+      "entries": [
+        "Circuit.from_unitary"
+      ],
+      "contract": "Finite unitary matrix; strict synthesis",
+      "positive": "tests/test_production_dense_and_dynamic.py::test_arbitrary_unitary",
+      "negative": "tests/test_production_dense_and_dynamic.py::test_matrix_invalid",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "synthesis",
+      "entries": [
+        "Circuit.from_synthesized",
+        "Circuit.control"
+      ],
+      "contract": "Bounded full operator residual, including controlled relative phase",
+      "positive": "tests/test_dx_coverage_promotions.py::test_control_phase",
+      "negative": "tests/test_production_native_faults.py::test_synthesis_wrong_operator_never_accepted",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "dynamic",
+      "entries": [
+        "Circuit.from_dynamic",
+        "Circuit.run_shots"
+      ],
+      "contract": "Nested native condition truth table and expanded preflight",
+      "positive": "tests/test_production_nested_dynamic.py::test_nested_truth_table",
+      "negative": "tests/test_production_nested_dynamic.py::test_nested_forbidden_leaves_even_in_unreachable_branch",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "projection",
+      "entries": [
+        "Circuit.project_annotated"
+      ],
+      "contract": "Independent ideal projection and preserved native structure",
+      "positive": "tests/test_production_annotated_projection.py::test_annotated_projection_structural_and_math",
+      "negative": "tests/test_production_annotated_projection.py::test_bad_metadata_rejected_before_copy",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "witness",
+      "entries": [
+        "Evidence.reproduce",
+        "Evidence.minimize"
+      ],
+      "contract": "Reproducible fixed witness; bounded local deletion",
+      "positive": "tests/test_witness_restart_minimization.py::test_restart_revisits_previously_rejected_deletion",
+      "negative": "tests/test_witness_restart_minimization.py::test_budget_retains_reproducible_witness_without_minimality_claim",
+      "status": "linked_review_required"
+    },
+    {
+      "id": "compare",
+      "entries": [
+        "_CircuitChecks.compare"
+      ],
+      "contract": "Sample-only matching inconclusive; dense check separate",
+      "positive": "tests/test_verification_workflow.py::test_ladder_never_promotes_samples_to_universal_pass",
+      "negative": "tests/test_verification_workflow.py::test_inputs_validated_before_run",
+      "status": "linked_review_required"
+    }
+  ]
+}

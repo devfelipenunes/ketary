@@ -31,8 +31,8 @@ Upstream references:
 
 CI records runtime, validation and build dependency metadata separately,
 including hashes of discovered installed notice files. It scans exact
-resolved validation versions using pip-audit. Build inventory is separate;
-a full build-tool vulnerability scan and hash-pinned toolchain remain open.
+resolved validation versions using pip-audit. Build inventory is separate; current packaging CI also scans resolved build
+tooling. A hash-pinned transitive toolchain remains open.
 Artifact manifests verify membership and SHA-256, not signatures or an SBOM
 certification. Absence of a known advisory is not proof of security.
 

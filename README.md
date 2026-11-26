@@ -84,6 +84,8 @@ Native interoperability is explicit. Existing aliases continue to work.
 - [Maturity review](docs/maturity-review.md)
 - [Technical consolidation roadmap](docs/technical-consolidation.md)
 - [Production qualification roadmap](docs/production-qualification.md)
+- [Capability and qualification matrix](docs/capability-matrix.md)
+- [Mathematical contract traceability](docs/mathematical-contract-matrix.md)
 - [Known limitations](docs/known-limitations.md)
 - [Compatibility policy](docs/compatibility.md)
 
