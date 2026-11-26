@@ -1,5 +1,5 @@
 """Explicit immutable query plans; execute exactly one native simulation."""
-from dataclasses import dataclass
+from dataclasses import dataclass,field
 from itertools import islice
 from ._inspection import _labels
 from ._validation import _int,_limit,ResourceLimit
@@ -7,6 +7,8 @@ from ._validation import _int,_limit,ResourceLimit
 @dataclass(frozen=True,init=False)
 class QueryPlan:
     _circuit: str
+    _snapshot: object=field(compare=False,repr=False)
+    _sizes: tuple[int,int,int]=field(compare=False,repr=False)
     bits: tuple[str,...]
     paulis: tuple[str,...]
     subsystems: tuple[tuple[int,...],...]
@@ -27,25 +29,25 @@ class QueryPlan:
             raise ValueError("expected up to eight distinct subsystems")
         if not p and not e and not selected:
             raise ValueError("query plan requires a query")
-        for key,value in (("_circuit",circuit.to_json()),("bits",p),("paulis",e),("subsystems",tuple(selected))):
+        from ._circuit import Circuit
+        payload=circuit.to_json()  # retain the same bounded replay admission
+        snapshot=Circuit.from_json(payload)  # validate once, retain private owned native program
+        sizes=(16*(1<<n),sum(16*(1<<(2*len(ws))) for ws in selected),len(snapshot._qc.data))
+        for key,value in (("_circuit",payload),("_snapshot",snapshot),("_sizes",sizes),("bits",p),("paulis",e),("subsystems",tuple(selected))):
             object.__setattr__(self,key,value)
 
     def estimate(self):
-        import json
-        d=json.loads(self._circuit)
-        n=d["num_qubits"]
-        return {"state_payload_bytes":16*(1<<n),"density_output_bytes":sum(16*(1<<(2*len(ws))) for ws in self.subsystems),
-                "gate_count":len(d["operations"]),"simulation_count":1,
+        state,density,gates=self._sizes
+        return {"state_payload_bytes":state,"density_output_bytes":density,
+                "gate_count":gates,"simulation_count":1,
                 "scope":"payload estimates; not total memory or time"}
 
     def run(self,*,initial_state=None,max_bytes=64*1024**2):
-        from ._circuit import Circuit
         budget=_int(max_bytes,1)
         sizes=self.estimate()
         if sizes["state_payload_bytes"]+sizes["density_output_bytes"]>budget:
             raise ResourceLimit("planned payload exceeds budget")
-        c=Circuit.from_json(self._circuit)
-        r=c.run(initial_state=initial_state,max_bytes=budget)
+        r=self._snapshot.run(initial_state=initial_state,max_bytes=budget)
         evidence=r.evidence(bits=self.bits,paulis=self.paulis)
         matrices=[]
         for wires in self.subsystems:
