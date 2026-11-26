@@ -1,0 +1,418 @@
+[
+  {
+    "config": "PERF01",
+    "job": 139710696966,
+    "run": 45760911391,
+    "commit": "fb58497991473081611028f48bec8d512bf7efab",
+    "rss": [
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114516,
+          "peak_kib": 114516,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148512,
+          "peak_kib": 164804,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114468,
+          "peak_kib": 114468,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148468,
+          "peak_kib": 164684,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114488,
+          "peak_kib": 114488,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148492,
+          "peak_kib": 164720,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114160,
+          "peak_kib": 114160,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148172,
+          "peak_kib": 164344,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114268,
+          "peak_kib": 114268,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148276,
+          "peak_kib": 164464,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114192,
+          "peak_kib": 114192,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148188,
+          "peak_kib": 164296,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      }
+    ]
+  },
+  {
+    "config": "EXP07",
+    "job": 139711303072,
+    "run": 45761111250,
+    "commit": "a914a9b0d74e2f41e6b660d7a2793a41a34a3a77",
+    "rss": [
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114256,
+          "peak_kib": 114256,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148256,
+          "peak_kib": 164556,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114296,
+          "peak_kib": 114296,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148300,
+          "peak_kib": 164460,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114596,
+          "peak_kib": 114596,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148604,
+          "peak_kib": 164764,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114368,
+          "peak_kib": 114368,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148372,
+          "peak_kib": 164596,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114476,
+          "peak_kib": 114476,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148480,
+          "peak_kib": 164812,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114556,
+          "peak_kib": 114556,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148556,
+          "peak_kib": 164828,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      }
+    ]
+  },
+  {
+    "config": "PERF04–06",
+    "job": 139720289329,
+    "run": 45763889629,
+    "commit": "a2e655023dfbdb5278aaa99c80775638a67ddcf9",
+    "rss": [
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 112472,
+          "peak_kib": 112472,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 146344,
+          "peak_kib": 162576,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 112684,
+          "peak_kib": 112684,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 146552,
+          "peak_kib": 162832,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 112420,
+          "peak_kib": 112420,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 146276,
+          "peak_kib": 162196,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 112624,
+          "peak_kib": 112624,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 146480,
+          "peak_kib": 162808,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 112732,
+          "peak_kib": 112732,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 146588,
+          "peak_kib": 162804,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 112448,
+          "peak_kib": 112448,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 146320,
+          "peak_kib": 162500,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      }
+    ]
+  },
+  {
+    "config": "combined native research",
+    "job": 139720747368,
+    "run": 45764043228,
+    "commit": "e0f325b84cfa89fad929d95650231f2850716982",
+    "rss": [
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114600,
+          "peak_kib": 114600,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148608,
+          "peak_kib": 164908,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114636,
+          "peak_kib": 114636,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148632,
+          "peak_kib": 164768,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114408,
+          "peak_kib": 114408,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148404,
+          "peak_kib": 164688,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114364,
+          "peak_kib": 114364,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148360,
+          "peak_kib": 164632,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "native",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114332,
+          "peak_kib": 114332,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148328,
+          "peak_kib": 164592,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      },
+      {
+        "variant": "sdk",
+        "n": 20,
+        "gates": 3,
+        "before": {
+          "current_kib": 114428,
+          "peak_kib": 114428,
+          "source": "procfs"
+        },
+        "after": {
+          "current_kib": 148432,
+          "peak_kib": 164656,
+          "source": "procfs"
+        },
+        "payload_bytes": 16777216
+      }
+    ]
+  }
+]

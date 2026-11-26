@@ -1,0 +1,252 @@
+{
+  "run": 45759762678,
+  "job": 139706757695,
+  "source": "pnnl/QASMBench",
+  "commit": "357b942396d5c2b7cbc1c229c585a6ef5ccaebac",
+  "qiskit": "2.6.2",
+  "tolerance": 1e-9,
+  "cases": [
+    {
+      "name": "adder_n4",
+      "git_blob_sha1": "895cf110c11cc822c7db74110336f88159ca3298",
+      "qubits": 4,
+      "native_instructions": 27,
+      "removed": {
+        "measure": 4,
+        "barrier": 0
+      },
+      "projected_gates": 23,
+      "import_path": "direct",
+      "ketary_gates": 23,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "max_operator_error": 0,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "bb84_n8",
+      "git_blob_sha1": "379af7d98bd9189f0f4214c6310d0c77aff5fb9e",
+      "qubits": 8,
+      "native_instructions": 43,
+      "status": "OUTSIDE_UNITARY_SCOPE",
+      "reason": "operation after measurement"
+    },
+    {
+      "name": "cat_state_n4",
+      "git_blob_sha1": "394ba7e47b74a8d95f7de27170004220859a4e49",
+      "qubits": 4,
+      "native_instructions": 8,
+      "removed": {
+        "measure": 4,
+        "barrier": 0
+      },
+      "projected_gates": 4,
+      "import_path": "direct",
+      "ketary_gates": 4,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "max_operator_error": 0,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "deutsch_n2",
+      "git_blob_sha1": "dc0ff30f107fa83c7b62e1b1fe01b347193e3741",
+      "qubits": 2,
+      "native_instructions": 7,
+      "removed": {
+        "measure": 2,
+        "barrier": 0
+      },
+      "projected_gates": 5,
+      "import_path": "direct",
+      "ketary_gates": 5,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "max_operator_error": 0,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "grover_n2",
+      "git_blob_sha1": "d52ad89fa94aecd0c40357907a4d569e4bbfa40d",
+      "qubits": 2,
+      "native_instructions": 18,
+      "removed": {
+        "measure": 2,
+        "barrier": 0
+      },
+      "projected_gates": 16,
+      "import_path": "direct",
+      "ketary_gates": 16,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "max_operator_error": 0,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "ising_n10",
+      "git_blob_sha1": "d50fc0d2e699278726a30aec99bbc7ea477b23b4",
+      "qubits": 10,
+      "native_instructions": 490,
+      "removed": {
+        "measure": 10,
+        "barrier": 0
+      },
+      "projected_gates": 480,
+      "import_path": "direct",
+      "ketary_gates": 480,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "status": "MATCHED_SELECTED_STATES"
+    },
+    {
+      "name": "qaoa_n3",
+      "git_blob_sha1": "2c3e0367d459088c6e80e651988960bc56e70f29",
+      "qubits": 3,
+      "native_instructions": 18,
+      "status": "OUTSIDE_UNITARY_SCOPE",
+      "reason": "operation after measurement"
+    },
+    {
+      "name": "qaoa_n6",
+      "git_blob_sha1": "326787ca86e0a5aa716687345bcad583e1420c7f",
+      "qubits": 6,
+      "native_instructions": 276,
+      "removed": {
+        "measure": 6,
+        "barrier": 0
+      },
+      "projected_gates": 270,
+      "direct_rejection": "only supported standard unitary gates can be appended/imported",
+      "import_path": "native_basis_translation",
+      "ketary_gates": 270,
+      "max_state_error": 1.6514567491299204e-15,
+      "tested_inputs": 4,
+      "max_operator_error": 1.849498357454304e-15,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "qec_sm_n5",
+      "git_blob_sha1": "1cf21012876190fa48157b9a35d9b250439b1409",
+      "qubits": 5,
+      "native_instructions": 11,
+      "status": "OUTSIDE_UNITARY_SCOPE",
+      "reason": "operation after measurement"
+    },
+    {
+      "name": "qft_n4",
+      "git_blob_sha1": "c6e6f124eff46718d66669afa55155bc61a6eebc",
+      "qubits": 4,
+      "native_instructions": 17,
+      "removed": {
+        "measure": 4,
+        "barrier": 1
+      },
+      "projected_gates": 12,
+      "direct_rejection": "only supported standard unitary gates can be appended/imported",
+      "import_path": "native_basis_translation",
+      "ketary_gates": 36,
+      "max_state_error": 4.370819479295668e-16,
+      "tested_inputs": 4,
+      "max_operator_error": 3.1676639673831405e-16,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "simon_n6",
+      "git_blob_sha1": "4f3fbc26538ffa072aad76a0d37d5ca58476b25b",
+      "qubits": 6,
+      "native_instructions": 24,
+      "removed": {
+        "measure": 6,
+        "barrier": 2
+      },
+      "projected_gates": 16,
+      "import_path": "direct",
+      "ketary_gates": 16,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "max_operator_error": 0,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "teleportation_n3",
+      "git_blob_sha1": "b88c71b51cecd5da74dcca4417605469ac4d983f",
+      "qubits": 3,
+      "native_instructions": 11,
+      "removed": {
+        "measure": 3,
+        "barrier": 0
+      },
+      "projected_gates": 8,
+      "import_path": "direct",
+      "ketary_gates": 8,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "max_operator_error": 0,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "variational_n4",
+      "git_blob_sha1": "5eea164b10a75205197db8428761bb53618377bd",
+      "qubits": 4,
+      "native_instructions": 58,
+      "removed": {
+        "measure": 4,
+        "barrier": 0
+      },
+      "projected_gates": 54,
+      "import_path": "direct",
+      "ketary_gates": 54,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "max_operator_error": 0,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "vqe_n4",
+      "git_blob_sha1": "3e5350a5e8c48cc6373af12290db33c7f883fde5",
+      "qubits": 4,
+      "native_instructions": 94,
+      "removed": {
+        "measure": 4,
+        "barrier": 1
+      },
+      "projected_gates": 89,
+      "import_path": "direct",
+      "ketary_gates": 89,
+      "max_state_error": 0,
+      "tested_inputs": 4,
+      "max_operator_error": 0,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    },
+    {
+      "name": "vqe_uccsd_n4",
+      "git_blob_sha1": "9e00a37821aef2cd1c13f2ea009b9b20cf15e0ec",
+      "status": "PARSER_UNSUPPORTED",
+      "reason": "\"<input>:225,8: 'q' is not defined in this scope\""
+    },
+    {
+      "name": "wstate_n3",
+      "git_blob_sha1": "4e08ca066153fc76ecc384110eafdde782be8fb1",
+      "qubits": 3,
+      "native_instructions": 9,
+      "removed": {
+        "measure": 3,
+        "barrier": 0
+      },
+      "projected_gates": 6,
+      "direct_rejection": "only supported standard unitary gates can be appended/imported",
+      "import_path": "native_basis_translation",
+      "ketary_gates": 30,
+      "max_state_error": 6.707437923744492e-16,
+      "tested_inputs": 4,
+      "max_operator_error": 6.473657049138937e-16,
+      "status": "MATCHED_OPERATOR_AND_STATES"
+    }
+  ],
+  "matched_operator_and_states": 11,
+  "matched_selected_states": 1,
+  "parser_unsupported": 1,
+  "outside_unitary_scope": 3,
+  "mismatch": 0,
+  "error": 0
+}
