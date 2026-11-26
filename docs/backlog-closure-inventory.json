@@ -1,0 +1,584 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-11-26",
+  "baseline": "bdec8ea030387edd74a17b4b093f6566e64b83d5",
+  "open_issue_count": 138,
+  "scope": "routing snapshot of all open issues; assignments are not evidence of completion",
+  "closed_in_cycle": [
+    114,
+    118,
+    119,
+    121,
+    123,
+    126,
+    249
+  ],
+  "lanes": {
+    "external_and_qualification": [
+      {
+        "issue": 22,
+        "title": "Research roadmap: human and agent quantum software engineering"
+      },
+      {
+        "issue": 35,
+        "title": "SDK stabilization and pre-alpha acceptance checklist"
+      },
+      {
+        "issue": 66,
+        "title": "EXP15 / AUD10 / BENCH03: held-out agent task fixtures and paired revision audit"
+      },
+      {
+        "issue": 74,
+        "title": "PERF07–13: same-host fusion, ISA, OpenMP, GPU and MPI deployment harness"
+      },
+      {
+        "issue": 86,
+        "title": "PERF19–26: extended native gate coverage, output adoption and hardware evidence"
+      },
+      {
+        "issue": 100,
+        "title": "TC13 [P1]: Controlled CPU host and memory profiling"
+      },
+      {
+        "issue": 101,
+        "title": "TC14 [P1]: ISA, cache, compiler and threading evidence"
+      },
+      {
+        "issue": 102,
+        "title": "TC15 [P2]: GPU/cuQuantum and multi-node MPI qualification"
+      },
+      {
+        "issue": 110,
+        "title": "TC23 [P1]: Packaging, dependency and license qualification"
+      },
+      {
+        "issue": 111,
+        "title": "TC24 [P1]: Release candidate acceptance and independent review"
+      },
+      {
+        "issue": 112,
+        "title": "TC25 [P2]: External developer pilot readiness"
+      },
+      {
+        "issue": 113,
+        "title": "TC26 [P2]: Agent held-out evaluation readiness"
+      },
+      {
+        "issue": 165,
+        "title": "ABS25 [P2]: Held-out developer and agent expressivity protocol"
+      },
+      {
+        "issue": 197,
+        "title": "RF29 [P2]: Held-out circuit rewrite challenge"
+      },
+      {
+        "issue": 211,
+        "title": "API08 [P1]: Independent usability and API acceptance gates"
+      },
+      {
+        "issue": 230,
+        "title": "CH17 [P1]: Release readiness audit"
+      },
+      {
+        "issue": 250,
+        "title": "MA11 [P1]: Warning, documentation and release evidence reconciliation"
+      },
+      {
+        "issue": 251,
+        "title": "MA12 [P1]: Independent usage and dedicated hardware pilot"
+      },
+      {
+        "issue": 348,
+        "title": "PROD01–10: production qualification and independent mathematical assurance"
+      }
+    ],
+    "performance": [
+      {
+        "issue": 52,
+        "title": "AUDIT02: longitudinal native-reference benchmarks and expressive API audit"
+      },
+      {
+        "issue": 98,
+        "title": "TC11 [P1]: Native batch and fusion optimization ablations"
+      },
+      {
+        "issue": 99,
+        "title": "TC12 [P1]: End-to-end Aer/Qiskit/QuEST benchmark refresh"
+      },
+      {
+        "issue": 109,
+        "title": "TC22 [P1]: Verification performance and scope calibration"
+      },
+      {
+        "issue": 193,
+        "title": "RF25 [P1]: Paired timing and allocation diagnostics"
+      },
+      {
+        "issue": 227,
+        "title": "CH14 [P1]: Parameter scaling and prepared binding profile"
+      },
+      {
+        "issue": 245,
+        "title": "MA06 [P1]: Sampling scratch allocation and sparse-shot scaling"
+      },
+      {
+        "issue": 247,
+        "title": "MA08 [P1]: Commuting Hamiltonian parity reuse synthesis"
+      },
+      {
+        "issue": 256,
+        "title": "F04 [P0]: Performance — build, binding, execution, queries and memory"
+      },
+      {
+        "issue": 302,
+        "title": "PERF04 [P0]: Sparse-shot sampling scratch allocation"
+      },
+      {
+        "issue": 303,
+        "title": "PERF05 [P1]: Shared parity reuse"
+      },
+      {
+        "issue": 309,
+        "title": "PERF11 [P1]: CPU SIMD and scaling qualification"
+      },
+      {
+        "issue": 310,
+        "title": "PERF12 [P0]: Process peak RSS benchmarks"
+      }
+    ],
+    "expressivity": [
+      {
+        "issue": 55,
+        "title": "EXP07: explicit aligned pair gates and topology ergonomics"
+      },
+      {
+        "issue": 56,
+        "title": "EXP08: symbolic reusable layers and variational writing study"
+      },
+      {
+        "issue": 106,
+        "title": "TC19 [P1]: Expressivity and negative evidence"
+      },
+      {
+        "issue": 107,
+        "title": "TC20 [P1]: Developer documentation and executable recipes"
+      },
+      {
+        "issue": 141,
+        "title": "ABS01 [P0]: Circuit pattern corpus and abstraction opportunity atlas"
+      },
+      {
+        "issue": 143,
+        "title": "ABS03 [P0]: Finite parameterized layers"
+      },
+      {
+        "issue": 144,
+        "title": "ABS04 [P0]: Operation scheduling and zipped parameter rows"
+      },
+      {
+        "issue": 145,
+        "title": "ABS05 [P1]: Circuit sequence composition and reuse"
+      },
+      {
+        "issue": 147,
+        "title": "ABS07 [P1]: Explicit noncommuting evolution and product formulas"
+      },
+      {
+        "issue": 148,
+        "title": "ABS08 [P1]: Controlled logical blocks with strict phase"
+      },
+      {
+        "issue": 149,
+        "title": "ABS09 [P1]: Operator powers and controlled powers"
+      },
+      {
+        "issue": 150,
+        "title": "ABS10 [P1]: Reversible conjugation ergonomics"
+      },
+      {
+        "issue": 151,
+        "title": "ABS11 [P1]: Reflections and generalized amplitude amplification"
+      },
+      {
+        "issue": 152,
+        "title": "ABS12 [P1]: State preparation abstractions"
+      },
+      {
+        "issue": 153,
+        "title": "ABS13 [P1]: Composable oracle construction"
+      },
+      {
+        "issue": 154,
+        "title": "ABS14 [P1]: Parity and Pauli-string circuit primitives"
+      },
+      {
+        "issue": 155,
+        "title": "ABS15 [P2]: Syndrome extraction and stabilizer checks"
+      },
+      {
+        "issue": 156,
+        "title": "ABS16 [P2]: Reversible arithmetic primitives"
+      },
+      {
+        "issue": 157,
+        "title": "ABS17 [P2]: Generalized classical feed-forward"
+      },
+      {
+        "issue": 158,
+        "title": "ABS18 [P2]: Circuit algebra and operator notation"
+      },
+      {
+        "issue": 159,
+        "title": "ABS19 [P2]: Automatic uncomputation feasibility"
+      },
+      {
+        "issue": 160,
+        "title": "ABS20 [P1]: Graph-state and topology expressivity"
+      },
+      {
+        "issue": 161,
+        "title": "ABS21 [P0]: Matched expressivity benchmark harness"
+      },
+      {
+        "issue": 162,
+        "title": "ABS22 [P0]: Abstraction semantic and cost regression gates"
+      },
+      {
+        "issue": 163,
+        "title": "ABS23 [P1]: Algorithm composition recipes and cross-family reuse"
+      },
+      {
+        "issue": 164,
+        "title": "ABS24 [P1]: API consolidation and discoverability study"
+      },
+      {
+        "issue": 166,
+        "title": "ABS26 [P1]: Abstraction promotion RFC and decision register"
+      },
+      {
+        "issue": 169,
+        "title": "RF01 [P0]: Freeze matched circuit rewriting baseline"
+      },
+      {
+        "issue": 171,
+        "title": "RF03 [P0]: Aligned pair performance and native batch transaction"
+      },
+      {
+        "issue": 172,
+        "title": "RF04 [P0]: Ketary-only source rewrite ladder"
+      },
+      {
+        "issue": 173,
+        "title": "RF05 [P0]: Executable source quality scoring"
+      },
+      {
+        "issue": 174,
+        "title": "RF06 [P0]: Fair Qiskit matched baselines"
+      },
+      {
+        "issue": 175,
+        "title": "RF07 [P0]: Pauli rotation public contract design"
+      },
+      {
+        "issue": 178,
+        "title": "RF10 [P1]: QAOA rewriting ladder and weighted costs"
+      },
+      {
+        "issue": 179,
+        "title": "RF11 [P1]: QFT rewriting ladder"
+      },
+      {
+        "issue": 180,
+        "title": "RF12 [P1]: QPE controlled-power cost reduction"
+      },
+      {
+        "issue": 181,
+        "title": "RF13 [P1]: VQE layer rewriting and parameter identity"
+      },
+      {
+        "issue": 182,
+        "title": "RF14 [P1]: Product/basis preparation promotion study"
+      },
+      {
+        "issue": 183,
+        "title": "RF15 [P1]: Truth oracle and parity rewriting"
+      },
+      {
+        "issue": 184,
+        "title": "RF16 [P1]: Reversible arithmetic consolidation"
+      },
+      {
+        "issue": 185,
+        "title": "RF17 [P1]: Graph state and entanglement rewriting"
+      },
+      {
+        "issue": 186,
+        "title": "RF18 [P1]: Reflection and amplitude amplification rewriting"
+      },
+      {
+        "issue": 187,
+        "title": "RF19 [P1]: Conjugation and sequence refactoring"
+      },
+      {
+        "issue": 188,
+        "title": "RF20 [P1]: Explicit approximation refinement"
+      },
+      {
+        "issue": 189,
+        "title": "RF21 [P1]: Controlled synthesis and phase fast path"
+      },
+      {
+        "issue": 191,
+        "title": "RF23 [P1]: Mutation/ownership and negative rewrite cases"
+      },
+      {
+        "issue": 192,
+        "title": "RF24 [P1]: Common-basis resource and depth comparison"
+      },
+      {
+        "issue": 194,
+        "title": "RF26 [P1]: Code review iteration evidence ledger"
+      },
+      {
+        "issue": 196,
+        "title": "RF28 [P1]: Promotion and rejection matrix for ABS26"
+      },
+      {
+        "issue": 206,
+        "title": "API03 [P1]: Parameter workflow differential and ergonomic evaluation"
+      },
+      {
+        "issue": 345,
+        "title": "LANG01–10: mathematical intent, executable language corpus and scoped promotions"
+      },
+      {
+        "issue": 352,
+        "title": "DX functional coverage acceptance matrix — local mathematics, dynamics and native hardware handoff"
+      }
+    ],
+    "integration": [
+      {
+        "issue": 88,
+        "title": "TC01 [P0]: Baseline and evidence registry"
+      },
+      {
+        "issue": 95,
+        "title": "TC08 [P0]: CI consolidation and reproducibility"
+      },
+      {
+        "issue": 115,
+        "title": "TC28 [P1]: Regression triage and longitudinal decision log"
+      },
+      {
+        "issue": 198,
+        "title": "RF30 [P1]: Integrated main consolidation and regression gate"
+      },
+      {
+        "issue": 258,
+        "title": "F06 [P0]: Cross-front integration — combined main acceptance and evidence ledger"
+      }
+    ],
+    "math_verification_native": [
+      {
+        "issue": 89,
+        "title": "TC02 [P0]: Native ABI and boundary qualification"
+      },
+      {
+        "issue": 90,
+        "title": "TC03 [P0]: Independent mathematical differential corpus"
+      },
+      {
+        "issue": 91,
+        "title": "TC04 [P0]: Public resource and preflight audit"
+      },
+      {
+        "issue": 92,
+        "title": "TC05 [P0]: Result ownership and numerical invariants"
+      },
+      {
+        "issue": 93,
+        "title": "TC06 [P0]: Replay and report schema robustness"
+      },
+      {
+        "issue": 94,
+        "title": "TC07 [P0]: Verify semantics, scopes and mutation resistance"
+      },
+      {
+        "issue": 96,
+        "title": "TC09 [P1]: Direct gate coverage inventory and closed-control qualification"
+      },
+      {
+        "issue": 97,
+        "title": "TC10 [P1]: Prepared execution and parameter semantics"
+      },
+      {
+        "issue": 108,
+        "title": "TC21 [P1]: Dynamic and statistical correctness"
+      },
+      {
+        "issue": 124,
+        "title": "QA07 [P0]: Observable algebra numerical edge cases"
+      },
+      {
+        "issue": 125,
+        "title": "QA08 [P0]: Trace/checkpoint resource and verdict branches"
+      },
+      {
+        "issue": 127,
+        "title": "QA10 [P1]: Grouped predicate preflight and cost consistency"
+      },
+      {
+        "issue": 130,
+        "title": "QA13 [P1]: Algorithm decoder malformed and tie fixtures"
+      },
+      {
+        "issue": 131,
+        "title": "QA14 [P1]: Operator metrics phase and scope cross-check"
+      },
+      {
+        "issue": 132,
+        "title": "QA15 [P1]: Report accessors and export consistency"
+      },
+      {
+        "issue": 136,
+        "title": "QA19 [P1]: Adversarial generator and resource boundary suite"
+      },
+      {
+        "issue": 243,
+        "title": "MA04 [P1]: Ordered observable embedding and reusable subsystem Hamiltonians"
+      },
+      {
+        "issue": 248,
+        "title": "MA09 [P1]: Shared-parameter gradient feasibility"
+      },
+      {
+        "issue": 254,
+        "title": "F02 [P0]: Mathematics — composable observables and exact numerical semantics"
+      },
+      {
+        "issue": 257,
+        "title": "F05 [P0]: Verification — adversarial semantics and reproducible evidence"
+      },
+      {
+        "issue": 260,
+        "title": "F02.1 [P1]: Cross-workflow local observable embedding cost and API decision"
+      },
+      {
+        "issue": 289,
+        "title": "MAT11 [P1]: Reversible arithmetic primitives"
+      },
+      {
+        "issue": 290,
+        "title": "MAT12 [P1]: Diagonal operator synthesis"
+      }
+    ],
+    "architecture_api": [
+      {
+        "issue": 105,
+        "title": "TC18 [P1]: Public API and typing refinement"
+      },
+      {
+        "issue": 134,
+        "title": "QA17 [P1]: API signature, exception and mode matrix"
+      },
+      {
+        "issue": 190,
+        "title": "RF22 [P1]: SDK-only internal code duplication audit"
+      },
+      {
+        "issue": 195,
+        "title": "RF27 [P1]: Public typing and docs examples for selected primitives"
+      },
+      {
+        "issue": 208,
+        "title": "API05 [P1]: Canonical verification and math vocabulary"
+      },
+      {
+        "issue": 209,
+        "title": "API06 [P1]: Factories versus primitives acceptance matrix"
+      },
+      {
+        "issue": 253,
+        "title": "F01 [P0]: Architecture — ownership, dependency and API governance"
+      },
+      {
+        "issue": 272,
+        "title": "ARC02 [P1]: Private Hamiltonian synthesis boundary"
+      },
+      {
+        "issue": 273,
+        "title": "ARC03 [P1]: Shared numerical validation audit"
+      },
+      {
+        "issue": 277,
+        "title": "ARC07 [P0]: Exception and contract consistency matrix"
+      }
+    ],
+    "applications": [
+      {
+        "issue": 216,
+        "title": "CH03 [P0]: Entanglement and topology"
+      },
+      {
+        "issue": 217,
+        "title": "CH04 [P0]: Algorithm challenge corpus"
+      },
+      {
+        "issue": 223,
+        "title": "CH10 [P1]: Composition challenge corpus"
+      },
+      {
+        "issue": 226,
+        "title": "CH13 [P1]: Symbolic QAOA end-to-end comparison"
+      },
+      {
+        "issue": 228,
+        "title": "CH15 [P1]: Hamiltonian synthesis and native reference"
+      },
+      {
+        "issue": 229,
+        "title": "CH16 [P1]: Executable challenge gap ledger"
+      },
+      {
+        "issue": 242,
+        "title": "MA03 [P0]: Real workflow corpus with objective and verification"
+      },
+      {
+        "issue": 255,
+        "title": "F03 [P0]: Workflows — full applications and independent expressivity evaluation"
+      },
+      {
+        "issue": 261,
+        "title": "F03.1 [P0]: QAOA preexpanded native comparator and matched phase"
+      },
+      {
+        "issue": 291,
+        "title": "APP01 [P0]: Combinatorial optimization application family"
+      },
+      {
+        "issue": 292,
+        "title": "APP02 [P1]: Physical simulation application family"
+      },
+      {
+        "issue": 293,
+        "title": "APP03 [P0]: Variational algorithm application family"
+      },
+      {
+        "issue": 294,
+        "title": "APP04 [P1]: Reversible logic application family"
+      },
+      {
+        "issue": 296,
+        "title": "APP06 [P1]: Error correction application family"
+      },
+      {
+        "issue": 297,
+        "title": "APP07 [P1]: Quantum protocols application family"
+      },
+      {
+        "issue": 298,
+        "title": "APP08 [P0]: Program verification application family"
+      }
+    ]
+  }
+}
