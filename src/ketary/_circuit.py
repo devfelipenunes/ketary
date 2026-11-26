@@ -870,7 +870,7 @@ class Circuit:
         # state. Not a process RSS guarantee. Validate before input copying.
         _limit(self.num_qubits,2*len(states)+1,budget=max_bytes)
         prepared=tuple(prepare_initial(self.num_qubits,state) for state in states)
-        return tuple(execute_ideal(self._qc,state,max_bytes) for state in prepared)
+        return tuple(execute_ideal(self._qc,state,max_bytes,prepared=True) for state in prepared)
 
 
 class _Gates:
