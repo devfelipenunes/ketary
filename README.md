@@ -1,5 +1,58 @@
 # Ketary
 
-An experimental Python SDK for quantum programming built on Qiskit.
+An experimental Python SDK for quantum programming, built on Qiskit.
 
-Development is conducted through pull requests. No stable release is available yet.
+**Status: design spike.** The interface is not stable, the production gate is open, and no package release is available. This branch proposes Apache-2.0 licensing (see LICENSE); adoption is subject to PR review. Third-party licenses remain applicable. No PyPI release is authorized.
+
+## Try the proof of concept
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m pytest -q -rs tests research/probes
+```
+
+Run from the repository root. Python **3.12.x** is the sole supported development target, with Qiskit 2.6.2. The `.python-version` file defines the CI target. Earlier Python 3.11 results are historical, not a continuing support commitment.
+
+```python
+import ketary as q
+
+circuit = q.bell()
+result = circuit.run()
+result.test.probability("00", 0.5).require()
+print(result.math.probabilities())
+
+circuit.gates.z(0)
+print(circuit.debug.trace()[-1].result.math.statevector())
+```
+
+The result is a snapshot. The second operation does not change the earlier result. The two Bell states have equal computational-basis probabilities but different relative phase.
+
+## Scope
+
+- One Circuit API: construction, H/X/Z/CX/SWAP, Bell/GHZ, import/export, composition and inverse.
+- Ideal statevector execution, terminal sampling, pure-state math and checks.
+- Trace is explicit and bounded; decomposition only lowers SWAP in this spike.
+- No classical bits, mid-circuit measurement, reset, layout, metadata, unbound parameters, hardware, alternative SDK or independent compiler.
+- Qubit zero is the least significant bit. Preserve global phase; state fidelity alone does not prove operator equivalence.
+- A memory guard estimates dense statevector payload, not total process memory.
+
+## Validation
+
+Run all tests, including upstream Qiskit probes. Missing Qiskit is a failure, not a passing skip. Historical local PoC results are not evidence of this branch's CI.
+
+```bash
+python -m pip freeze > environment.txt
+python benchmark.py > benchmark_results.json
+```
+
+The diagnostic benchmark uses paired randomized timing, mixed gate workloads and isolated peak RSS processes. It runs after required tests in CI. Shared runner results are preliminary, not release guarantees; build and execution costs are reported separately. User ergonomics and broader workload coverage remain to be measured. No performance claim is made.
+
+## Examples and review
+
+Run `python -m examples.first_bell` and `python -m examples.diagnose_phase` from the repository root. These executable examples illustrate the same API. See `docs/validation.md` for the performance and human usability protocol.
+
+## Workflow
+
+All changes go through branches and pull requests. Do not merge automatically. Review evidence and production readiness before expanding scope or publishing.
