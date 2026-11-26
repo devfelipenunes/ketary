@@ -193,7 +193,10 @@ class SweepPlan:
             bind=circuit._bind_numeric
         else:
             bind=circuit.bind
-        payloads=tuple(bind({params[name]:v for name,v in row}) for row in rows)
+        # Resolve immutable parameter identities once for the ordinary rows;
+        # preserve dictionary insertion order and subclass binding dispatch.
+        keys=tuple(params[name] for name,_ in rows[0])
+        payloads=tuple(bind(dict(zip(keys,(v for _,v in row),strict=True))) for row in rows)
         self._rows=rows
         self._payloads=payloads
         self._width=circuit.num_qubits
@@ -607,7 +610,11 @@ def _expectation_hessian(c,bindings,observables,*,max_bytes):
     circuits={}
     for k in sorted(needed):
         circuits[k]=_shifted_bound_circuit(bound,((index,offset*pi/2) for index,offset in k))
-    evaluated={k:run.run(max_bytes=max_bytes).math.expectations(obs) for k,run in circuits.items()}
+    # All shifts were staged before any execution. Release each disposable
+    # native circuit as it is evaluated, retaining only its scalar results.
+    evaluated={}
+    for k in tuple(circuits):
+        evaluated[k]=circuits.pop(k).run(max_bytes=max_bytes).math.expectations(obs)
     def shifted(terms,o):
         return _real(fsum(_real(a*evaluated[k][o]) for k,a in terms))
     output=[]
