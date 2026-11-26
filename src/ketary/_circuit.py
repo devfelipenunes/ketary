@@ -257,6 +257,13 @@ class Circuit:
         return Circuit._from_native(native,owned=True)
 
     @classmethod
+    def project_annotated(cls,template):
+        """Explicitly return (ideal logical projection, independent native source)."""
+        from ._adapter import _project_annotated
+        logical,source=_project_annotated(template)
+        return cls._from_native(logical,owned=True),source
+
+    @classmethod
     def from_synthesized(cls,template,*,seed=0):
         """Explicit bounded native unitary lowering, checked on all basis columns."""
         from ._transpilation import _synthesize_native

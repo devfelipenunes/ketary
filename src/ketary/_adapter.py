@@ -115,3 +115,84 @@ def _append_bound_blocks(target,block,placements):
 def _append_bound_block(target,block,wires):
     """Append one validated bound block; shared transaction implementation."""
     return _append_bound_blocks(target,block,(wires,))
+
+
+def _validate_annotation_metadata(metadata):
+    """Validate trusted JSON-like metadata without arbitrary serialization hooks."""
+    import json
+    from ._validation import ResourceLimit
+    if type(metadata) is not dict:
+        raise ValueError("expected ordinary metadata dictionary")
+    nodes=0
+    def visit(value,depth):
+        nonlocal nodes
+        nodes+=1
+        if nodes>4096 or depth>8:
+            raise ResourceLimit("metadata exceeds node or depth budget")
+        kind=type(value)
+        if kind is dict:
+            if len(value)>4096-nodes:
+                raise ResourceLimit("metadata exceeds node budget")
+            for key,child in value.items():
+                if type(key) is not str:
+                    raise ValueError("metadata keys must be strings")
+                visit(key,depth+1)
+                visit(child,depth+1)
+        elif kind is list:
+            if len(value)>4096-nodes:
+                raise ResourceLimit("metadata exceeds node budget")
+            for child in value:
+                visit(child,depth+1)
+        elif kind is str:
+            if len(value)>4096:
+                raise ResourceLimit("metadata string exceeds length budget")
+            try:
+                value.encode("utf-8")
+            except UnicodeError as exc:
+                raise ValueError("metadata strings must be valid UTF-8") from exc
+        elif kind is int:
+            if value.bit_length()>64:
+                raise ResourceLimit("metadata integer exceeds 64 bits")
+        elif kind is float:
+            if not math.isfinite(value):
+                raise ValueError("metadata numbers must be finite")
+        elif kind is bool or value is None:
+            pass
+        else:
+            raise ValueError("metadata must contain only JSON-compatible builtins")
+    visit(metadata,0)
+    if len(json.dumps(metadata,ensure_ascii=False,allow_nan=False,separators=(",",":")).encode("utf-8"))>65536:
+        raise ResourceLimit("metadata exceeds 64 KiB")
+
+def _project_annotated(template):
+    """Return independent native structural snapshot and ideal-only projection."""
+    from qiskit.circuit import Barrier
+    from ._validation import ResourceLimit
+    QC,_=_sdk()
+    if not isinstance(template,QC):
+        raise TypeError("expected QuantumCircuit")
+    if not 1<=template.num_qubits<=22 or len(template.data)>10000:
+        raise ResourceLimit("annotated projection exceeds 22 wires or 10000 instructions")
+    if template.num_clbits or template.parameters or template.layout is not None or getattr(template,"num_vars",0) or getattr(template,"num_stretches",0):
+        raise UnsupportedOperation("annotated projection requires bound logical unitary input")
+    _angle(template.global_phase)
+    _validate_annotation_metadata(template.metadata)
+    # Validate the entire source before allocating either returned circuit.
+    for item in template.data:
+        if item.clbits:
+            raise UnsupportedOperation("classical operands unsupported")
+        op=item.operation
+        if type(op) is Barrier:
+            if op.params or not item.qubits or len(set(item.qubits))!=len(item.qubits) or op.num_qubits!=len(item.qubits):
+                raise UnsupportedOperation("invalid native barrier")
+        else:
+            _validate_gate(op)
+    source=template.copy()
+    # Explicitly independent logical projection: no native annotation or
+    # scheduling equivalence is claimed for this output.
+    logical=QC(source.num_qubits,global_phase=source.global_phase)
+    for item in source.data:
+        if type(item.operation) is not Barrier:
+            logical.append(item.operation,[source.find_bit(w).index for w in item.qubits],copy=True)
+    _validate(logical)
+    return logical,source
