@@ -1,5 +1,7 @@
 name: Agent readability research
 on:
+  pull_request:
+    branches: [research/agent-readability]
   push:
     branches: [research/agent-readability]
 permissions:
@@ -21,6 +23,7 @@ jobs:
           python -m pytest -q research/agent_readability
           python -m pytest -q -rs tests research/probes
           python research/agent_readability/test_pilot.py
+          python research/agent_readability/ketary_eval_v03.py --self-test
           python research/agent_readability/ketary_eval.py --self-test
           python research/agent_readability/ketary_eval.py --compare-syntax
           python research/agent_readability/benchmark_context.py
