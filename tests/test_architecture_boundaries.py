@@ -8,7 +8,7 @@ import ketary as q
 def test_native_import_boundary_inventory():
     expected={
         "qiskit":{"_adapter","_checks","_circuit","_classical","_observable","_replay","_result","_transpilation","_verification"},
-        "numpy":{"_checks","_execution","_result","_trace","_validation","_verification"},
+        "numpy":{"_checks","_ergonomics","_execution","_result","_trace","_validation","_verification"},
         "qiskit_aer":{"_classical"},
         "mqt":{"_external"},
     }
