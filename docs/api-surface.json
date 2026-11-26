@@ -268,7 +268,11 @@
     "superdense",
     "teleportation",
     "basis",
-    "Circuit.expectation_jacobian"
+    "Circuit.expectation_jacobian",
+    "Circuit.bind_partial",
+    "Circuit.control",
+    "Circuit.evolve_product",
+    "Observable.anticommutator"
   ],
   "Native": [
     "Circuit.append",
@@ -279,7 +283,11 @@
     "Observable.from_qiskit",
     "Observable.to_qiskit",
     "_CircuitChecks.external_equivalence",
-    "from_qiskit"
+    "from_qiskit",
+    "Circuit.from_symbolic",
+    "Circuit.from_synthesized",
+    "Observable.product",
+    "Observable.commutator"
   ],
   "Compatibility": [
     "Circuit.analyze",

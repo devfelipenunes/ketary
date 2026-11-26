@@ -6,7 +6,7 @@
   native operations, metadata/layout, unbound imports or hardware. Logical
   replay: 22 wires, 10000 operations, 1 MiB.
 - Symbolic mode: native parameter expressions; complete binding required
-  before unitary operations. No partial binding or symbolic replay.
+  before execution. Explicit partial binding and symbolic import are available within limits; no symbolic replay.
 - Dynamic mode: optional Aer, one classical register, X/Z conditional operations,
   12 wires/bits, 1024 top-level operations, 10000 shots. No generic control
   flow, external dynamic import, noise model or pure-state conversion.
@@ -24,6 +24,8 @@
   not independent research or proof of improved productivity.
 - No published distribution; use a verified checkout or build artifact.
 
-- Named selections/checkpoint annotations are local conveniences; logical replay preserves operators, not names. General controlled blocks and automatic ancilla cleanup are not supported. Sweep plans are bounded zipped ideal simulations, not hardware jobs. Typed report dictionaries retain mutable legacy behavior.
+- Named selections/checkpoint annotations are local conveniences; logical replay preserves operators, not names. Bound controlled blocks up to five total wires are supported via checked synthesis; symbolic controlled blocks and automatic ancilla cleanup are not supported. Sweep plans are bounded zipped ideal simulations, not hardware jobs. Typed report dictionaries retain mutable legacy behavior.
 
 - Core designation is a recommended experimental entry path, not a stable 1.0 guarantee. Aggregate expressions require hashable Observable keys or full-width strings; no general symbolic predicate language. Named annotations remain local, not serialized.
+
+Explicit synthesis accepts trusted bound gate-only circuits up to five wires; direct native import remains strict. Noncommuting product evolution is explicitly approximate. Complex Pauli products and commutators return native SparsePauliOp; Observable stays real Hermitian. No new noise/hardware/mixed-state mode.
