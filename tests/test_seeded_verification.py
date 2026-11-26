@@ -52,7 +52,7 @@ def test_random_composition_order_and_observable_linearity(seed):
     assert target.to_qiskit()==original
     v=rng.normal(size=16)+1j*rng.normal(size=16);v/=np.linalg.norm(v)
     state=actual.run(initial_state=v)
-    H=q.X(0)@q.Y(1);G=q.Z(0)+q.I()
+    H=q.X(0)@q.Y(1);G=q.Observable({"IZ":1.,"II":1.})
     a,b=rng.uniform(-1,1,2)
     A=H.on(wires,width=4);B=G.on(wires,width=4)
     value=state.math.expectation(a*A+b*B)
