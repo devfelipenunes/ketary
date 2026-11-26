@@ -54,3 +54,26 @@ def test_asymmetric_partition():
     r=Result([1/np.sqrt(2),0,0,0,0,1/np.sqrt(2),0,0])
     assert r.math.entropy(([1],[0,2]))==pytest.approx(0,abs=1e-12)
     assert r.math.entropy(([2],[0,1]))==pytest.approx(1,abs=1e-12)
+
+def test_fidelity_near_normalized_identical_ray():
+    r=Result([np.sqrt(1-8e-10),0])
+    s=Result([1j*np.sqrt(1-8e-10),0])
+    assert r.math.fidelity(s)==pytest.approx(1,abs=1e-14,rel=0)
+    r.test.fidelity(s).require()
+
+def test_output_dictionary_limits():
+    r=Result([1,0,0,0])
+    with pytest.raises(ResourceLimit): r.math.probabilities(max_outcomes=3)
+    with pytest.raises(ResourceLimit): r.math.marginal_probabilities([1,0],max_outcomes=3)
+    with pytest.raises(ResourceLimit): r.sample(shots=4,max_outcomes=3)
+    assert r.math.probabilities(max_outcomes=4)["00"]==1
+    assert r.math.marginal_probabilities([0],max_outcomes=2)["0"]==1
+    assert r.sample(shots=3,max_outcomes=3,seed=42)=={"00":3}
+
+def test_renamed_gate_rejected():
+    from qiskit.circuit.library import RXGate
+    from ketary import Circuit, UnsupportedOperation
+    g=RXGate(.37);g.name="x"
+    c=Circuit(1)
+    with pytest.raises(UnsupportedOperation): c.append(g,[0])
+    assert c.resources.summary().gate_count==0
