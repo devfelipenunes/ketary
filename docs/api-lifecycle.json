@@ -1576,6 +1576,16 @@
       "category": "Advanced",
       "group": "math",
       "lifecycle": "supported_advanced"
+    },
+    "basis": {
+      "category": "Advanced",
+      "group": "factories",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.expectation_jacobian": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
     }
   }
 }

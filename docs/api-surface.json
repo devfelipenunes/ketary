@@ -266,7 +266,9 @@
     "recover_simon",
     "simon",
     "superdense",
-    "teleportation"
+    "teleportation",
+    "basis",
+    "Circuit.expectation_jacobian"
   ],
   "Native": [
     "Circuit.append",

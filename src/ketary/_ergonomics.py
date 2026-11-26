@@ -283,3 +283,79 @@ def _evolve(c,observable,time):
             elif axis=="Y":native.rx(-pi/2,wire)
     # Existing application transaction preserves phase/checkpoint semantics.
     return c.apply(block)
+
+
+def _expectation_jacobian(c,bindings,observables,*,max_bytes):
+    """Bounded occurrence-wise two-point shifts; not a state derivative."""
+    from math import pi,fsum
+    from ._validation import _real
+    from ._circuit import Circuit
+    from ._observable import Observable
+    if c.num_clbits:
+        raise UnsupportedOperation("unitary expectation derivative only")
+    if c.num_qubits>8 or len(c.parameters)>32 or len(c._qc.data)>256:
+        raise ResourceLimit("Jacobian supports <=8 wires, 32 parameters, 256 gates")
+    _limit(c.num_qubits,3,budget=max_bytes)
+    # Own the template before consuming user iterables/mappings.
+    template=c.copy()
+    params=template.parameters
+    if not isinstance(bindings,Mapping) or set(bindings)!=set(params):
+        raise ValueError("complete native parameter identity mapping required")
+    vals={p:_real(bindings[p]) for p in params}
+    if isinstance(observables,(str,bytes,Mapping,set,frozenset)):
+        raise ValueError("expected ordered observables")
+    try:
+        obs=tuple(islice(iter(observables),9))
+    except TypeError as exc:
+        raise ValueError("expected ordered observables") from exc
+    if not 1<=len(obs)<=8:
+        raise ResourceLimit("Jacobian requires 1..8 observables")
+    if any(not isinstance(H,Observable) or H.num_qubits>template.num_qubits for H in obs):
+        raise ValueError("expected compatible real Observable objects")
+    def numeric(expr):
+        try:
+            if getattr(expr,"parameters",()):
+                expr=expr.bind({p:vals[p] for p in expr.parameters})
+            value=complex(expr)
+        except (TypeError,ValueError,OverflowError,ZeroDivisionError) as exc:
+            raise ValueError("nonfinite or unbound derivative expression") from exc
+        if value.imag!=0:
+            raise ValueError("derivative expression must be real")
+        return _real(value.real)
+    supported={"rx","ry","rz","rxx","ryy","rzz","p","cp"}
+    staged=[]
+    for i,item in enumerate(template._qc.data):
+        for j,angle in enumerate(item.params):
+            present=getattr(angle,"parameters",())
+            if not present:
+                continue
+            if item.operation.name not in supported or j!=0:
+                raise UnsupportedOperation("generator not qualified for two-point shift")
+            weights=tuple(numeric(angle.gradient(p)) if p in present else 0. for p in params)
+            if any(weights):
+                staged.append((i,weights))
+                if len(staged)>64:
+                    raise ResourceLimit("Jacobian supports at most 64 active occurrences")
+    # Bind even for zero derivatives, including symbolic global phase.
+    bound=template.bind(vals)._qc
+    pairs=[]
+    # Complete shifted circuit validation before starting any simulation.
+    for index,weights in staged:
+        shifted_pair=[]
+        for sign in (1,-1):
+            shifted=bound.copy()
+            item=shifted.data[index]
+            gate=item.operation.to_mutable()
+            gate.params=[_real(float(gate.params[0])+sign*pi/2)]
+            shifted.data[index]=item.replace(operation=gate)
+            shifted_pair.append(Circuit._from_native(shifted,owned=True))
+        pairs.append((weights,*shifted_pair))
+    contributions=[[[] for _ in params] for _ in obs]
+    for weights,plus,minus in pairs:
+        left=plus.run(max_bytes=max_bytes).math.expectations(obs)
+        right=minus.run(max_bytes=max_bytes).math.expectations(obs)
+        for row,(a,b) in zip(contributions,zip(left,right,strict=True),strict=True):
+            diff=.5*(a-b)
+            for terms,weight in zip(row,weights,strict=True):
+                terms.append(_real(diff*weight))
+    return tuple(tuple(_real(fsum(terms)) for terms in row) for row in contributions)

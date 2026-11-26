@@ -211,6 +211,11 @@ class Circuit:
         c._qc=bound
         return c
 
+    def expectation_jacobian(self,bindings,observables,*,max_bytes=64*1024**2):
+        """Explicit ideal expectation derivatives in observable/native parameter order."""
+        from ._ergonomics import _expectation_jacobian
+        return _expectation_jacobian(self,bindings,observables,max_bytes=max_bytes)
+
     def sweep(self,**values):
         """Construct a bounded zipped parameter plan without execution."""
         from ._ergonomics import SweepPlan
