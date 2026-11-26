@@ -10,8 +10,8 @@ def test_trace_owned_checkpoints_match_prefix(seed):
     rng=np.random.default_rng(seed)
     raw=QuantumCircuit(4,global_phase=.37)
     for _ in range(6):
-        raw.h(0);raw.id(3);raw.cx(0,2);raw.ry(float(rng.normal()),1);raw.rz(float(rng.normal()),2)
-    c=q.Circuit.from_qiskit(raw)
+        raw.h(0);raw.rz(0.,3);raw.cx(0,2);raw.ry(float(rng.normal()),1);raw.rz(float(rng.normal()),2)
+    c=q.from_qiskit(raw)
     steps=c.debug.trace()
     arrays=[]
     for index,step in enumerate(steps):
