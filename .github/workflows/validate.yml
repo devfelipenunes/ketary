@@ -93,6 +93,8 @@ jobs:
           python -m research.closure_arithmetic_compare > closure-arithmetic.json
           python -m research.closure_qec_metrics > closure-qec.json
           python -m research.alpha_sweep_rss --reps 3 > alpha-sweep-rss.json
+          python -m research.alpha_binding_profile --reps 9 > alpha-binding-profile.json
+          python -m research.alpha_parity_profile --reps 9 > alpha-parity-profile.json
           python -m research.closure_physical_dynamics > closure-physical-dynamics.json
           python -m research.closure_reversible_logic > closure-reversible-logic.json
           python -m research.priority_architecture_audit > closure-architecture.json
@@ -108,6 +110,8 @@ jobs:
             closure-arithmetic.json
             closure-qec.json
             alpha-sweep-rss.json
+            alpha-binding-profile.json
+            alpha-parity-profile.json
             closure-physical-dynamics.json
             closure-reversible-logic.json
             closure-architecture.json
