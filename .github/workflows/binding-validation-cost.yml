@@ -4,6 +4,8 @@ on:
     paths:
       - 'research/binding_validation_cost.py'
       - 'tests/test_binding_validation_cost.py'
+      - 'research/sweep_binding_cost.py'
+      - 'tests/test_sweep_binding_cost.py'
       - '.github/workflows/binding-validation-cost.yml'
       - 'src/ketary/**'
   workflow_dispatch:
@@ -36,14 +38,16 @@ jobs:
           python -m pip freeze > environment.txt
           lscpu > host.txt
           git rev-parse HEAD > revision.txt
-      - run: python -m pytest -q tests/test_binding_validation_cost.py
+      - run: python -m pytest -q tests/test_binding_validation_cost.py tests/test_sweep_binding_cost.py
       - run: python -m research.binding_validation_cost --output binding-cost.json --seed "$SEED"
+      - run: python -m research.sweep_binding_cost --output sweep-binding-cost.json --seed "$SEED"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: binding-cost-${{ matrix.seed }}
           path: |
             binding-cost.json
+            sweep-binding-cost.json
             environment.txt
             host.txt
             revision.txt

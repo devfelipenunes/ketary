@@ -180,11 +180,15 @@ class Circuit:
         # Only internal circuits have the validated structure invariant.
         # Native assignment preserves it; check evaluated numeric values,
         # including expression overflow, without rechecking every gate kind.
-        from ._adapter import _validate_bound_values
         from ._validation import _angle
         if set(bindings)!=set(self._qc.parameters):
             raise ValueError("bindings must cover exactly the template parameters")
         numeric={key:_angle(value) for key,value in bindings.items()}
+        return self._bind_numeric(numeric)
+
+    def _bind_numeric(self,numeric):
+        """Private assignment for complete, preflighted finite parameter rows."""
+        from ._adapter import _validate_bound_values
         try:
             bound=self._qc.assign_parameters(numeric,inplace=False,flat_input=True)
         except (ZeroDivisionError,OverflowError) as exc:

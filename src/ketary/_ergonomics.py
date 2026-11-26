@@ -157,7 +157,12 @@ class SweepPlan:
         # Private path only: callers preflight complete, finite, bounded rows.
         # Native assignment returns independent circuits; JSON remains an
         # external replay format, not an in-memory execution transport.
-        payloads=tuple(circuit.bind({params[name]:v for name,v in row}) for row in rows)
+        from ._circuit import Circuit
+        # Exact Circuit instances can reuse the complete finite row preflight.
+        # Subclasses keep the public bind dispatch. No source snapshot is cached;
+        # assignment and validation of evaluated values happen for every row.
+        bind=circuit._bind_numeric if type(circuit) is Circuit else circuit.bind
+        payloads=tuple(bind({params[name]:v for name,v in row}) for row in rows)
         self._rows=rows
         self._payloads=payloads
         self._width=circuit.num_qubits
