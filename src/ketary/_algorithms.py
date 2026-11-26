@@ -127,3 +127,47 @@ def superdense(bits):
     if bits[0]=="1": c.x(0)
     if bits[1]=="1": c.z(0)
     return c.cx(0,1).h(0)
+
+
+def phase_estimation(phase, precision=3):
+    """QPE for known phase gate P(2*pi*phase), eigenstate |1>.
+
+    This pedagogical circuit is not a generic controlled-unitary synthesis API.
+    Counting wires 0..precision-1; eigenstate wire precision.
+    """
+    from math import pi
+    from ._validation import _real,ResourceLimit
+    phase=_real(phase)
+    precision=_int(precision,1)
+    if not 0<=phase<1:
+        raise ValueError("phase must be in [0,1)")
+    if precision>12:
+        raise ResourceLimit("phase estimation precision limited to 12 bits")
+    c=Circuit(precision+1).x(precision).h_many(range(precision))
+    for wire in range(precision):
+        c.cp(2*pi*((phase*(1<<wire))%1),wire,precision)
+    return c.compose(qft(precision,inverse=True),wires=range(precision))
+
+
+def simon(secret):
+    """One coherent Simon iteration for a constructed XOR-periodic oracle.
+
+    For nonzero binary s, f(x)=x XOR (x[pivot]*s). The function is exactly
+    two-to-one with period s. The caller samples the input wires and solves
+    the resulting GF(2) equations; this does not pretend one sample finds s.
+    """
+    from ._validation import ResourceLimit
+    if type(secret) is not str or not secret or set(secret)-{"0","1"} or "1" not in secret:
+        raise ValueError("expected nonzero binary secret")
+    n=len(secret)
+    if n>10:
+        raise ResourceLimit("Simon example limited to ten input wires")
+    active=[i for i,b in enumerate(reversed(secret)) if b=="1"]
+    pivot=active[0]
+    c=Circuit(2*n).h_many(range(n))
+    for i in range(n):
+        if i!=pivot:
+            c.cx(i,n+i)
+            if i in active:
+                c.cx(pivot,n+i)
+    return c.h_many(range(n))

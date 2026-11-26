@@ -31,3 +31,7 @@ SPECS = {
     "ryy": ("RYYGate", 2, 1, 0, "negative"),
     "rzz": ("RZZGate", 2, 1, 0, "negative"),
 }
+
+# Variable-width MCX has 3..7 controls (4..8 total wires).
+MCX_MIN_WIRES=4
+MCX_MAX_WIRES=8

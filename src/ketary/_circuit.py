@@ -64,11 +64,11 @@ class Circuit:
         return cls._from_native(bound,owned=True)
 
     def inspect(self, *, start=0, limit=32):
-        """Research candidate: bounded logical operations, no copy or run."""
+        """Bounded logical operations, no copy or execution."""
         from ._inspection import inspect_circuit
         return inspect_circuit(self,start=start,limit=limit)
 
-    # Research-only syntax aliases. Existing gates namespace stays unchanged.
+    # Fluent aliases; the existing gates namespace remains compatible.
     def h(self,q):
         return self.gates.h(q)
 
@@ -155,6 +155,9 @@ class Circuit:
 
     def rzz(self,theta,a,b):
         return self.gates.rzz(theta,a,b)
+
+    def mcx(self,controls,target):
+        return self.gates.mcx(controls,target)
 
     def copy(self):
         """Independent logical circuit with identical ordered operations."""
@@ -387,6 +390,20 @@ class _Gates:
     def rzz(self,theta,a,b):
         from qiskit.circuit.library import RZZGate
         return self._c.append(RZZGate(_angle(theta)),[a,b])
+
+    def mcx(self,controls,target):
+        """Bounded closed controls, with CX/CCX canonical for one/two controls."""
+        from itertools import islice
+        from qiskit.circuit.library import MCXGate
+        controls=tuple(self._wire(w) for w in islice(iter(controls),8))
+        target=self._wire(target)
+        if not 1<=len(controls)<=7 or len(set((*controls,target)))!=len(controls)+1:
+            raise ValueError("expected 1..7 distinct controls and target")
+        if len(controls)==1:
+            return self.cx(controls[0],target)
+        if len(controls)==2:
+            return self.ccx(*controls,target)
+        return self._c.append(MCXGate(len(controls)),[*controls,target])
 
 def from_qiskit(qc):
     return Circuit._from_native(qc)

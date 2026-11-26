@@ -29,3 +29,7 @@ assert_type(r.sample(shots=10,wires=[0]), dict[str,int])
 assert_type(q.Contract(2, expectations={"XX":1}).verify(r), q.VerificationReport)
 assert_type(c.debug.checkpoint(1), q.TraceStep)
 assert_type(r.math.top_probabilities(k=2), dict[str,float])
+
+assert_type(q.Circuit(4).mcx([0,1,2],3),q.Circuit)
+assert_type(q.phase_estimation(.125),q.Circuit)
+assert_type(q.simon('101'),q.Circuit)

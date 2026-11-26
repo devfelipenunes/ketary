@@ -11,7 +11,7 @@ _SCHEMA=1
 _MAX_BYTES=1024*1024
 _MAX_QUBITS=22
 _MAX_GATES=10000
-from ._gate_specs import SPECS
+from ._gate_specs import SPECS,MCX_MIN_WIRES,MCX_MAX_WIRES
 _ARITY={name:spec[1] for name,spec in SPECS.items()}
 
 def _keys(value,expected):
@@ -42,7 +42,7 @@ def _encode(circuit):
     operations=[]
     for item in qc.data:
         op=item.operation
-        if op.name not in _ARITY:
+        if op.name not in _ARITY and op.name!='mcx':
             raise ValueError("unsupported replay gate")
         operations.append({
             "gate":op.name,
@@ -90,18 +90,22 @@ def _decode(payload):
     for item in ops:
         _keys(item,("gate","wires","params"))
         name,wires,params=item["gate"],item["wires"],item["params"]
-        if type(name) is not str or name not in _ARITY:
+        if type(name) is not str or (name not in _ARITY and name!='mcx'):
             raise ValueError("unsupported replay gate")
-        if (type(wires) is not list or len(wires)!=_ARITY[name]
+        if (type(wires) is not list or (not MCX_MIN_WIRES<=len(wires)<=MCX_MAX_WIRES if name=="mcx" else len(wires)!=_ARITY[name])
             or any(type(w) is not int or w<0 or w>=n for w in wires)
             or len(set(wires))!=len(wires)):
             raise ValueError("invalid replay wires")
-        if type(params) is not list or len(params)!=SPECS[name][2]:
+        if type(params) is not list or len(params)!=(0 if name=='mcx' else SPECS[name][2]):
             raise ValueError("invalid replay parameter count")
         validated.append((name,tuple(_angle(p) for p in params),tuple(wires)))
     QC,_=_sdk()
     qc=QC(n,global_phase=phase)
     for name,params,wires in validated:
         # Only statically allowlisted standard gate names reach this call.
-        getattr(qc,name)(*params,*wires)
+        if name=="mcx":
+            from qiskit.circuit.library import MCXGate
+            qc.append(MCXGate(len(wires)-1),list(wires))
+        else:
+            getattr(qc,name)(*params,*wires)
     return qc

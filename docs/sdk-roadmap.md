@@ -8,11 +8,11 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 | SDK02 | direct gates, copy, atomic H batch | canonical syntax review; analyze compatibility alias |
 | SDK03 | inspect/evidence/verify, immutable Contract and VerificationReport | report schema review |
 | SDK04 | explicit basis, array or Result initial state | broader resource tests |
-| SDK05 | 29 fixed logical gate types; central registry | MCX/variable-width gates and backend boundary |
+| SDK05 | 29 fixed gate types plus bounded MCX; central registry | broader multi-control synthesis and backend boundary |
 | SDK06 | reduced density, purity, weighted Pauli expectation, Dirac, conditional probability, Schmidt, pure-state trace distance, Pauli variance, top-k | general mixed-state metrics and observable variance |
 | SDK07 | incremental aligned comparison, selected checkpoint, historical budget retained | nontrivial alignment |
 | SDK08 | native template binding, independent copy, compose | symbolic Circuit lifecycle RFC |
-| SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover and superdense | QPE, Simon and larger algorithms |
+| SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover, superdense, phase-gate QPE and Simon oracle iteration | generic QPE, Simon GF(2) solver and larger algorithms |
 | SDK10 | SVG histogram, Bloch coordinates, executed how-to/notebook, paired density and Pauli query benchmarks | full graphical circuit/Bloch sphere and dedicated machine benchmark |
 | SDK11 | terminal sampling of selected wires | classical registers, measurement/collapse/reset/control flow RFC |
 | SDK12 | existing package CI and release checklist | owner review, dependency/license re-review, controlled benchmark, release authorization |
@@ -66,3 +66,5 @@ construction, contracts, mathematical queries, diagnosis and search; its cells
 are exercised by pytest. Query benchmarks compare equal outputs separately
 from construction and execution. Existing process RSS measurements remain
 statevector scenarios, not a bound on every query.
+
+MCX supports 1–7 closed controls (CX/CCX canonical for 1/2), distinct wires; replay accepts bounded variable width. `phase_estimation(phase, precision)` estimates a known phase-gate eigenvalue on |1>, not arbitrary unitary. `simon(secret)` constructs one iteration with a known two-to-one oracle, yielding orthogonal samples; classical recovery remains external.

@@ -19,6 +19,14 @@ def _gate_classes():
 
 def _validate_gate(gate):
     Gate,classes=_gate_classes()
+    from qiskit.circuit.library import MCXGate
+    from ._gate_specs import MCX_MIN_WIRES,MCX_MAX_WIRES
+    if isinstance(gate,Gate) and gate.base_class is MCXGate:
+        if (gate.name!="mcx" or not MCX_MIN_WIRES<=gate.num_qubits<=MCX_MAX_WIRES
+            or gate.params or gate.num_ctrl_qubits!=gate.num_qubits-1
+            or gate.ctrl_state!=(1<<gate.num_ctrl_qubits)-1):
+            raise UnsupportedOperation("MCX requires 3..7 distinct closed controls")
+        return
     if not isinstance(gate,Gate) or gate.base_class not in classes:
         raise UnsupportedOperation("only supported standard unitary gates can be appended/imported")
     name,(_,wires,params,controls,_)=classes[gate.base_class]
