@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "weights": {
+    "intent": 25,
+    "reuse": 20,
+    "source": 15,
+    "cost": 15,
+    "consistency": 15,
+    "maintenance": 10
+  },
+  "rating_scale": {
+    "0": "negative evidence",
+    "1": "mixed or bounded positive evidence",
+    "2": "positive evidence"
+  },
+  "gates": [
+    "semantic_oracle",
+    "resource_ownership",
+    "compatibility_typing",
+    "scope_approval",
+    "ci"
+  ],
+  "thresholds": {
+    "promote": 75,
+    "refine": 50
+  },
+  "note": "Subjective engineering rubric calibrated against authored experiments; unknown=null; scores rank investigation, never authorize changes. Already integrated features retain compatibility even if later evidence changes.",
+  "candidates": [
+    {
+      "id": "aligned_pairs",
+      "decision": "retain",
+      "canonical": "Circuit.cp and six existing pair rotations",
+      "ratings": {
+        "intent": 2,
+        "reuse": 2,
+        "source": 2,
+        "cost": 1,
+        "consistency": 2,
+        "maintenance": 2
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": true,
+        "compatibility_typing": true,
+        "scope_approval": true,
+        "ci": true
+      },
+      "evidence": [
+        "#199",
+        "#202",
+        "45770886424",
+        "45771339631"
+      ],
+      "rationale": "17 vs 34 CP tokens; construction 4.09–5.24x vs SDK loop at 10k; native loop still faster; no new method."
+    },
+    {
+      "id": "commuting_evolution",
+      "decision": "retain",
+      "canonical": "Circuit.evolve",
+      "ratings": {
+        "intent": 2,
+        "reuse": 2,
+        "source": 2,
+        "cost": 1,
+        "consistency": 2,
+        "maintenance": 1
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": true,
+        "compatibility_typing": true,
+        "scope_approval": true,
+        "ci": true
+      },
+      "evidence": [
+        "#201",
+        "#203",
+        "45771462347"
+      ],
+      "rationale": "204 vs 474 manual tokens; 92 vs 72 native common basis gates; faster than old prototype, slower than manual SDK construction; bounded exact numeric evolution."
+    },
+    {
+      "id": "generic_layers",
+      "decision": "recipe",
+      "canonical": "Circuit.ry + Circuit.apply + Python loop",
+      "ratings": {
+        "intent": 1,
+        "reuse": 2,
+        "source": 0,
+        "cost": 0,
+        "consistency": 1,
+        "maintenance": 0
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#167",
+        "#168",
+        "#200"
+      ],
+      "rationale": "32 vs 52 tokens for proposed VQE layer; existing row broadcasting and loops express sequential intent."
+    },
+    {
+      "id": "controlled_blocks",
+      "decision": "refine",
+      "canonical": "Circuit.cp/crx/cry/crz and apply",
+      "ratings": {
+        "intent": 2,
+        "reuse": 2,
+        "source": 1,
+        "cost": 0,
+        "consistency": 1,
+        "maintenance": 0
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#168",
+        "#189"
+      ],
+      "rationale": "Relative phase matters; QPE generic construction 99 vs 12 tokens and 60 vs 40 common basis gates; broader control cases not qualified."
+    },
+    {
+      "id": "product_preparation",
+      "decision": "research",
+      "canonical": "Circuit.ry + Circuit.rz",
+      "ratings": {
+        "intent": 2,
+        "reuse": 1,
+        "source": 2,
+        "cost": 1,
+        "consistency": 1,
+        "maintenance": null
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#168",
+        "#182"
+      ],
+      "rationale": "38 to 8 tokens in authored fixture; distinguish product preparation from arbitrary amplitude unitary and initialization."
+    },
+    {
+      "id": "reversible_arithmetic",
+      "decision": "research",
+      "canonical": "explicit gate composition",
+      "ratings": {
+        "intent": 2,
+        "reuse": 1,
+        "source": 2,
+        "cost": 1,
+        "consistency": 1,
+        "maintenance": null
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#168",
+        "#184"
+      ],
+      "rationale": "Increment 42 to 8 tokens; add register 31 to 8; full small truth tables but native arithmetic comparison incomplete."
+    },
+    {
+      "id": "truth_oracle",
+      "decision": "research",
+      "canonical": "phase_oracle / parity_oracle",
+      "ratings": {
+        "intent": 2,
+        "reuse": 1,
+        "source": 2,
+        "cost": 1,
+        "consistency": 1,
+        "maintenance": null
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#168",
+        "#183"
+      ],
+      "rationale": "44 to 14 tokens for explicit <=3 data wire truth-table fixture; promise and resource scope still open."
+    },
+    {
+      "id": "graph_state_alias",
+      "decision": "recipe",
+      "canonical": "Circuit.h + Circuit.cz(pairs=...)",
+      "ratings": {
+        "intent": 1,
+        "reuse": 1,
+        "source": 2,
+        "cost": 1,
+        "consistency": 0,
+        "maintenance": 0
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#168",
+        "#200"
+      ],
+      "rationale": "Shorter graph recipe but existing topology interface sufficient; no duplicate name."
+    },
+    {
+      "id": "conjugation_context",
+      "decision": "recipe",
+      "canonical": "Circuit.compute_action_uncompute",
+      "ratings": {
+        "intent": 1,
+        "reuse": 1,
+        "source": 0,
+        "cost": 0,
+        "consistency": 1,
+        "maintenance": 0
+      },
+      "gates": {
+        "semantic_oracle": null,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#200",
+        "#187"
+      ],
+      "rationale": "Explicit fluent conjugation 27 vs 51 tokens; context manager not implemented, failure atomicity unresolved."
+    },
+    {
+      "id": "automatic_uncompute",
+      "decision": "defer",
+      "canonical": "explicit compute_action_uncompute",
+      "ratings": {
+        "intent": 2,
+        "reuse": null,
+        "source": null,
+        "cost": null,
+        "consistency": 0,
+        "maintenance": 0
+      },
+      "gates": {
+        "semantic_oracle": null,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#168",
+        "#159"
+      ],
+      "rationale": "Dirty ancilla counterexample; general guarantee not established."
+    },
+    {
+      "id": "product_formula",
+      "decision": "research",
+      "canonical": "explicit approximation research",
+      "ratings": {
+        "intent": 2,
+        "reuse": 2,
+        "source": 1,
+        "cost": null,
+        "consistency": 1,
+        "maintenance": null
+      },
+      "gates": {
+        "semantic_oracle": true,
+        "resource_ownership": null,
+        "compatibility_typing": null,
+        "scope_approval": false,
+        "ci": null
+      },
+      "evidence": [
+        "#167",
+        "#188"
+      ],
+      "rationale": "Explicit first/second order convergence on small fixture; error and cost policies not qualified."
+    }
+  ]
+}

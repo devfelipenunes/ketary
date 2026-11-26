@@ -91,3 +91,5 @@ H=q.Z(0)@q.Z(1)+.5*q.Z(1)@q.Z(2)
 c=q.Circuit(3).h(range(3)).evolve(H,time=.2)
 r=c.run()
 ```
+
+For the complete lifecycle inventory, parameter grammar and candidate review rubric, see [API decision policy](api-decision-policy.md).
