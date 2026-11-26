@@ -3,3 +3,6 @@ numpy>=1.26,<3
 pytest>=8,<10
 coverage>=7.6,<8
 mypy>=1.15,<2
+# Direct imports in research and dependency tooling; not SDK runtime roots.
+scipy>=1.14
+packaging>=24
