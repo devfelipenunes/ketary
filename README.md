@@ -2,7 +2,7 @@
 
 An experimental Python SDK for quantum programming, built on Qiskit.
 
-**Status: design spike.** The interface is not stable, the production gate is open, and no package release is available. Ketary is licensed under Apache-2.0 (see LICENSE). Third-party licenses remain applicable. No PyPI release is authorized.
+**Status: experimental L0 development.** The interface is not stable, the production gate is open, and no package release is available. Ketary is licensed under Apache-2.0 (see LICENSE). Third-party licenses remain applicable. No PyPI release is authorized.
 
 ## Try the proof of concept
 
@@ -29,6 +29,15 @@ print(circuit.debug.trace()[-1].result.math.statevector())
 
 The result is a snapshot. The second operation does not change the earlier result. The two Bell states have equal computational-basis probabilities but different relative phase.
 
+## Documentation
+
+- [Tutorial](docs/tutorial.md)
+- [How-to guides](docs/how-to.md)
+- [API reference and limits](docs/reference.md)
+- [Explanation](docs/explanation.md)
+- [Architecture](docs/architecture.md)
+- [Engineering audit](docs/audit-l0.md)
+
 ## Scope
 
 - One Circuit API: construction, H/X/Y/Z/S/T/SDG/TDG/RX/RY/RZ/CX/CZ/SWAP/CCX, Bell/GHZ, import/export, composition and inverse.
@@ -38,7 +47,7 @@ The result is a snapshot. The second operation does not change the earlier resul
 - Trace is explicit and bounded; decomposition only lowers SWAP in this spike.
 - No classical bits, mid-circuit measurement, reset, layout, metadata, unbound parameters, hardware, alternative SDK or independent compiler.
 - Qubit zero is the least significant bit. Preserve global phase; state fidelity alone does not prove operator equivalence.
-- A memory guard estimates dense statevector payload, not total process memory.
+- A memory guard estimates dense statevector payload, not total process memory. Probability and sampling dictionaries also have a configurable outcome cap.
 
 ## Quantum checks
 

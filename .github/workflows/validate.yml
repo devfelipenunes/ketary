@@ -27,7 +27,14 @@ jobs:
           python -m pip freeze
           python -c "import qiskit; print(qiskit.__version__)"
       - name: Required tests and upstream probes
-        run: python -m pytest -q -rs tests research/probes
+        run: |
+          python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes
+          python -m coverage report -m
+          python -m coverage json -o coverage.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.json
 
   benchmark:
     needs: tests

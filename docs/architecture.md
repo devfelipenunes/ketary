@@ -1,23 +1,23 @@
 # Experimental modular architecture
 
-The public package is a facade. QuantumCircuit is the authoritative mutable
-program; Result owns a defensive ideal-state snapshot. No parallel mutable IR,
-new backend, or custom simulator is introduced.
+QuantumCircuit is the authoritative mutable program. Result owns an independent
+ideal-state snapshot. No parallel mutable IR, second simulator or backend.
 
-| Module | Responsibility | Internal dependencies |
-|---|---|---|
-| _validation | integer, tolerance, memory guards, exceptions | NumPy |
-| _adapter | strict Qiskit import validation and lazy SDK loading | _validation |
-| _result | independent snapshots, sampling, math, checks | _validation |
-| _trace | explicit bounded state evolution | _adapter, _result, _validation |
-| _circuit | builder, gates, transforms, run | _adapter, _result, _trace, _validation |
-| _algorithms | Bell and GHZ factories | _circuit, _validation |
+| Module | Responsibility |
+|---|---|
+| _validation | integer/angle/tolerance validation and payload guards |
+| _adapter | strict native gate and circuit validation; lazy Qiskit import |
+| _circuit | facade, mutation, transformations, explicit execution |
+| _result | defensive snapshot, sampling, math and state checks |
+| _checks | residuals and bounded complete operator checks |
+| _trace | explicit state evolution and aligned checkpoint diagnosis |
+| _resources | logical resource reports and text drawing |
+| _algorithms | Bell, GHZ and explicit Deutsch-Jozsa oracle factories |
+| _optimization | exact adjacent inverse cancellation |
+| _replay | bounded logical JSON artifacts |
 
-The package exports the same public objects. The previous private _limit
-binding is retained for existing internal tests, not part of the supported
-public API. The package uses a src layout; new gates and parameter support are separate increments.
-Validate all existing tests, facade imports and paired benchmarks before
-accepting the modularization. The production gate and human usability
-evaluation remain separate requirements. Python 3.12.x only.
-
-The PoC and modular refactor are merged into main. The package remains experimental.
+The public package has a src layout; private modules are not a second API.
+Transforms and public import/export isolate objects. JSON is not a persistent
+mutable circuit model. Explicit calls may allocate temporary memory. Python
+3.12.x only. Review current scope in [reference](reference.md) and
+[audit](audit-l0.md). Release and human evaluation remain pending.

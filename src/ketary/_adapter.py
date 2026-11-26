@@ -25,6 +25,9 @@ def _validate_gate(gate):
     if not isinstance(gate,Gate) or gate.base_class not in fixed+rotations:
         raise UnsupportedOperation("only supported standard unitary gates can be appended/imported")
     cls=gate.base_class
+    # Replay and cancellation depend on the canonical name as well as type.
+    if gate.name!=cls.__name__.removesuffix("Gate").lower():
+        raise UnsupportedOperation("renamed standard gates are outside the L0 whitelist")
     if cls in rotations:
         if len(gate.params)!=1:
             raise UnsupportedOperation("invalid rotation parameters")

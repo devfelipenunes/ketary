@@ -85,6 +85,30 @@ def main(reps):
         np.testing.assert_allclose(execute(native,"native"),execute(sdk,"sdk"),atol=1e-9,rtol=0)
         result=paired(lambda:execute(native,"native"),lambda:execute(sdk,"sdk"),reps)
         data["cases"].append({"operation":"statevector","n":n,"gates":count,**result})
+    # Supplemental operations: compare matching outputs, not different semantics.
+    n=8; ops=workload(n,128)
+    native=build(n,ops,"native"); sdk=build(n,ops,"sdk")
+    for operation,base,trial in [
+        ("compose",lambda:native.compose(native),lambda:sdk.compose(sdk)),
+        ("export_copy",lambda:native.copy(),lambda:sdk.to_qiskit()),
+    ]:
+        expected=base(); observed=trial()
+        assert expected==(observed.to_qiskit() if isinstance(observed,q.Circuit) else observed)
+        data["cases"].append({"operation":operation,"n":n,"gates":len(ops),**paired(base,trial,reps)})
+    def native_trace():
+        initial=np.zeros(1<<n,dtype=complex)
+        initial[0]=np.exp(1j*float(native.global_phase))
+        state=Statevector(initial)
+        snapshots=[state.data.copy()]
+        for item in native.data:
+            state=state.evolve(item.operation,qargs=[native.find_bit(w).index for w in item.qubits])
+            snapshots.append(state.data.copy())
+        return tuple(snapshots)
+    def sdk_trace():
+        return tuple(step.result.math.statevector() for step in sdk.debug.trace())
+    for expected,observed in zip(native_trace(),sdk_trace(),strict=True):
+        np.testing.assert_allclose(expected,observed,atol=1e-9,rtol=0)
+    data["cases"].append({"operation":"trace","n":n,"gates":len(ops),**paired(native_trace,sdk_trace,reps)})
     variants=["native","sdk"]*3; random.Random(42).shuffle(variants)
     for variant in variants:
         raw=subprocess.check_output([sys.executable,__file__,"--rss-worker",variant],text=True)

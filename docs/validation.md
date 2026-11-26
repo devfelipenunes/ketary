@@ -2,7 +2,7 @@
 
 ## Runtime policy
 
-Python 3.12.x is the sole development and CI target. Earlier dual-version CI results below are retained as historical evidence; Python 3.11 support is not maintained. Future package metadata must declare `>=3.12,<3.13` until the policy changes.
+Python 3.12.x is the sole development and CI target. Earlier dual-version CI results below are retained as historical evidence; Python 3.11 support is not maintained. Package metadata declares `>=3.12,<3.13` until the policy changes.
 
 ## Performance evidence
 
@@ -23,6 +23,20 @@ Only three processes per variant and one memory workload. Do not interpret
 the small difference as evidence that Ketary uses less memory in general.
 Shared-runner absolute timings cannot be compared across runs. Re-run on
 controlled hardware before a release; raw timings and p95 in CI artifacts.
+
+## Current L0 baseline
+
+[Main after PR #10](https://github.com/devfelipenunes/ketary/actions/runs/45737152433)
+passed all CI jobs. [PR #10](https://github.com/devfelipenunes/ketary/actions/runs/45736946909)
+recorded 201 tests and build overhead 9.25% / 8.78%, statevector overhead
+0.02% / 0.86% / 0.53% for 8/12/16 qubits. Median peak RSS at 20q:
+native 161400 KiB, wrapper 161292 KiB. Shared runner, limited workloads.
+
+The documentation audit adds branch coverage reporting and supplemental
+compose, export copy and trace measurements. These are diagnostic: native
+trace returns arrays while Ketary additionally constructs validated snapshots.
+No threshold is imposed on these operations before calibration. See
+[audit](audit-l0.md) for remaining work.
 
 ## Usability protocol (not yet conducted with participants)
 
@@ -46,5 +60,4 @@ individual results and limitations, not general population conclusions.
 Technical validation: correct subset, tests, bounded memory, provisional
 performance targets and reviewed contracts. Human usability, dependency
 license review, vulnerability findings and owner review are separate.
-No auto-merge or package release. The architecture for production is not
-yet implemented.
+The owner authorizes reviewed merges after CI. No package publication is authorized. Experimental L0 architecture is implemented; production and public release gates remain separate.

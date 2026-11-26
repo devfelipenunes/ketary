@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 import numpy as np
-from ._validation import _int, _tol
+from ._validation import _int, _tol, ResourceLimit
 
 @dataclass(frozen=True)
 class CheckResult:
@@ -46,8 +46,10 @@ class Result:
     def test(self):
         return _Checks(self)
 
-    def sample(self, *, shots, seed=None):
+    def sample(self, *, shots, seed=None, max_outcomes=65536):
         shots = _int(shots,1)
+        if min(shots,self._data.size)>_int(max_outcomes,1):
+            raise ResourceLimit("potential sample dictionary exceeds outcome limit")
         if seed is not None:
             seed = _int(seed)
         p = np.abs(self._data)**2
@@ -88,10 +90,12 @@ class _Math:
             raise ArithmeticError("invalid Hermitian Pauli expectation")
         return float(value.real)
 
-    def probabilities(self):
+    def probabilities(self, *, max_outcomes=65536):
+        if self._r._data.size>_int(max_outcomes,1):
+            raise ResourceLimit("probability dictionary exceeds outcome limit")
         return {format(i,f"0{self._r._n}b"):float(p) for i,p in enumerate(np.abs(self._r._data)**2)}
 
-    def marginal_probabilities(self,wires):
+    def marginal_probabilities(self,wires,*,max_outcomes=65536):
         """Z-basis probabilities; output labels follow the given wire order.
 
         For wires=[2,0], label "10" denotes q2=1 and q0=0.
@@ -100,6 +104,8 @@ class _Math:
         n=self._r._n
         if not wires or len(set(wires))!=len(wires) or any(i>=n for i in wires):
             raise ValueError("invalid marginal wires")
+        if (1<<len(wires))>_int(max_outcomes,1):
+            raise ResourceLimit("marginal dictionary exceeds outcome limit")
         p=(np.abs(self._r._data)**2).reshape((2,)*n)
         axes=[n-1-i for i in wires]
         rest=[i for i in range(n) if i not in axes]
@@ -110,7 +116,8 @@ class _Math:
         other = target if isinstance(target,Result) else Result(target)
         if other._data.shape != self._r._data.shape:
             raise ValueError("dimension mismatch")
-        return float(np.clip(abs(np.vdot(other._data,self._r._data))**2,0,1))
+        denominator=np.vdot(other._data,other._data).real*np.vdot(self._r._data,self._r._data).real
+        return float(np.clip(abs(np.vdot(other._data,self._r._data))**2/denominator,0,1))
 
     def norm(self):
         return float(np.linalg.norm(self._r._data))
