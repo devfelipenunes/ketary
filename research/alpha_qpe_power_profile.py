@@ -23,6 +23,33 @@ def powers(p,m):
     c.append(QFTGate(m).inverse(),range(m))
     return c
 
+def legacy_composed(p,m):
+    """Exact historical admitted QPE construction, including export."""
+    from math import pi
+    from ketary._validation import _real,_int,ResourceLimit
+    p=_real(p)
+    m=_int(m,1)
+    if not 0<=p<1:raise ValueError("phase must be in [0,1)")
+    if m>12:raise ResourceLimit("phase estimation precision limited to 12 bits")
+    c=q.Circuit(m+1).x(m).h_many(range(m))
+    for wire in range(m):c.cp(2*pi*((p*(1<<wire))%1),wire,m)
+    return c.compose(q.qft(m,inverse=True),wires=range(m)).to_qiskit()
+
+
+def direct_inverse_qft(p,m):
+    """Research candidate: append exact inverse-QFT sequence to the same builder."""
+    from math import pi
+    c=q.Circuit(m+1).x(m).h_many(range(m))
+    for wire in range(m):c.cp(2*pi*((p*(1<<wire))%1),wire,m)
+    # Reverse the canonical forward logical QFT operations and negate CP.
+    # Keep swaps and controlled phases even when angles are zero.
+    for wire in reversed(range(m//2)):c.swap(wire,m-1-wire)
+    for target in range(m):
+        for control in range(target):c.cp(-pi/(2**(target-control)),control,target)
+        c.h(target)
+    return c.to_qiskit()
+
+
 def run(seed,reps):
     rng=random.Random(seed)
     rows=[]
@@ -30,10 +57,13 @@ def run(seed,reps):
         N=1<<m
         for p in (3/8,.237,0.):
             paths={"ketary":lambda:q.phase_estimation(p,precision=m).to_qiskit(),
-                   "manual_cp":lambda:manual(p,m),"native_power":lambda:powers(p,m)}
+                   "legacy_ketary":lambda:legacy_composed(p,m),
+                   "manual_cp":lambda:manual(p,m),"native_power":lambda:powers(p,m),
+                   "direct_inverse_qft":lambda:direct_inverse_qft(p,m)}
             indices=np.arange(N)
             expected=np.abs(np.exp(2j*np.pi*(p-indices[:,None]/N)*indices[None,:]).mean(axis=1))**2
             reference=Operator(manual(p,m)).data
+            assert direct_inverse_qft(p,m)==paths["ketary"]()==legacy_composed(p,m)
             results={}
             for name,fn in paths.items():
                 raw=fn();common=transpile(raw,basis_gates=["u","cx"],optimization_level=0,seed_transpiler=seed,qubits_initially_zero=False)
@@ -42,7 +72,7 @@ def run(seed,reps):
                 v=Statevector.from_instruction(raw).data
                 np.testing.assert_allclose(abs(v[N:])**2,expected,atol=1e-9,rtol=0)
                 np.testing.assert_allclose(v[:N],0.,atol=1e-9,rtol=0)
-                results[name]=dict(common_gates=len(common.data),common_cx=common.count_ops().get("cx",0),build_ms=[])
+                results[name]=dict(logical_gates=len(raw.data),common_gates=len(common.data),common_cx=common.count_ops().get("cx",0),common_depth=common.depth(),build_ms=[])
             for _ in range(reps):
                 for name in rng.sample(list(paths),len(paths)):
                     t=time.perf_counter_ns();raw=paths[name]();dt=(time.perf_counter_ns()-t)/1e6
@@ -55,4 +85,4 @@ def run(seed,reps):
 if __name__=="__main__":
     p=argparse.ArgumentParser();p.add_argument("--reps",type=int,default=9);a=p.parse_args()
     if a.reps<1:p.error("positive repetitions required")
-    print(json.dumps({"scope":"known phase only; construction includes Ketary export; no generic QPE guarantee","rows":[r for seed in (1101,2202,3303) for r in run(seed,a.reps)]},indent=2,allow_nan=False))
+    print(json.dumps({"scope":"known phase only; legacy and candidate Ketary routes include native export; identical direct logical sequence; no generic QPE guarantee","rows":[r for seed in (1101,2202,3303) for r in run(seed,a.reps)]},indent=2,allow_nan=False))

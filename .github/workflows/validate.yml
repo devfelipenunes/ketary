@@ -97,6 +97,7 @@ jobs:
           python -m research.alpha_parity_profile --reps 9 > alpha-parity-profile.json
           python -m research.alpha_observable_reuse_profile --reps 9 > alpha-observable-reuse-profile.json
           python -m research.alpha_operator_metrics_profile --reps 5 > alpha-operator-metrics-profile.json
+          python -m research.alpha_verification_scope_profile > alpha-verification-scope-profile.json
           python -m research.alpha_pauli_filter_profile --reps 9 > alpha-pauli-filter-profile.json
           python -m research.alpha_synthesis_depth --reps 5 > alpha-synthesis-depth.json
           python -m research.alpha_native_cost_audit --reps 9 > alpha-native-cost-audit.json
@@ -104,6 +105,8 @@ jobs:
           python -m research.alpha_commutation_lab --reps 9 > alpha-commutation-lab.json
           python -m research.alpha_buffer_normalization --reps 5 --rss > alpha-buffer-normalization.json
           python -m research.alpha_chunk_profile --reps 5 --rss > alpha-chunk-profile.json
+          python -m research.alpha_exact_topk_profile --reps 5 --rss > alpha-exact-topk-profile.json
+          python -m research.alpha_qpe_power_profile --reps 9 > alpha-qpe-power-profile.json
           python -m research.closure_physical_dynamics > closure-physical-dynamics.json
           python -m research.closure_reversible_logic > closure-reversible-logic.json
           python -m research.priority_architecture_audit > closure-architecture.json
@@ -123,6 +126,7 @@ jobs:
             alpha-parity-profile.json
             alpha-observable-reuse-profile.json
             alpha-operator-metrics-profile.json
+            alpha-verification-scope-profile.json
             alpha-pauli-filter-profile.json
             alpha-synthesis-depth.json
             alpha-native-cost-audit.json
@@ -130,6 +134,8 @@ jobs:
             alpha-commutation-lab.json
             alpha-buffer-normalization.json
             alpha-chunk-profile.json
+            alpha-exact-topk-profile.json
+            alpha-qpe-power-profile.json
             closure-physical-dynamics.json
             closure-reversible-logic.json
             closure-architecture.json
@@ -188,6 +194,7 @@ jobs:
           python -m build --no-isolation
           python -m twine check dist/*
           python tools/check_distribution.py
+          python -m research.alpha_distribution_audit dist/*.whl dist/*.tar.gz > alpha-distribution-audit.json
       - name: Scan resolved build tooling
         run: |
           python -m venv audit-venv
@@ -223,6 +230,7 @@ jobs:
           path: |
             dist/*
             distribution-manifest.json
+            alpha-distribution-audit.json
             build-license-inventory.json
             build-audited-requirements.txt
             build-vulnerability-report.json

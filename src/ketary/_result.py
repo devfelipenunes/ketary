@@ -45,6 +45,25 @@ def _residual(actual,expected,ignore_global_phase,atol):
     return CheckResult("PASS" if error<=t else "FAIL",error,0,t,
                        "max absolute residual; phase "+("ignored" if ignore_global_phase else "preserved"))
 
+def _topk_exact_chunks(data,k):
+    """Bounded ranking with exactly the original scalar probability scores."""
+    selected=np.empty(0,dtype=np.int64)
+    scores=np.empty(0,dtype=np.float64)
+    for start in range(0,len(data),1024):
+        block=data[start:start+1024]
+        indices=np.arange(start,start+len(block),dtype=np.int64)
+        # Do not vectorize complex magnitude: rounding near ties can change
+        # rank relative to the public scalar heap contract.
+        probabilities=np.fromiter((abs(value)**2 for value in block),
+                                  dtype=np.float64,count=len(block))
+        order=np.lexsort((indices,-probabilities))[:k]
+        selected=np.concatenate((selected,indices[order]))
+        scores=np.concatenate((scores,probabilities[order]))
+        keep=np.lexsort((selected,-scores))[:k]
+        selected,scores=selected[keep],scores[keep]
+    return tuple(int(i) for i in selected)
+
+
 def _accumulate_pauli_chunks(state,out,terms,chunk):
     """Accumulate real weighted Pauli action without dense operators.
 
@@ -422,7 +441,10 @@ class _Math:
         if k>65536:
             raise ResourceLimit("top-k output limit exceeded")
         data=self._r._data
-        ranked=heapq.nlargest(min(k,len(data)),range(len(data)),key=lambda i:(abs(data[i])**2,-i))
+        if len(data)>=1024 and 8<=k<=32:
+            ranked=_topk_exact_chunks(data,k)
+        else:
+            ranked=heapq.nlargest(min(k,len(data)),range(len(data)),key=lambda i:(abs(data[i])**2,-i))
         return {format(i,f"0{self._r._n}b"):float(abs(data[i])**2/self._r._norm_sq) for i in ranked}
 
     def observable(self, terms):

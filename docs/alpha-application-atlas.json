@@ -195,6 +195,62 @@
       "symbol": "test_repetition_code_syndrome",
       "scope": "native measured route + analytic syndrome and Bloch marginals",
       "status": "inventoried-authored"
+    },
+    {
+      "id": "multi-mark-amplification",
+      "family": "oracle",
+      "path": "tests/test_alpha_parallel_applications.py",
+      "symbol": "test_multi_mark_full_operator",
+      "scope": "full operator + analytic marked probability",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "complex-preparation-reflection",
+      "family": "oracle",
+      "path": "tests/test_alpha_parallel_applications.py",
+      "symbol": "test_prepared_state_reflection",
+      "scope": "zero-input preparation + full reflection operator",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "controlled-prepared-reflection",
+      "family": "oracle",
+      "path": "tests/test_alpha_parallel_applications.py",
+      "symbol": "test_controlled_prepared_reflection",
+      "scope": "independent full controlled operator with relative phase",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "variational-overlap-optimization",
+      "family": "variational",
+      "path": "tests/test_alpha_parallel_applications.py",
+      "symbol": "test_variational_overlap",
+      "scope": "real optimizer + analytic overlap + native",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "multi-observable-optimization",
+      "family": "variational",
+      "path": "tests/test_alpha_parallel_applications.py",
+      "symbol": "test_multi_observable_objective",
+      "scope": "real optimizer + analytic objective + native",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "reversible-block-inverse-verification",
+      "family": "verification",
+      "path": "tests/test_alpha_parallel_applications.py",
+      "symbol": "test_reversible_block_verification",
+      "scope": "complete operator + selected witness + replay",
+      "status": "inventoried-authored"
+    },
+    {
+      "id": "phase-error-repetition-recovery",
+      "family": "dynamic",
+      "path": "tests_dynamic/test_alpha_phase_error_repetition.py",
+      "symbol": "test_phase_error_repetition",
+      "scope": "local dynamic syndrome + analytic Bloch expectation",
+      "status": "inventoried-authored"
     }
   ]
 }
