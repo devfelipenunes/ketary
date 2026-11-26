@@ -9,7 +9,7 @@ responsibility audit, not a performance or concurrency proof.
 | Group | Modules | Responsibility |
 |---|---|---|
 | Public facade | __init__, __init__.pyi, py.typed | exports and type contract |
-| Construction | _circuit, _algorithms, _ergonomics | native circuit builder, factories, ordered selection, binding/sweep |
+| Construction | _circuit, _algorithms, _ergonomics, _topology | native circuit builder, factories, ordered selection, binding/sweep |
 | Math and predicates | _result, _observable, _contracts, _statistical | snapshots, real Pauli sums, numerical/statistical predicates |
 | Verification | _checks, _trace, _verification | operators, explicit traces, comparison and evidence |
 | Native integration | _adapter, _execution, _classical, _external, _transpilation | validation, optional dynamic/external execution, logical transpile |
@@ -19,8 +19,8 @@ responsibility audit, not a performance or concurrency proof.
 | Shared foundation | _validation | scalar validation and resource guards |
 
 This classification assigns responsibilities; modules can contain multiple
-concerns. All 25 Python modules including the facade are accounted for.
-The stub and typing marker are not runtime Python modules.
+concerns. All 26 Python modules including the facade are accounted for.
+The stub and typing marker are not runtime Python modules. The machine-readable [ownership registry](module-ownership.json) is checked against the AST inventory; each runtime module has one primary responsibility, not an imposed architectural layer.
 
 ## Actual direct imports (including local imports)
 
@@ -63,7 +63,7 @@ backend substitution.
   and verifies a Bell snapshot. This checks optional dependency isolation
   along that workflow, not every execution path.
 - Eager internal import graph must be acyclic; _validation and _gate_specs
-  cannot eagerly import internal modules. Function-local imports are excluded
+  cannot import internal modules, including function-local imports. Function-local imports are excluded
   from this cycle check, not claimed to be acyclic.
 - Existing signature, compatibility, native-oracle and packaging tests remain
   required. No new runtime dependencies.
