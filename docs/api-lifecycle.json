@@ -1571,6 +1571,11 @@
       "group": "compatibility",
       "lifecycle": "retained_compatibility",
       "prefer": "_Math.expectation"
+    },
+    "Observable.on": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
     }
   }
 }

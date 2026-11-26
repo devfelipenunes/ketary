@@ -4,6 +4,7 @@ No new simulator, implicit execution or non-Hermitian operator algebra.
 """
 from collections.abc import Mapping
 from dataclasses import dataclass
+from itertools import islice
 from numbers import Real
 from ._validation import _int,_real,ResourceLimit
 
@@ -72,6 +73,32 @@ class Observable:
         if n<self._width or n>_MAX_WIDTH:
             raise ValueError("observable embedding must preserve width and fit 62 qubits")
         return {label.rjust(n,"I"):value for label,value in self._terms}
+
+    def on(self,wires,*,width):
+        """Return this local observable embedded in ordered absolute wires.
+
+        Local bit i maps to wires[i]. Identity and zero retain explicit
+        width; no execution, mutation or implicit ancillary qubits.
+        """
+        n=_int(width,1)
+        if n>_MAX_WIDTH:
+            raise ResourceLimit("embedding width exceeds 62")
+        if isinstance(wires,(str,bytes,Mapping,set,frozenset)):
+            raise ValueError("ordered wires required")
+        k=self._width
+        try:
+            ws=tuple(_int(w) for w in islice(iter(wires),k+1))
+        except TypeError as exc:
+            raise ValueError("ordered wires required") from exc
+        if len(ws)!=k or len(set(ws))!=k or any(w>=n for w in ws):
+            raise ValueError("exact distinct local-to-global wire mapping required")
+        out={}
+        for label,coef in self._terms:
+            axes=["I"]*n
+            for i,w in enumerate(ws):
+                axes[n-1-w]=label[k-1-i]
+            out["".join(axes)]=coef
+        return Observable(out)
 
     def to_qiskit(self,num_qubits=None):
         from qiskit.quantum_info import SparsePauliOp

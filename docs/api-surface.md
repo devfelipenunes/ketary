@@ -19,7 +19,7 @@ All declared public stub entries are classified once; constructors and dunder pr
 - **_Math**: `amplitude`, `expectation`, `expectations`, `probabilities`, `probability`, `variance`
 - **_Report**: `render`, `require`, `status`
 
-## Advanced (170)
+## Advanced (171)
 
 - **CheckResult**: `to_dict`, `to_json`
 - **Circuit**: `bind`, `capabilities`, `checkpoint`, `checkpoints`, `classical`, `compose`, `compute_action_uncompute`, `debug`, `decompose`, `diff`, `evolve`, `from_json`, `if_x`, `if_z`, `inspect`, `inverse`, `measure`, `num_clbits`, `optimize`, `parameter`, `parameter_vector`, `parameters`, `plan`, `register`, `registers`, `reset`, `resources`, `run_many`, `run_shots`, `sweep`, `sweep_rows`, `symbolic`, `to_json`, `visualize`
@@ -28,7 +28,7 @@ All declared public stub entries are classified once; constructors and dunder pr
 - **Evidence**: `from_dict`, `from_json`, `minimize`, `to_dict`, `to_json`
 - **ExternalVerificationReport**: `external_equivalence`
 - **ModalOutcomeReport**: `label`, `peak_probability`
-- **Observable**: `to_dict`
+- **Observable**: `on`, `to_dict`
 - **OperatorMetricsReport**: `operator_norm`
 - **PhaseEstimateReport**: `phase`
 - **QueryPlan**: `bits`, `estimate`, `paulis`, `run`, `subsystems`

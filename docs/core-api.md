@@ -93,3 +93,14 @@ r=c.run()
 ```
 
 For the complete lifecycle inventory, parameter grammar and candidate review rubric, see [API decision policy](api-decision-policy.md).
+
+### Ordered local observable embedding (advanced)
+
+`H.on(wires, width=n)` creates an immutable new observable, mapping local bit i to the i-th ordered absolute wire. Exact local width, distinct indices, bounded iterable, explicit width up to 62; identity/zero retain width and source is unchanged. This is useful for both `evolve` and `result.math.expectation`, without hidden execution.
+
+```python
+H=q.X(0)@q.Z(1)
+local=H.on([3,1],width=4)
+c=q.Circuit(4).evolve(local,time=.3)
+energy=c.run().math.expectation(local)
+```
