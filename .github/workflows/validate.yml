@@ -26,6 +26,8 @@ jobs:
           python --version
           python -m pip freeze
           python -c "import qiskit; print(qiskit.__version__)"
+      - name: Typed public consumer
+        run: python -m mypy --strict --follow-imports=silent --ignore-missing-imports tests/typing/consumer.py
       - name: Required tests and upstream probes
         run: |
           python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes
@@ -117,7 +119,7 @@ jobs:
           "$RUNNER_TEMP/ketary-wheel/bin/python" -m pip install dist/*.whl
           "$RUNNER_TEMP/ketary-wheel/bin/python" -m pip check
           cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/ketary-wheel/bin/python" -c 'import ketary as q; from importlib.metadata import version; assert version("ketary") == "0.1.0.dev0"; assert q.bell().run().test.probability("00", 0.5).status == "PASS"; print(q.__file__)'
+          "$RUNNER_TEMP/ketary-wheel/bin/python" -c 'import ketary as q; from importlib.metadata import version; assert version("ketary") == "0.1.0.dev0"; from pathlib import Path; assert Path(q.__file__).with_name("py.typed").is_file(); assert Path(q.__file__).with_name("__init__.pyi").is_file(); assert q.bell().run().test.probability("00", 0.5).status == "PASS"; print(q.__file__)'
       - name: Install source distribution in clean environment
         run: |
           python -m venv "$RUNNER_TEMP/ketary-sdist"

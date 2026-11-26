@@ -1,0 +1,20 @@
+from typing import assert_type
+import ketary as q
+from numpy.typing import NDArray
+import numpy as np
+
+c = q.Circuit(2).gates.h(0).gates.cx(0, 1)
+assert_type(c, q.Circuit)
+r = c.run()
+assert_type(r, q.Result)
+assert_type(r.math.statevector(), NDArray[np.complex128])
+assert_type(r.math.probabilities(), dict[str, float])
+assert_type(r.sample(shots=10), dict[str, int])
+assert_type(r.test.normalized(), q.CheckResult)
+assert_type(c.debug.trace(), tuple[q.TraceStep, ...])
+assert_type(c.resources.summary(), q.ResourceReport)
+assert_type(q.Circuit.from_json(c.to_json()), q.Circuit)
+# A strict consumer must reject these calls; unused ignores are failures.
+c.gates.h("0")  # type: ignore[arg-type]
+r.sample(shots="10")  # type: ignore[arg-type]
+c.run(mode="hardware")  # type: ignore[arg-type]
