@@ -211,27 +211,43 @@ class _Gates:
     def __init__(self,c):
         self._c=c
 
-    def _apply(self,name,*wires):
-        indices=tuple(_int(w) for w in wires)
-        if len(set(indices))!=len(indices) or any(w>=self._c.num_qubits for w in indices):
-            raise ValueError("invalid wires")
-        getattr(self._c._qc,name)(*indices)
-        return self._c
+    def _wire(self,q):
+        # Builtin ints are the common case; keep full validation for other
+        # integer-like values and reject bools, floats and negative indices.
+        if type(q) is not int:
+            q=_int(q)
+        if q<0 or q>=self._c.num_qubits:
+            raise ValueError("invalid wire")
+        return q
+
+    def _pair(self,a,b):
+        a=self._wire(a)
+        b=self._wire(b)
+        if a==b:
+            raise ValueError("duplicate wires")
+        return a,b
 
     def h(self,q):
-        return self._apply("h",q)
+        self._c._qc.h(self._wire(q))
+        return self._c
 
     def x(self,q):
-        return self._apply("x",q)
+        self._c._qc.x(self._wire(q))
+        return self._c
 
     def z(self,q):
-        return self._apply("z",q)
+        self._c._qc.z(self._wire(q))
+        return self._c
 
     def cx(self,c,t):
-        return self._apply("cx",c,t)
+        c,t=self._pair(c,t)
+        self._c._qc.cx(c,t)
+        return self._c
 
     def swap(self,a,b):
-        return self._apply("swap",a,b)
+        a,b=self._pair(a,b)
+        self._c._qc.swap(a,b)
+        return self._c
 
 def _validate(qc):
     QC,_=_sdk()

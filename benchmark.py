@@ -52,19 +52,24 @@ def paired(native,sdk,reps):
     a,b=(summarize(samples[k]) for k in ("native","sdk"))
     return {"native":a,"sdk":b,"overhead_percent":100*(b["median_ms"]/a["median_ms"]-1),"delta_ms":b["median_ms"]-a["median_ms"]}
 
-def peak_kib():
+def memory_kib():
+    # Linux /proc VmHWM is the process image high-water mark, avoiding
+    # ru_maxrss inheritance from the benchmark coordinator across fork/exec.
+    if sys.platform.startswith("linux"):
+        with open("/proc/self/status",encoding="utf-8") as f:
+            fields={line.split(":",1)[0]:line.split(":",1)[1].strip() for line in f if ":" in line}
+        return {"current_kib":int(fields["VmRSS"].split()[0]),"peak_kib":int(fields["VmHWM"].split()[0]),"source":"procfs"}
     peak=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    return peak/1024 if sys.platform=="darwin" else peak
+    return {"current_kib":None,"peak_kib":peak/1024 if sys.platform=="darwin" else peak,"source":"getrusage"}
 
 def rss_worker(variant):
-    # Separate processes so high water marks do not contaminate another variant.
-    # Peak includes interpreter, imports, circuit and simulator allocations.
     n=20; ops=[("h",(0,)),("cx",(0,n-1)),("z",(n-1,))]
-    c=build(n,ops,variant); baseline=peak_kib()
+    c=build(n,ops,variant); before=memory_kib()
     state=execute(c,variant)
+    after=memory_kib()
     assert np.count_nonzero(abs(state)>1e-12)==2
     assert np.isclose(np.linalg.norm(state),1)
-    return {"variant":variant,"n":n,"gates":len(ops),"baseline_peak_kib":baseline,"peak_kib":peak_kib(),"payload_bytes":state.nbytes}
+    return {"variant":variant,"n":n,"gates":len(ops),"before":before,"after":after,"payload_bytes":state.nbytes}
 
 def main(reps):
     data={"python":sys.version,"platform":platform.platform(),"qiskit":qiskit.__version__,"numpy":np.__version__,"cpu":platform.processor(),"repetitions":reps,"cases":[],"rss":[]}
