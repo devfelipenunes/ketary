@@ -1,0 +1,3 @@
+# DX coverage wave 1
+
+Eight additive candidate paths: from_symbolic, bind_partial, from_synthesized, control, evolve_product, product, commutator, anticommutator. No weakening of strict imports, full bind, exact evolve or disjoint tensor product. Explicit synthesis uses trusted local native definitions and strict full operator residual, not untrusted inputs or polynomial-time guarantees. Product formulas use canonical order; order two is symmetric Strang splitting. Complex results stay native. Dynamic import, metadata/barrier policy, mixed states, noise and hardware remain separate architecture work. No publication.

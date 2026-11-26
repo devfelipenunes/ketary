@@ -194,6 +194,56 @@ class Circuit:
         c._qc=bound
         return c
 
+    @classmethod
+    def from_symbolic(cls,template):
+        """Import an independent bounded native symbolic template."""
+        from ._validation import ResourceLimit
+        QC,_=_sdk()
+        if not isinstance(template,QC):
+            raise TypeError("expected QuantumCircuit")
+        if template.num_qubits>62 or len(template.data)>10000 or len(template.parameters)>4096:
+            raise ResourceLimit("symbolic import exceeds width, gate or parameter limit")
+        _validate(template,allow_parameters=True)
+        c=cls.__new__(cls)
+        c._qc=template.copy()
+        c._symbolic=True
+        return c
+
+    def bind_partial(self,bindings):
+        """Bind a subset of native parameter identities without execution."""
+        from collections.abc import Mapping
+        if self.num_clbits:
+            raise UnsupportedOperation("partial binding requires unitary mode")
+        if not isinstance(bindings,Mapping):
+            raise TypeError("expected native parameter mapping")
+        template=self.copy()
+        if not set(bindings)<=set(template.parameters):
+            raise ValueError("unknown parameter identity")
+        numeric={p:_angle(bindings[p]) for p in bindings}
+        try:
+            native=template._qc.assign_parameters(numeric,inplace=False,flat_input=True)
+        except (ZeroDivisionError,OverflowError) as exc:
+            raise ValueError("invalid partial parameter expression") from exc
+        if native.parameters:
+            return Circuit.from_symbolic(native)
+        return Circuit._from_native(native,owned=True)
+
+    @classmethod
+    def from_synthesized(cls,template,*,seed=0):
+        """Explicit bounded native unitary lowering, checked on all basis columns."""
+        from ._transpilation import _synthesize_native
+        return _synthesize_native(template,seed=seed)
+
+    def control(self,*,controls=1,control_state=None,seed=0):
+        """Return a strictly verified controlled bound block."""
+        from ._transpilation import _control_block
+        return _control_block(self,controls=controls,control_state=control_state,seed=seed)
+
+    def evolve_product(self,observable,*,time,steps,order=2):
+        """Explicit first/second-order Pauli product formula."""
+        from ._ergonomics import _evolve_product
+        return _evolve_product(self,observable,time=time,steps=steps,order=order)
+
     def _bind_numeric(self,numeric):
         """Sweep-only assignment for complete, preflighted finite rows.
 

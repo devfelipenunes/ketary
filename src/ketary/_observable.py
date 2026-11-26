@@ -104,6 +104,20 @@ class Observable:
         from qiskit.quantum_info import SparsePauliOp
         return SparsePauliOp.from_list(list(self.to_dict(num_qubits).items()))
 
+    def product(self,other):
+        """Ordered AB as a native complex Pauli sum."""
+        from qiskit.quantum_info import SparsePauliOp
+        return SparsePauliOp.from_list(list(_pauli_product(self,other).items()))
+
+    def commutator(self,other):
+        """AB-BA as a native complex Pauli sum."""
+        from qiskit.quantum_info import SparsePauliOp
+        return SparsePauliOp.from_list(list(_pauli_product(self,other,mode="commutator").items()))
+
+    def anticommutator(self,other):
+        """AB+BA of Hermitian inputs is Hermitian."""
+        return Observable({p:_real(v.real) for p,v in _pauli_product(self,other,mode="anticommutator").items()})
+
     def __add__(self,other):
         if isinstance(other,Real):
             other=Observable({"I":_real(other)})
@@ -183,3 +197,40 @@ def Z(wire):
 
 def I(wire=0):
     return _local("I",wire)
+
+
+def _pauli_product(left,right,*,mode="product"):
+    if not isinstance(right,Observable):
+        raise TypeError("expected Observable")
+    n=max(left.num_qubits,right.num_qubits)
+    a,b=left.to_dict(n),right.to_dict(n)
+    if len(a)*len(b)>4096:
+        raise ResourceLimit("Pauli product exceeds 4096 term pairs")
+    table={("X","Y"):("Z",1j),("Y","Z"):("X",1j),("Z","X"):("Y",1j),
+           ("Y","X"):("Z",-1j),("Z","Y"):("X",-1j),("X","Z"):("Y",-1j)}
+    out={}
+    for p,x in a.items():
+        for q,y in b.items():
+            phase=1+0j
+            label=[]
+            for u,v in zip(p,q,strict=True):
+                if u=="I":label.append(v)
+                elif v=="I":label.append(u)
+                elif u==v:label.append("I")
+                else:
+                    axis,factor=table[u,v]
+                    label.append(axis)
+                    phase*=factor
+            if mode=="commutator":
+                phase=2j*phase.imag
+            elif mode=="anticommutator":
+                phase=2*phase.real
+            if not phase:
+                continue
+            key="".join(label)
+            value=out.get(key,0j)+phase*x*y
+            out[key]=complex(_real(value.real),_real(value.imag))
+    out={p:v for p,v in out.items() if v} or {"I"*n:0j}
+    if len(out)>256:
+        raise ResourceLimit("Pauli product exceeds 256 output terms")
+    return dict(sorted(out.items()))

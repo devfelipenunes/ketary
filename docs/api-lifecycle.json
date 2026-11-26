@@ -1586,6 +1586,46 @@
       "category": "Advanced",
       "group": "execution",
       "lifecycle": "supported_advanced"
+    },
+    "Circuit.bind_partial": {
+      "category": "Advanced",
+      "group": "parameters",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.control": {
+      "category": "Advanced",
+      "group": "composition",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.evolve_product": {
+      "category": "Advanced",
+      "group": "composition",
+      "lifecycle": "supported_advanced"
+    },
+    "Observable.anticommutator": {
+      "category": "Advanced",
+      "group": "math",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.from_symbolic": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Circuit.from_synthesized": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Observable.product": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Observable.commutator": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
     }
   }
 }
