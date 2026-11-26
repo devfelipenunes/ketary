@@ -35,6 +35,7 @@ def run_shots(circuit,*,shots,seed,max_bytes):
     if shots>10000 or qc.num_qubits>12 or qc.num_clbits>12 or len(qc.data)>1024:
         raise ResourceLimit("dynamic execution: <=12 wires/bits, 1024 instructions, 10000 shots")
     _limit(qc.num_qubits,budget=max_bytes)
+    _validate_dynamic(qc)
     if seed is not None:
         seed=_int(seed)
         if seed>2**32-1:
@@ -78,6 +79,11 @@ def run_shots(circuit,*,shots,seed,max_bytes):
 
 
 def _dynamic_snapshot(template):
+    _validate_dynamic(template)
+    return template.copy()
+
+
+def _validate_dynamic(template):
     from qiskit import QuantumCircuit
     from qiskit.circuit import Gate,Measure,Reset,IfElseOp,Clbit,ClassicalRegister
     from ._adapter import _validate_gate
@@ -95,6 +101,8 @@ def _dynamic_snapshot(template):
     for item in template.data:
         op=item.operation
         work+=1
+        if work>1024:
+            raise ResourceLimit("dynamic execution exceeds 1024 expanded instructions")
         if isinstance(op,Gate):
             _validate_gate(op)
         elif type(op) in (Measure,Reset) or getattr(op,"base_class",None) in (Measure,Reset):
@@ -129,7 +137,7 @@ def _dynamic_snapshot(template):
                     _validate_gate(row.operation)
         else:
             raise UnsupportedOperation("unsupported native dynamic instruction")
-    return template.copy()
+    return None
 
 
 def _density_preflight(circuit,max_bytes):

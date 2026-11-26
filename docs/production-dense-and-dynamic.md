@@ -1,0 +1,3 @@
+# Production hardening: bounded dense mathematics and dynamic budgets
+
+Additive candidate state preparation, matrix synthesis and dense exact-in-model Hamiltonian evolution, all limited to five qubits, independent of product-formula approximation. No new simulator. The preparation unitary is a reversible block, not initialize/reset. Global phase remains strict; no implicit normalization. Dynamic expanded-instruction limit checked on import and execution, including after mutations. Metadata and barriers remain explicit gaps; no silent projection. No physical hardware, release or broad production claim.

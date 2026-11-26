@@ -1646,6 +1646,21 @@
       "category": "Native",
       "group": "native",
       "lifecycle": "explicit_native"
+    },
+    "Circuit.prepare_state": {
+      "category": "Advanced",
+      "group": "composition",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.from_unitary": {
+      "category": "Advanced",
+      "group": "composition",
+      "lifecycle": "supported_advanced"
+    },
+    "Circuit.evolve_exact": {
+      "category": "Advanced",
+      "group": "composition",
+      "lifecycle": "supported_advanced"
     }
   }
 }

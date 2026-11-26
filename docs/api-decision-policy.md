@@ -8,8 +8,8 @@ stability guarantee. No public symbol is removed or renamed.
 ## Lifecycle and canonical language
 
 Every declared entry is classified in api-lifecycle.json and cross-checked
-with api-surface.json. Core (94), Advanced (177), Native (17), Compatibility
-(34): 322 declarations including types and accessors, not a count of algorithms.
+with api-surface.json. Core (94), Advanced (180), Native (17), Compatibility
+(34): 325 declarations including types and accessors, not a count of algorithms.
 Core remains the learning path. Advanced is supported when its distinct
 semantics matter; Native is explicit interoperability. Compatibility stays
 callable and typed but is not taught as a parallel API. Candidate research

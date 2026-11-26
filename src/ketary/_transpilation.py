@@ -104,3 +104,88 @@ def _transpile_for(circuit,backend,*,optimization_level,seed):
                          seed_transpiler=seed,qubits_initially_zero=False)
     except TranspilerError as exc:
         raise UnsupportedOperation("target cannot transpile requested circuit") from exc
+
+
+def _finite_complex(value):
+    from numbers import Complex
+    from math import isfinite
+    if isinstance(value,bool) or not isinstance(value,Complex):
+        raise ValueError("expected finite complex scalar")
+    z=complex(value)
+    if not isfinite(z.real) or not isfinite(z.imag):
+        raise ValueError("expected finite complex scalar")
+    return z
+
+
+def _bounded_rows(values,limit):
+    from itertools import islice
+    from collections.abc import Mapping
+    if isinstance(values,(str,bytes,Mapping,set,frozenset)):
+        raise TypeError("expected ordered numeric iterable")
+    try:
+        out=tuple(islice(iter(values),limit+1))
+    except TypeError as exc:
+        raise TypeError("expected ordered numeric iterable") from exc
+    if len(out)>limit:
+        raise ResourceLimit("dense synthesis supports at most 32 amplitudes or rows")
+    return out
+
+
+def _dense_width(size):
+    if size<2 or size&(size-1):
+        raise ValueError("dense dimension must be 2**n, n>=1")
+    return size.bit_length()-1
+
+
+def _prepare_state(amplitudes,*,seed):
+    from math import fsum
+    from qiskit import QuantumCircuit
+    from qiskit.circuit.library import StatePreparation
+    values=tuple(_finite_complex(v) for v in _bounded_rows(amplitudes,32))
+    n=_dense_width(len(values))
+    try:
+        norm=fsum(v.real*v.real+v.imag*v.imag for v in values)
+    except OverflowError as exc:
+        raise ValueError("state amplitudes must be normalized") from exc
+    if not abs(norm-1)<=1e-10:
+        raise ValueError("state amplitudes must be normalized; no implicit normalization")
+    raw=QuantumCircuit(n)
+    raw.append(StatePreparation(list(values),normalize=False),range(n))
+    return _synthesize_native(raw,seed=seed)
+
+
+def _from_unitary(matrix,*,seed):
+    from qiskit import QuantumCircuit
+    from qiskit.circuit.library import UnitaryGate
+    from qiskit.quantum_info import Operator
+    rows=_bounded_rows(matrix,32)
+    n=_dense_width(len(rows))
+    values=tuple(tuple(_finite_complex(v) for v in _bounded_rows(row,32)) for row in rows)
+    if any(len(row)!=len(rows) for row in values):
+        raise ValueError("expected a square unitary matrix")
+    operator=Operator([list(row) for row in values])
+    if not operator.is_unitary(atol=1e-10,rtol=0):
+        raise ValueError("matrix must be unitary")
+    raw=QuantumCircuit(n)
+    raw.append(UnitaryGate(operator),range(n))
+    return _synthesize_native(raw,seed=seed)
+
+
+def _evolve_dense(circuit,observable,*,time,seed):
+    from qiskit import QuantumCircuit
+    from qiskit.circuit.library import HamiltonianGate
+    from ._observable import Observable
+    from ._validation import _angle
+    circuit._require_bound()
+    if not isinstance(observable,Observable):
+        raise TypeError("expected Observable")
+    n=circuit.num_qubits
+    if n>5:
+        raise ResourceLimit("dense Hamiltonian evolution supports <=5 wires")
+    t=_angle(time)
+    # Materialize only a bounded 32x32 Hermitian operator.
+    H=observable.to_qiskit(n).to_matrix()
+    raw=QuantumCircuit(n)
+    raw.append(HamiltonianGate(H,t),range(n))
+    block=_synthesize_native(raw,seed=seed)
+    return circuit.apply(block)
