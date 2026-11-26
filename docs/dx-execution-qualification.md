@@ -1,0 +1,3 @@
+# DX execution qualification candidate
+
+Native density results are separate from pure Ketary Result. Explicit local Aer noise model; no implicit backend selection or hardware submission. Native dynamic import preserves disjoint contiguous register bit order and supports bounded one-level gate-only conditions. Target transpilation is a native BackendV2 bridge, not a hardware execution claim. Physical hardware requires provider credentials, target-specific ISA verification, job/result contracts, costs, consent and real-device qualification; use explicit native provider API for now. Review optional dependencies and limits before promotion.

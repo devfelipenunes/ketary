@@ -279,7 +279,11 @@
     "Observable.from_qiskit",
     "Observable.to_qiskit",
     "_CircuitChecks.external_equivalence",
-    "from_qiskit"
+    "from_qiskit",
+    "Circuit.from_dynamic",
+    "Circuit.run_density",
+    "Circuit.run_noisy",
+    "Circuit.transpile_for"
   ],
   "Compatibility": [
     "Circuit.analyze",
