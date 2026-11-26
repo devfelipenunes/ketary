@@ -64,10 +64,19 @@ class _CircuitChecks:
         if ignore_global_phase and abs(overlap)>0:
             a=a*(np.conj(overlap)/abs(overlap))
         delta=a-b
-        spectral=float(np.linalg.norm(delta,ord=2))
+        max_error=float(np.max(np.abs(delta)))
+        # The complete numerical matrices were independently evaluated.
+        # An exactly zero residual has all singular values equal to zero;
+        # do not run a cubic SVD merely to recover that known result.
+        # Nonzero residuals retain the original spectral norm calculation.
+        if max_error==0.0:
+            spectral=frobenius=0.0
+        else:
+            spectral=float(np.linalg.norm(delta,ord=2))
+            frobenius=float(np.linalg.norm(delta))
         return dict(report,status="PASS" if spectral<=t else "FAIL",
-                    max_element_error=float(np.max(np.abs(delta))),
-                    frobenius_norm=float(np.linalg.norm(delta)),
+                    max_element_error=max_error,
+                    frobenius_norm=frobenius,
                     operator_norm=spectral,process_fidelity=fidelity)
 
 
