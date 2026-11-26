@@ -67,3 +67,5 @@ same workload and output contract, not across unrelated machines.
 Dedicated device was offline at the present inspection. Do not claim
 CUDA/cuQuantum execution, peak bandwidth, GPU memory, multi-node scaling,
 or release validation before actual artifacts exist.
+
+See [native backend decision](native-backend-decision.md) for the consolidated evidence and NO-GO promotion gates. This does not authorize native backend integration.

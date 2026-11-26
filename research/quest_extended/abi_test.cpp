@@ -43,6 +43,26 @@ int main(){
     require(call(22,1,3,0.)==5,"large output accepted");untouched();
     require(call(3,100000,100,0.)==5,"large angle table accepted");untouched();
     require(call(3,1,1,std::numeric_limits<double>::infinity())==2,"nonfinite phase accepted");untouched();
+    // Check each null pointer independently before any output mutation.
+    for(int missing=0;missing<5;missing++){
+        output.fill(99.);times.fill(99.);
+        require(extended_run(3,1,1,missing==0?nullptr:row.data(),
+            missing==1?nullptr:theta.data(),missing==2?nullptr:input.data(),
+            0.,missing==3?nullptr:output.data(),missing==4?nullptr:times.data())==2,
+            "null pointer accepted");
+        untouched();
+    }
+    row[1]=0;require(call(3,1,1,0.)==3,"zero arity accepted");untouched();row[1]=1;
+    row[0]=14;row[1]=23;require(call(3,1,1,0.)==3,"oversized MCX accepted");untouched();row[0]=1;row[1]=1;
+    theta[0]=std::numeric_limits<double>::infinity();
+    require(call(3,1,1,0.)==3,"nonfinite first angle accepted");untouched();theta[0]=0.;
+    // Empty program must still apply the exact global phase once.
+    require(call(3,0,1,.71)==0,"empty phased program failed");
+    for(int i=0;i<8;i++){
+        require(std::abs(output[2*i]-(i==0?std::cos(.71):0.))<1e-12,"empty phase real");
+        require(std::abs(output[2*i+1]-(i==0?std::sin(.71):0.))<1e-12,"empty phase imag");
+    }
+
     row[0]=99;require(call(3,1,1,0.)==3,"invalid opcode accepted");untouched();row[0]=1;
     row[2]=3;require(call(3,1,1,0.)==3,"invalid wire accepted");untouched();row[2]=2;
     row[3]=1;require(call(3,1,1,0.)==3,"invalid padding accepted");untouched();row[3]=-1;
