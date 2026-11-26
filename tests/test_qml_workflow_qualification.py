@@ -14,3 +14,13 @@ def test_fixed_splits_and_objective_history():
     assert hist.shape==(8,3) and len(held)==4
     assert hist[-1,0]<hist[0,0]
     assert len(PAIRS)==4
+
+@pytest.mark.parametrize("name",["angle","parity"])
+def test_explicit_classification_outcomes(name):
+    row=evaluate(name,3)
+    result=row["classification"]
+    assert set(result["targets"])=={0,1}
+    assert result["sdk"]==result["native"]==result["analytic"]
+    assert len(result["sdk"]["labels"])==4
+    assert 0<=result["sdk"]["accuracy"]<=1
+    if name=="angle":assert result["split"]=="held-out"

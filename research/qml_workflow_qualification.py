@@ -121,6 +121,27 @@ def evaluate(name,reps=7):
     np.testing.assert_allclose(Operator(sc.to_qiskit()).data,Operator(nc).data,atol=1e-9,rtol=0)
     s=sdk();n=native()
     for got in (s,n):np.testing.assert_allclose(got,expected,atol=1e-9,rtol=0)
+    classification={}
+    if name=="angle":
+        # Train on continuous surrogate only, evaluate fixed binary labels
+        # on disjoint held-out points at a threshold fixed before fitting.
+        threshold=.8
+        truth=(np.cos(np.asarray(HELD)+.41)>=threshold).astype(int)
+        for k,values in (("sdk",s),("native",n),("analytic",expected)):
+            labels=(values[-5:-1]>=threshold).astype(int)
+            classification[k]=dict(labels=labels.tolist(),accuracy=float(np.mean(labels==truth)))
+        classification.update(threshold=threshold,targets=truth.tolist(),split="held-out")
+        assert classification["sdk"]==classification["native"]==classification["analytic"]
+    elif name=="parity":
+        # The synthetic targets indicate whether the expected parity score
+        # exceeds a predeclared threshold; this is not a fitted classifier.
+        threshold=.5
+        truth=(expected>=threshold).astype(int)
+        for k,values in (("sdk",s),("native",n),("analytic",expected)):
+            labels=(values>=threshold).astype(int)
+            classification[k]=dict(labels=labels.tolist(),accuracy=float(np.mean(labels==truth)))
+        classification.update(threshold=threshold,targets=truth.tolist(),split="fixed evaluation")
+        assert classification["sdk"]==classification["native"]==classification["analytic"]
     samples={"sdk":[],"native":[]};rng=random.Random(29501);orders=[]
     for _ in range(reps):
         order=list(samples);rng.shuffle(order);orders.append(order)
@@ -132,7 +153,7 @@ def evaluate(name,reps=7):
                 sdk_source=source_metrics(s_builder),native_source=source_metrics(n_builder),
                 sdk_gates=len(sc.to_qiskit().data),native_gates=len(nc.data),state_payload_bytes=16*(1<<sc.num_qubits),
                 variants={k:dict(raw_ms=v,p50_ms=statistics.median(v),p95_ms=float(np.quantile(v,.95))) for k,v in samples.items()},
-                order=orders,expected=expected.tolist(),sdk=s.tolist(),native=n.tolist())
+                classification=classification,order=orders,expected=expected.tolist(),sdk=s.tolist(),native=n.tolist())
 
 def main():
     p=argparse.ArgumentParser();p.add_argument("--output",type=Path,required=True);p.add_argument("--repetitions",type=int,default=7);a=p.parse_args()
