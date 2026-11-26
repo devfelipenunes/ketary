@@ -5,6 +5,9 @@ from research.workflow_depth import evaluate,gradient_counterexample
 def test_objective_workflow(kind,n):
     row=evaluate(kind,n,reps=3)
     assert all(v["max_error"]<1e-9 for v in row["variants"].values())
+    if kind=="qaoa":
+        assert set(row["variants"])=={"ketary","qiskit","qiskit_direct","qiskit_preexpanded"}
+        assert row["variants"]["qiskit_preexpanded"]["logical_gates"]>row["variants"]["qiskit"]["logical_gates"]
 
 @pytest.mark.parametrize("t",[.17,.37,-.81])
 def test_shared_parameter_shift_counterexample(t):
