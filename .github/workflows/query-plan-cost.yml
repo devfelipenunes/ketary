@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'research/query_plan_cost.py'
+      - 'research/query_plan_amortization.py'
+      - 'tests/test_query_plan_amortization.py'
       - 'tests/test_query_plan_cost.py'
       - '.github/workflows/query-plan-cost.yml'
       - 'src/ketary/**'
@@ -38,12 +40,14 @@ jobs:
           git rev-parse HEAD > revision.txt
       - run: python -m pytest -q tests/test_query_plan_cost.py
       - run: python -m research.query_plan_cost --output query-plan.json --seed "$SEED"
+      - run: python -m research.query_plan_amortization --output amortization.json --seed "$SEED"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: query-plan-${{ matrix.seed }}
           path: |
             query-plan.json
+            amortization.json
             environment.txt
             host.txt
             revision.txt
