@@ -45,6 +45,34 @@ def _residual(actual,expected,ignore_global_phase,atol):
     return CheckResult("PASS" if error<=t else "FAIL",error,0,t,
                        "max absolute residual; phase "+("ignored" if ignore_global_phase else "preserved"))
 
+def _accumulate_pauli_chunks(state,out,terms,chunk):
+    """Accumulate real weighted Pauli action without dense operators.
+
+    Input j maps to j XOR xmask; Y contributes i and Z/Y parity
+    contributes (-1)**popcount(j & zmask). Each permutation is unique.
+    Scratch stays local to this function, released before variance reduction.
+    """
+    for label,coefficient in terms:
+        if not coefficient:
+            continue
+        x=z=y=0
+        for i,axis in enumerate(reversed(label)):
+            if axis in "XY":x|=1<<i
+            if axis in "YZ":z|=1<<i
+            if axis=="Y":y+=1
+        phase=1j**y
+        for start in range(0,state.size,chunk):
+            j=np.arange(start,min(start+chunk,state.size),dtype=np.int64)
+            parity=j&z
+            parity^=parity>>32
+            parity^=parity>>16
+            parity^=parity>>8
+            parity^=parity>>4
+            parity^=parity>>2
+            parity^=parity>>1
+            out[j^x]+=coefficient*phase*(1-2*(parity&1))*state[j]
+
+
 class Result:
     """Independent ideal pure-state snapshot; no circuit reference or re-execution."""
 
@@ -408,18 +436,25 @@ class _Math:
             if type(label) is not str or len(label)!=n or set(label)-set("IXYZ"):
                 raise ValueError("invalid Pauli label")
             validated.append((label,_real(coefficient)))
-        # Statevector.evolve(Pauli) is not assumed matrix-free; apply native
-        # one-wire gates instead, preserving Y and tensor ordering.
-        from qiskit.circuit.library import XGate,YGate,ZGate
-        gates={"X":XGate(),"Y":YGate(),"Z":ZGate()}
         state=self._r._data/math.sqrt(self._r._norm_sq)
         result=np.zeros_like(state)
-        for label,coefficient in validated:
-            term=Statevector(state)
-            for wire,axis in enumerate(reversed(label)):
-                if axis!="I":
-                    term=term.evolve(gates[axis],qargs=[wire])
-            result+=coefficient*term.data
+        # Retain the existing four-state payload admission and work cap.
+        # The two retained arrays plus conservative chunk scratch must fit
+        # that payload budget; scratch is not an RSS guarantee.
+        chunk=min(state.size,4096,(_int(max_bytes,1)-32*state.size)//96)
+        if chunk:
+            _accumulate_pauli_chunks(state,result,validated,chunk)
+        else:
+            # At the smallest admissible budget the old one-wire path fits
+            # the established contract; never reject previously valid input.
+            from qiskit.circuit.library import XGate,YGate,ZGate
+            gates={"X":XGate(),"Y":YGate(),"Z":ZGate()}
+            for label,coefficient in validated:
+                term=Statevector(state)
+                for wire,axis in enumerate(reversed(label)):
+                    if axis!="I":
+                        term=term.evolve(gates[axis],qargs=[wire])
+                result+=coefficient*term.data
         delta=result-np.vdot(state,result)*state
         value=float(np.vdot(delta,delta).real)
         if not math.isfinite(value):
