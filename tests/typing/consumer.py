@@ -107,3 +107,7 @@ assert_type(q.Circuit.classical(3,3).measure([2,0],[0,2]).reset(range(3)),q.Circ
 assert_type(c.cx(pairs=[(0,1)]).cz(pairs=q.chain(c.wires)),q.Circuit)
 assert_type(c.rzz(.2,pairs=[(0,1)]),q.Circuit)
 assert_type(q.Circuit.symbolic(2).crx(angle,pairs=[(0,1)]),q.Circuit)
+
+assert_type(q.Observable.from_qiskit(H.to_qiskit()),q.Observable)
+assert_type(q.maxcut_hamiltonian(4,q.ring(range(4))),q.Observable)
+assert_type(q.amplitude_amplification(q.phase_oracle(["001","110"]),iterations=1),q.Circuit)
