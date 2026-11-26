@@ -55,3 +55,5 @@ record selection/exclusion), count API call sites and semantic patterns,
 include dynamic/measurement and parameter sweeps; compare completion time,
 errors, and conceptual load with human participants. No performance or
 adoption claim without controlled evidence.
+
+The compact native baselines also use native pair broadcasting and repeat where supported. First CI revision passed the eight operator comparisons and 511 core/522 combined tests, but failed the exact public export inventory because four approved topology helpers had not been added to that separate assertion. Correct the expected explicit set (no weakening) and rerun all jobs before integration.

@@ -5,6 +5,7 @@ import ketary as q
 
 def test_public_exports():
     assert set(q.__all__) == {
+        "chain", "ring", "star", "all_pairs",
         "Circuit", "Result", "Observable", "X", "Y", "Z", "I", "CheckResult", "Contract", "VerificationReport", "Evidence", "ComparisonReport", "DiagnosticReport", "StatisticalReport", "OperatorMetricsReport", "SemanticDiffReport", "SnapshotReport", "ExternalVerificationReport", "ModalOutcomeReport", "PhaseEstimateReport", "SweepPlan", "StatisticalContract", "QueryPlan", "ShotResult", "TraceStep", "TraceComparison", "ResourceReport",
         "ResourceLimit", "UnsupportedOperation", "from_qiskit", "bell", "ghz", "constant_oracle", "parity_oracle", "deutsch_jozsa", "bernstein_vazirani", "qft", "grover", "superdense", "phase_estimation", "simon", "recover_simon", "teleportation", "decode_phase_estimation", "decode_bernstein_vazirani", "decode_teleportation",
     }

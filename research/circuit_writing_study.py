@@ -19,12 +19,12 @@ CASES=[
 ("ghz_chain",
 """c=QuantumCircuit(4)
 c.h(3)
-for a,b in [(3,2),(2,1),(1,0)]: c.cx(a,b)""",
+c.cx([3,2,1],[2,1,0])""",
 """c=q.Circuit(4).h(3).apply_each(q.Circuit(2).cx(0,1),placements=q.chain(reversed(range(4))))"""),
 ("graph_ring",
 """c=QuantumCircuit(4)
 c.h(range(4))
-for a,b in [(0,1),(1,2),(2,3),(3,0)]: c.cz(a,b)""",
+c.cz([0,1,2,3],[1,2,3,0])""",
 """c=q.Circuit(4).h(range(4)).apply_each(q.Circuit(2).cz(0,1),placements=q.ring(range(4)))"""),
 ("real_amplitudes",
 """c=real_amplitudes(4,entanglement='linear',reps=2).assign_parameters(angles)""",
@@ -43,7 +43,7 @@ c.ry(su2_angles[8:12],c.wires).rz(su2_angles[12:],c.wires)"""),
 """c=QuantumCircuit(4)
 c.h(range(4))
 for gamma,beta in [(0.2,0.3),(0.4,0.5)]:
-    for a,b in [(0,1),(1,2),(2,3),(3,0)]: c.rzz(2*gamma,a,b)
+    c.rzz(2*gamma,[0,1,2,3],[1,2,3,0])
     c.rx(2*beta,range(4))""",
 """c=q.Circuit(4).h(range(4))
 for gamma,beta in [(0.2,0.3),(0.4,0.5)]:
@@ -60,8 +60,7 @@ c.ry(angles[:4],c.wires)"""),
 """layer=QuantumCircuit(4)
 layer.h(range(4))
 layer.cx(0,1)
-c=QuantumCircuit(4)
-for _ in range(4): c.compose(layer,inplace=True)""",
+c=layer.repeat(4)""",
 """layer=q.Circuit(4).h(range(4)).cx(0,1)
 c=layer.repeat(4)"""),
 ]
