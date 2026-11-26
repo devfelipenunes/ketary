@@ -92,6 +92,9 @@ jobs:
           python -m research.closure_sampling_pinned --quick > closure-sampling-pinned.json
           python -m research.closure_arithmetic_compare > closure-arithmetic.json
           python -m research.closure_qec_metrics > closure-qec.json
+          python -m research.closure_physical_dynamics > closure-physical-dynamics.json
+          python -m research.closure_reversible_logic > closure-reversible-logic.json
+          python -m research.priority_architecture_audit > closure-architecture.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: benchmark-results
@@ -102,6 +105,9 @@ jobs:
             closure-sampling-pinned.json
             closure-arithmetic.json
             closure-qec.json
+            closure-physical-dynamics.json
+            closure-reversible-logic.json
+            closure-architecture.json
             environment.txt
 
   dependency-review:
