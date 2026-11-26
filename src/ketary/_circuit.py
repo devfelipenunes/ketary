@@ -559,46 +559,68 @@ class Circuit:
 
     # Fluent aliases; the existing gates namespace remains compatible.
     def h(self,q):
+        if type(q) is int:
+            return self.gates.h(q)
         from ._ergonomics import _single
         return _single(self,"h",q)
 
     def x(self,q):
+        if type(q) is int:
+            return self.gates.x(q)
         from ._ergonomics import _single
         return _single(self,"x",q)
 
     def y(self,q):
+        if type(q) is int:
+            return self.gates.y(q)
         from ._ergonomics import _single
         return _single(self,"y",q)
 
     def z(self,q):
+        if type(q) is int:
+            return self.gates.z(q)
         from ._ergonomics import _single
         return _single(self,"z",q)
 
     def s(self,q):
+        if type(q) is int:
+            return self.gates.s(q)
         from ._ergonomics import _single
         return _single(self,"s",q)
 
     def sdg(self,q):
+        if type(q) is int:
+            return self.gates.sdg(q)
         from ._ergonomics import _single
         return _single(self,"sdg",q)
 
     def t(self,q):
+        if type(q) is int:
+            return self.gates.t(q)
         from ._ergonomics import _single
         return _single(self,"t",q)
 
     def tdg(self,q):
+        if type(q) is int:
+            return self.gates.tdg(q)
         from ._ergonomics import _single
         return _single(self,"tdg",q)
 
     def rx(self,theta,q):
+        if type(q) is int and type(theta) in (int,float):
+            return self.gates.rx(theta,q)
         from ._ergonomics import _rotation
         return _rotation(self,"rx",theta,q)
 
     def ry(self,theta,q):
+        if type(q) is int and type(theta) in (int,float):
+            return self.gates.ry(theta,q)
         from ._ergonomics import _rotation
         return _rotation(self,"ry",theta,q)
 
     def rz(self,theta,q):
+        if type(q) is int and type(theta) in (int,float):
+            return self.gates.rz(theta,q)
         from ._ergonomics import _rotation
         return _rotation(self,"rz",theta,q)
 
@@ -624,10 +646,14 @@ class Circuit:
         return self.gates.ccx(c1,c2,t)
 
     def p(self,theta,q):
+        if type(q) is int and type(theta) in (int,float):
+            return self.gates.p(theta,q)
         from ._ergonomics import _rotation
         return _rotation(self,"p",theta,q)
 
     def u(self,theta,phi,lam,q):
+        if type(q) is int:
+            return self.gates.u(theta,phi,lam,q)
         from ._ergonomics import _single
         return _single(self,"u",q,theta,phi,lam)
 
@@ -662,10 +688,14 @@ class Circuit:
         return _pairs(self,"crz",a,b,pairs,theta)
 
     def sx(self,q):
+        if type(q) is int:
+            return self.gates.sx(q)
         from ._ergonomics import _single
         return _single(self,"sx",q)
 
     def sxdg(self,q):
+        if type(q) is int:
+            return self.gates.sxdg(q)
         from ._ergonomics import _single
         return _single(self,"sxdg",q)
 
