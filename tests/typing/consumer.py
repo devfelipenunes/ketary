@@ -18,3 +18,10 @@ assert_type(q.Circuit.from_json(c.to_json()), q.Circuit)
 c.gates.h("0")  # type: ignore[arg-type]
 r.sample(shots="10")  # type: ignore[arg-type]
 c.run(mode="hardware")  # type: ignore[arg-type]
+
+assert_type(q.Circuit(2).h(0).cp(.2,0,1).copy(), q.Circuit)
+assert_type(c.run(initial_state="01"), q.Result)
+assert_type(r.math.density_matrix([0]), NDArray[np.complex128])
+assert_type(r.math.purity([0]), float)
+assert_type(q.qft(3), q.Circuit)
+assert_type(r.sample(shots=10,wires=[0]), dict[str,int])

@@ -58,3 +58,24 @@ print(text)
 ```
 
 Default tables show the first 16 basis indices (not the most probable outcomes). Supply explicit labels for a targeted view. The table reports raw amplitudes and normalized probabilities, rounded for display only.
+
+
+## Use explicit state and reduced density matrices
+
+```python
+import ketary as q
+c = q.Circuit(2).h(0).cx(0, 1)
+r = c.run(initial_state="00")
+assert r.verify(expectations={"XX": 1, "ZZ": 1})["status"] == "PASS"
+assert abs(r.math.purity([0]) - 0.5) < 1e-9
+print(r.math.dirac())
+```
+
+## Fourier transform and search
+
+```python
+import ketary as q
+c = q.qft(3)
+c.compose(q.qft(3, inverse=True)).test.equivalent(q.Circuit(3)).require()
+assert q.grover("101").run().math.probability("101") > 0.9
+```

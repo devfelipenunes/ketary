@@ -62,3 +62,68 @@ def deutsch_jozsa(oracle):
     for i in range(n):
         c.gates.h(i)
     return c
+
+
+def bernstein_vazirani(mask):
+    """Recover a hidden nonzero parity mask using an explicit oracle."""
+    return deutsch_jozsa(parity_oracle(mask))
+
+
+def qft(n, *, inverse=False, swaps=True):
+    """Exact logical QFT with positive Fourier sign, highest-wire-first labels."""
+    from math import pi
+    n=_int(n,1)
+    if n>22:
+        from ._validation import ResourceLimit
+        raise ResourceLimit("QFT construction limited to 22 qubits")
+    if type(inverse) is not bool or type(swaps) is not bool:
+        raise ValueError("inverse and swaps must be boolean")
+    c=Circuit(n)
+    for target in reversed(range(n)):
+        c.h(target)
+        for control in reversed(range(target)):
+            c.cp(pi/(2**(target-control)),control,target)
+    if swaps:
+        for i in range(n//2):
+            c.swap(i,n-1-i)
+    return c.inverse() if inverse else c
+
+
+def grover(marked, *, iterations=None):
+    """Small pedagogical single-marked-basis search (2 or 3 input qubits)."""
+    from math import floor,pi,asin,sqrt
+    if type(marked) is not str or len(marked) not in (2,3) or set(marked)-{"0","1"}:
+        raise ValueError("expected a 2- or 3-bit marked label")
+    n=len(marked)
+    count=floor(pi/(4*asin(1/sqrt(2**n)))) if iterations is None else _int(iterations)
+    if count>64:
+        from ._validation import ResourceLimit
+        raise ResourceLimit("Grover iteration limit exceeded")
+    c=Circuit(n).h_many(range(n))
+    def phase_flip(bits):
+        zeros=[i for i,b in enumerate(reversed(bits)) if b=="0"]
+        for i in zeros: c.x(i)
+        if n==2:
+            c.cz(0,1)
+        else:
+            c.h(2).ccx(0,1,2).h(2)
+        for i in zeros: c.x(i)
+    for _ in range(count):
+        phase_flip(marked)
+        c.h_many(range(n))
+        phase_flip("0"*n)
+        c.h_many(range(n))
+        # H(I-2|0><0|)H differs from standard diffusion by global -1.
+        c._qc.global_phase += pi
+    return c
+
+
+def superdense(bits):
+    """Ideal coherent superdense encoding and decoding; no communication model."""
+    if type(bits) is not str or len(bits)!=2 or set(bits)-{"0","1"}:
+        raise ValueError("expected two bits")
+    c=bell()
+    # Z encodes the low-order output bit, X the high-order output bit.
+    if bits[0]=="1": c.x(0)
+    if bits[1]=="1": c.z(0)
+    return c.cx(0,1).h(0)

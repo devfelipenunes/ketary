@@ -48,6 +48,21 @@ class Circuit:
         c._qc=qc if owned else qc.copy()
         return c
 
+    @classmethod
+    def from_parameterized(cls, template, bindings):
+        """Bind all parameters in a trusted native template before import.
+
+        Unbound circuits never enter the Ketary logical Circuit.
+        """
+        from collections.abc import Mapping
+        QC,_=_sdk()
+        if not isinstance(template,QC) or not isinstance(bindings,Mapping):
+            raise TypeError("expected QuantumCircuit and parameter mapping")
+        if set(bindings)!=set(template.parameters):
+            raise ValueError("bindings must cover exactly the template parameters")
+        bound=template.assign_parameters({key:_angle(value) for key,value in bindings.items()},inplace=False)
+        return cls._from_native(bound,owned=True)
+
     def inspect(self, *, start=0, limit=32):
         """Research candidate: bounded logical operations, no copy or run."""
         from ._inspection import inspect_circuit

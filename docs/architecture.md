@@ -23,3 +23,5 @@ mutable circuit model. Explicit calls may allocate temporary memory. Python
 [audit](audit-l0.md). Release and human evaluation remain pending.
 
 Composition is closed over validated Circuit inputs: the native nonmutating composition result is adopted without a redundant full scan. Imports, appends and other transformations retain validation. Snapshot validation uses scalar absolute norm tolerance and retains defensive copying.
+
+The developer expansion centralizes supported gate specifications in `_gate_specs`, adds `_inspection` for bounded read models, and preserves the same native Circuit and snapshot model. Symbolic native templates are bound before entering the logical subset.

@@ -61,10 +61,20 @@ class Result:
         from ._inspection import verify_result
         return verify_result(self,probabilities=probabilities,expectations=expectations,normalized=normalized,atol=atol)
 
-    def sample(self, *, shots, seed=None, max_outcomes=65536):
+    def sample(self, *, shots, seed=None, max_outcomes=65536, wires=None):
         shots = _int(shots,1)
         if shots>np.iinfo(np.int64).max:
             raise ResourceLimit("shots exceed signed 64-bit range")
+        if wires is not None:
+            # Explicit final Z-basis sampling of selected wires, without collapse.
+            cap=_int(max_outcomes,1)
+            probabilities=self.math.marginal_probabilities(wires,max_outcomes=cap)
+            if seed is not None:
+                seed=_int(seed)
+            p=np.array(list(probabilities.values()))
+            p/=p.sum()
+            counts=np.random.default_rng(seed).multinomial(shots,p)
+            return {key:int(v) for key,v in zip(probabilities,counts,strict=True) if v}
         if min(shots,self._data.size)>_int(max_outcomes,1):
             raise ResourceLimit("potential sample dictionary exceeds outcome limit")
         if seed is not None:

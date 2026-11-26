@@ -130,3 +130,7 @@ Install `build` and run `python -m build` to produce a local wheel and source di
 ## Internal architecture (experimental)
 
 The public import remains `import ketary as q`. Internal modules separate circuit construction, Qiskit validation, result math and checks, trace, resource guards, and state factories. No new capability or production-readiness claim follows from this refactor. Internal modules are not a second public API.
+
+## Developer SDK expansion (experimental)
+
+See [SDK roadmap and usage](docs/sdk-roadmap.md) for fluent gates, explicit initial states, mathematical reports, bounded algorithms and remaining boundaries.

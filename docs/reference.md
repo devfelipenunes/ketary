@@ -35,3 +35,7 @@ Additional guards: exporting a dense snapshot copy is bounded by its payload; en
 Experimental logical transpilation delegates to Qiskit at optimization level 0 with only a supported basis and seed. No target, coupling map or backend; rejects layout/unsupported output and verifies strict full-operator equivalence up to 8 qubits. This can be expensive and is not a QPU optimization guarantee.
 
 For distribution boundaries and licensing review see [third-party review](third-party-review.md). The package is not published.
+
+## Experimental developer extensions
+
+See [SDK roadmap](sdk-roadmap.md) for direct gate aliases, the expanded gate registry, initial states, selective inspection, verification, density matrices, parameter binding and algorithm contracts. Existing `.gates` remains supported.
