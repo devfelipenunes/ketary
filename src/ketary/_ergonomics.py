@@ -359,3 +359,33 @@ def _expectation_jacobian(c,bindings,observables,*,max_bytes):
             for terms,weight in zip(row,weights,strict=True):
                 terms.append(_real(diff*weight))
     return tuple(tuple(_real(fsum(terms)) for terms in row) for row in contributions)
+
+
+def _evolve_product(c,observable,*,time,steps,order):
+    """Stage an explicitly approximate ordered Pauli product formula."""
+    from ._observable import Observable
+    from ._circuit import Circuit
+    c._require_bound()
+    if not isinstance(observable,Observable):
+        raise TypeError("expected Observable")
+    n=c.num_qubits
+    if n>8:
+        raise ResourceLimit("product evolution supports <=8 wires")
+    t=c._gate_angle(time)
+    steps,order=_int(steps,1),_int(order,1)
+    if steps>64:
+        raise ResourceLimit("product evolution supports <=64 steps")
+    if order not in (1,2):
+        raise ValueError("product formula order must be one or two")
+    terms=tuple((p,v) for p,v in observable.to_dict(n).items() if v)
+    count=sum(max(1,6*sum(a!="I" for a in p)-1) for p,_ in terms)
+    if count*steps*order>10000:
+        raise ResourceLimit("product formula exceeds 10000 estimated instructions")
+    if not terms or t==0:
+        return c
+    block=Circuit(n)
+    sequence=terms if order==1 else terms+terms[::-1]
+    dt=t/(steps*order)
+    for p,v in sequence:
+        block.evolve(Observable({p:v}),time=dt)
+    return c.apply(block,times=steps)

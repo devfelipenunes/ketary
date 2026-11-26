@@ -61,7 +61,9 @@ def _validate(qc,*,allow_parameters=False):
         if item.clbits:
             raise UnsupportedOperation("classical operands unsupported")
         _validate_gate(item.operation,allow_parameters=allow_parameters)
-    if not math.isfinite(float(qc.global_phase)):
+    if allow_parameters and getattr(qc.global_phase,"parameters",()):
+        _gate_angle(qc.global_phase,allow_parameters=True)
+    elif not math.isfinite(float(qc.global_phase)):
         raise ValueError("invalid global phase")
 
 

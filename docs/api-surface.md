@@ -19,16 +19,16 @@ All declared public stub entries are classified once; constructors and dunder pr
 - **_Math**: `amplitude`, `expectation`, `expectations`, `probabilities`, `probability`, `variance`
 - **_Report**: `render`, `require`, `status`
 
-## Advanced (173)
+## Advanced (177)
 
 - **CheckResult**: `to_dict`, `to_json`
-- **Circuit**: `bind`, `capabilities`, `checkpoint`, `checkpoints`, `classical`, `compose`, `compute_action_uncompute`, `debug`, `decompose`, `diff`, `evolve`, `expectation_jacobian`, `from_json`, `if_x`, `if_z`, `inspect`, `inverse`, `measure`, `num_clbits`, `optimize`, `parameter`, `parameter_vector`, `parameters`, `plan`, `register`, `registers`, `reset`, `resources`, `run_many`, `run_shots`, `sweep`, `sweep_rows`, `symbolic`, `to_json`, `visualize`
+- **Circuit**: `bind`, `bind_partial`, `capabilities`, `checkpoint`, `checkpoints`, `classical`, `compose`, `compute_action_uncompute`, `control`, `debug`, `decompose`, `diff`, `evolve`, `evolve_product`, `expectation_jacobian`, `from_json`, `if_x`, `if_z`, `inspect`, `inverse`, `measure`, `num_clbits`, `optimize`, `parameter`, `parameter_vector`, `parameters`, `plan`, `register`, `registers`, `reset`, `resources`, `run_many`, `run_shots`, `sweep`, `sweep_rows`, `symbolic`, `to_json`, `visualize`
 - **Contract**: `to_dict`
 - **Top-level**: `DiagnosticReport`, `ModalOutcomeReport`, `OperatorMetricsReport`, `PhaseEstimateReport`, `QueryPlan`, `ResourceLimit`, `ResourceReport`, `SemanticDiffReport`, `ShotResult`, `StatisticalContract`, `StatisticalReport`, `SweepPlan`, `TraceComparison`, `TraceStep`, `UnsupportedOperation`, `amplitude_amplification`, `ansatz`, `basis`, `bernstein_vazirani`, `constant_oracle`, `decode_bernstein_vazirani`, `decode_phase_estimation`, `decode_teleportation`, `deutsch_jozsa`, `ghz`, `grover`, `maxcut_hamiltonian`, `parity_oracle`, `phase_estimation`, `phase_oracle`, `qft`, `recover_simon`, `simon`, `superdense`, `teleportation`
 - **Evidence**: `from_dict`, `from_json`, `minimize`, `to_dict`, `to_json`
 - **ExternalVerificationReport**: `external_equivalence`
 - **ModalOutcomeReport**: `label`, `peak_probability`
-- **Observable**: `on`, `to_dict`
+- **Observable**: `anticommutator`, `on`, `to_dict`
 - **OperatorMetricsReport**: `operator_norm`
 - **PhaseEstimateReport**: `phase`
 - **QueryPlan**: `bits`, `estimate`, `paulis`, `run`, `subsystems`
@@ -50,11 +50,11 @@ All declared public stub entries are classified once; constructors and dunder pr
 - **_ResultVisualize**: `bloch`, `bloch_svg`, `histogram`
 - **_Visualize**: `svg`, `text`
 
-## Native (13)
+## Native (17)
 
-- **Circuit**: `append`, `from_dynamic`, `from_parameterized`, `run_density`, `run_noisy`, `to_qiskit`, `transpile`, `transpile_for`
+- **Circuit**: `append`, `from_dynamic`, `from_parameterized`, `from_symbolic`, `from_synthesized`, `run_density`, `run_noisy`, `to_qiskit`, `transpile`, `transpile_for`
 - **Top-level**: `ExternalVerificationReport`, `from_qiskit`
-- **Observable**: `from_qiskit`, `to_qiskit`
+- **Observable**: `commutator`, `from_qiskit`, `product`, `to_qiskit`
 - **_CircuitChecks**: `external_equivalence`
 
 ## Compatibility (34)
