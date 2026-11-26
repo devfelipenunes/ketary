@@ -21,7 +21,7 @@ is not installed.
 | Select | ordered wires, pairs=, chain/ring/star/all_pairs | absolute observable indices vs ordered local selection |
 | Compose | apply(block,wires=...,times=...), apply_each | compose/inverse/repeat independent transforms |
 | Parameterize | symbolic(), parameter/vector, bind | sweep_rows/sweep are independent runs, not sequential layers |
-| Express math | Observable, X/Y/Z/I, evolve(H,time=...) | evolve exact commuting numeric; explicit approximation separate |
+| Express math | Observable, X/Y/Z/I, evolve(H,time=...) | evolve exact commuting; explicit approximation separate |
 | Execute | run(), run_shots() | ideal pure vs empirical measured distributions |
 | Read | result.math.expectation/probability | no simulation; bounded dense/streamed variance paths |
 | Assert | result.test.expectation(...).require() | contract(...).verify(result) for reusable requirements |
@@ -76,16 +76,17 @@ when new experiments contradict the assessment.
 | bind(values) | native circuit parameter order, not insertion order |
 | sweep_rows(rows) | independent fully bound circuits per ordered row |
 | sweep(**columns) | zipped columns, not Cartesian product |
-| evolve(H,time=t) | numeric time; exact commuting real Pauli evolution |
+| evolve(H,time=t) | numeric or explicitly symbolic time; exact commuting real Pauli evolution |
 
 No implicit Cartesian product, implicit parameter sharing, implicit
 partial bind, automatic ancilla, execution during construction, or
 automatic approximation. Prefer Parameter identities for reusable
 templates, names for simple interactive use, and ordered vectors when
 their order is explicitly known. A same-name distinct identity must not
-be silently renamed. Symbolic parameter expressions are supported in
-symbolic gate builders; evolve's time remains numeric. A future symbolic
-time design must qualify phase expressions, overflow and replay first.
+be silently renamed. Symbolic parameter expressions are supported in symbolic gate builders
+and exact evolution in explicit symbolic mode. Identity terms contribute
+to symbolic native global phase; full binding is required before replay,
+execution or comparison. Checkpoint invalidation follows apply.
 
 ## Candidate decisions
 
