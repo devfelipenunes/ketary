@@ -130,7 +130,12 @@ def pair_build(n,layers):
         for _ in range(layers):
             c.apply_each(edge,placements=pairs)
         return c
-    return {"native":native,"sdk_scalar":scalar,"sdk_apply_each":grouped}
+    def direct():
+        c=q.Circuit(n)
+        for _ in range(layers):
+            c.cz(pairs=pairs)
+        return c
+    return {"native":native,"sdk_scalar":scalar,"sdk_apply_each":grouped,"sdk_pairs":direct}
 
 
 def dynamic_build(layers):
