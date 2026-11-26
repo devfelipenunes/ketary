@@ -1,11 +1,12 @@
 # Ketary
 
-**Write quantum programs you can understand and verify.**
+**Quantum Software Engineering SDK**
 
-Ketary is an experimental high-level Python SDK for building, understanding and
-verifying small quantum programs. It uses Qiskit for the authoritative circuit
-and ideal-state execution model. Python stays Python; no separate language or
-compiler is required.
+Ketary is an experimental Python SDK for mathematical modeling, controlled
+experimentation, analysis, verification and diagnosis of small quantum programs.
+It uses Qiskit as the authoritative circuit and ideal-state execution model.
+Expressiveness and performance are quality attributes; the goal is reliable,
+reproducible quantum software engineering, not a replacement for Qiskit.
 
 ```python
 import ketary as q
@@ -82,6 +83,7 @@ Native interoperability is explicit. Existing aliases continue to work.
 - [Circuit Challenge](docs/circuit-challenge.md)
 - [Maturity review](docs/maturity-review.md)
 - [Technical consolidation roadmap](docs/technical-consolidation.md)
+- [Production qualification roadmap](docs/production-qualification.md)
 - [Known limitations](docs/known-limitations.md)
 - [Compatibility policy](docs/compatibility.md)
 
