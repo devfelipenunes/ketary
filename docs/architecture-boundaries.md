@@ -27,7 +27,7 @@ The stub and typing marker are not runtime Python modules. The machine-readable 
 | Dependency | Direct source modules |
 |---|---|
 | qiskit | _adapter, _checks, _circuit, _classical, _observable, _replay, _result, _transpilation, _verification |
-| numpy | _checks, _execution, _result, _trace, _validation, _verification |
+| numpy | _checks, _ergonomics, _execution, _result, _trace, _validation, _verification |
 | qiskit_aer | _classical only |
 | mqt | _external only |
 
@@ -96,3 +96,5 @@ foundation/private-facade rules and baseline cyclic membership, including
 local imports. See [resource and ownership contracts](resource-contracts.md).
 
 _topology is a pure ordered logical pair generator depending only on _validation; no native imports or public facade dependency. Rotation layers reuse the existing _ergonomics and adapter boundaries.
+
+QGT uses a function-local NumPy import in _ergonomics for the bounded projected derivative Gram matrix; no new distribution, eager import or optional backend dependency. The exact AST inventory is expanded, not relaxed.
