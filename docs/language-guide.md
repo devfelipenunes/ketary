@@ -238,3 +238,26 @@ one scalar real or explicitly symbolic angle for the whole batch.
 No Cartesian product, scheduling, hidden execution, or implicit controls.
 Bound mode appends directly through the native transaction; symbolic
 and classical mode stage on a native copy.
+
+
+## Native variational ansatz and parameter vectors
+
+```python
+weights = q.Circuit.parameter_vector("w", 4)
+layer = q.Circuit.symbolic(4).ry(weights, range(4))
+template = q.ansatz(4, rotations=("ry", "rz"), reps=2, prefix="a")
+bound = template.bind([0.1] * len(template.parameters))
+energy = bound.run().math.expectation(q.Z(0))
+```
+
+The ansatz delegates directly to Qiskit n_local. Rotation blocks are ordered
+rx/ry/rz, CX entanglement is linear/reverse_linear/circular/full with native
+ordering, and a final rotation layer is included. Limits: 2..62 wires,
+1..64 repetitions, 4096 parameters and 10000 estimated instructions.
+Independent templates with distinct parameters must use distinct prefixes
+when combined in one symbolic target. Vectors are immutable tuples of native
+Parameter objects. Ordered bind consumes exactly one finite value per native
+parameter in Circuit.parameters order; mappings and named binding remain
+supported. Binding returns a new bound circuit; no hidden execution or
+classical optimizer. This is an experimental convenience for a subset of
+n_local, not all Qiskit variational capabilities.

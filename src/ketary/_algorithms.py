@@ -287,3 +287,35 @@ def decode_teleportation(result):
     output={bit:sum(v for k,v in counts.items() if k[0]==bit) for bit in ("0","1")}
     return {"scope":"empirical output bit 2; not state fidelity or proof of teleportation",
             "shots":shots,"counts":output,"probabilities":{k:v/shots for k,v in output.items()}}
+
+
+def ansatz(n,*,rotations=("ry",),entanglement="linear",reps=1,prefix="theta"):
+    """Native alternating rotations/CX ansatz; no execution or optimizer.
+
+    Rotation gate order, parameter order and entanglement semantics are native
+    Qiskit n_local. Reusing the same prefix in independent templates is not
+    implicit parameter sharing.
+    """
+    from collections.abc import Mapping
+    from itertools import islice
+    from ._validation import ResourceLimit
+    n,reps=_int(n,2),_int(reps,1)
+    if n>62 or reps>64:
+        raise ResourceLimit("ansatz limited to 62 wires and 64 repetitions")
+    if isinstance(rotations,(str,bytes,set,frozenset,Mapping)):
+        raise ValueError("rotations must be an ordered sequence")
+    try:
+        rotations=tuple(islice(iter(rotations),4))
+    except TypeError as exc:
+        raise ValueError("rotations must be an ordered sequence") from exc
+    if not 1<=len(rotations)<=3 or any(type(g) is not str or g not in ("rx","ry","rz") for g in rotations):
+        raise ValueError("expected 1..3 ordered rx/ry/rz rotation blocks")
+    if type(entanglement) is not str or entanglement not in ("linear","reverse_linear","circular","full"):
+        raise ValueError("unsupported native entanglement topology")
+    if type(prefix) is not str or not prefix or len(prefix)>112:
+        raise ValueError("expected a nonempty parameter prefix up to 112 characters")
+    parameters=n*len(rotations)*(reps+1)
+    edges=n*(n-1)//2 if entanglement=="full" else n if entanglement=="circular" else n-1
+    if parameters>4096 or parameters+reps*edges>10000:
+        raise ResourceLimit("ansatz exceeds 4096 parameters or 10000 instructions")
+    return Circuit._native_ansatz(n,rotations,entanglement,reps,prefix)
