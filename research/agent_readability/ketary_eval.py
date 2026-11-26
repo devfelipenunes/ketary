@@ -8,6 +8,7 @@ import ast
 import io
 import json
 import tokenize
+import random
 from pathlib import Path
 import numpy as np
 from qiskit import QuantumCircuit
@@ -41,14 +42,28 @@ def source(framework,n,gates):
         lines.append(prefix+name+"("+", ".join(repr(a) for a in args)+")")
     return "\n".join(lines)
 
-def prompt(case,framework):
+def prompt(case,framework,condition='card'):
     p={"id":case["id"],"kind":case["kind"],"framework":framework,"request":case["request"],
        "response_schema":{"code":"Python source string"} if "gates" in case else {"answer":"requested JSON value"}}
     if "source" in case: p["source"]=source(framework,case["n"],case["source"])
     if case.get("dynamic"): p["source"]=source(framework,case["n"],[])+("\nc.gates.rx(theta, 0)" if framework=="ketary" else "\nc.rx(theta, 0)")
     if "gates" in case:
         p["constraints"]="Use exactly the literal constructor/import and gate statements of the requested API; no loops, variables, helper functions, extra imports or symbolic arguments. Circuit must implement the specified full operator with strict global phase. Return JSON only."
-        p["api"]={"constructor":"QuantumCircuit(n)" if framework=="qiskit" else "q.Circuit(n)","gate_prefix":"c.gates." if framework=="ketary" else "c.","import":"from qiskit import QuantumCircuit" if framework=="qiskit" else "import ketary as q"}
+        if condition!="none": p["api"]={"constructor":"QuantumCircuit(n)" if framework=="qiskit" else "q.Circuit(n)","gate_prefix":"c.gates." if framework=="ketary" else "c.","import":"from qiskit import QuantumCircuit" if framework=="qiskit" else "import ketary as q"}
+    if condition not in ("none","card","reference"): raise ValueError("invalid documentation condition")
+    if condition!="none":
+        p["context"]={"bit_order":"highest-wire-first","rotation_unit":"radian","cx_arguments":"control,target",
+            "scope":"ideal unitary logical circuits; initial state all zero"}
+    if condition=="reference":
+        p["reference"]={
+            "construction":"Construct one circuit with n qubits; use only literal supported gate calls.",
+            "gates":"h,x,y,z,s,sdg,t,tdg(wire); rx,ry,rz(angle,wire); cx,cz,swap(wire,wire); ccx(control,control,target)",
+            "measurement":"Z-basis probabilities discard relative phase; equal distributions need not imply equal states.",
+            "equivalence":"Global phase may be ignored for states only when requested; full operator checks in this benchmark preserve it.",
+            "checkpoints":"Index zero is before any gate; subsequent indices follow ordered operations.",
+            "source":"The literal reader cannot resolve dynamic expressions or unknown variables. Abstain rather than infer.",
+            "mutation":"Gate calls append operations; use explicit statements in the submitted code."
+        }
     return p
 
 def native(n,gates):
@@ -78,6 +93,8 @@ def grade(case,framework,response):
     if "count" in case and len(report["operations"])!=case["count"]: return {"status":"FAIL","reason":"gate count"}
     # Rebuild the allowlisted operations, never execute the submitted program.
     gates=[(op["gate"],*op["params"],*op["wires"]) for op in report["operations"]]
+    if case['id'] in ('G03','R03') and gates!=case['gates']:
+        return {'status':'FAIL','reason':'requested literal rotation sequence'}
     actual=Operator(native(case["n"],gates)).data
     expected=Operator(native(case["n"],case["gates"])).data
     return {"status":"PASS" if np.allclose(actual,expected,atol=1e-9,rtol=0) else "FAIL","reason":"strict full operator"}
@@ -117,10 +134,14 @@ def main():
     options.add_argument("--grade",type=Path)
     options.add_argument("--self-test",action="store_true")
     options.add_argument("--compare-syntax",action="store_true")
+    parser.add_argument('--condition',choices=['none','card','reference'],default='card')
+    parser.add_argument('--seed',type=int,default=42)
     args=parser.parse_args()
     if args.self_test: out=self_test()
     elif args.compare_syntax: out=compare_syntax()
-    elif args.prompts: out=[prompt(c,args.prompts) for c in CASES]
+    elif args.prompts:
+        out=[prompt(c,args.prompts,args.condition) for c in CASES]
+        random.Random(args.seed).shuffle(out)
     else:
         if args.grade.stat().st_size>1024*1024: raise ValueError("response file too large")
         responses=json.loads(args.grade.read_text())
