@@ -75,7 +75,6 @@ def build_candidate_sdist(destination):
         raise RuntimeError("diagnostic requires pinned setuptools 84.2.1")
     epoch=int(os.environ["SOURCE_DATE_EPOCH"])
     if not 0<=epoch<2**32:raise ValueError("invalid gzip epoch")
-    original=sdist.make_archive
     calls=[]
     def make_archive(self,base_name,format,root_dir=None,base_dir=None,owner=None,group=None):
         if format!="gztar" or root_dir is not None or owner is not None or group is not None:
@@ -110,13 +109,17 @@ def study():
                 assert len(files)==1
                 results[ext]=inventory(files[0])
             outputs.append(results)
-            candidate_dir=source/"candidate-dist"
+            candidate_source=Path(tmp)/("candidate-"+slot)
+            candidate_source.mkdir()
+            with tarfile.open(fileobj=io.BytesIO(archive),mode="r:") as tar:
+                tar.extractall(candidate_source,filter="data")
+            candidate_dir=Path(tmp)/("candidate-dist-"+slot)
             candidate_dir.mkdir()
-            subprocess.run([sys.executable,str(root/"research/alpha_rebuild_compare.py"),"--candidate-sdist",str(candidate_dir)],cwd=source,env=env,check=True,stdout=sys.stderr)
+            subprocess.run([sys.executable,str(root/"research/alpha_rebuild_compare.py"),"--candidate-sdist",str(candidate_dir)],cwd=candidate_source,env=env,check=True,stdout=sys.stderr)
             files=list(candidate_dir.glob("*.tar.gz"))
             assert len(files)==1
             candidates.append(inventory(files[0]))
-            subprocess.run([sys.executable,"-m","pip","wheel","--no-deps","--no-build-isolation","--wheel-dir",str(candidate_dir),str(files[0])],cwd=source,env=env,check=True,stdout=sys.stderr)
+            subprocess.run([sys.executable,"-m","pip","wheel","--no-deps","--no-build-isolation","--wheel-dir",str(candidate_dir),str(files[0])],cwd=candidate_source,env=env,check=True,stdout=sys.stderr)
             wheels=list(candidate_dir.glob("*.whl"))
             assert len(wheels)==1
             candidate_wheels.append(inventory(wheels[0]))
