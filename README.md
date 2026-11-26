@@ -2,7 +2,7 @@
 
 An experimental Python SDK for quantum programming, built on Qiskit.
 
-**Status: experimental L0 development.** The interface is not stable, the production gate is open, and no package release is available. Ketary is licensed under Apache-2.0 (see LICENSE). Third-party licenses remain applicable. No PyPI release is authorized.
+**Status: experimental SDK development.** The interface is not stable, the production gate is open, and no package release is available. Ketary is licensed under Apache-2.0 (see LICENSE). Third-party licenses remain applicable. No PyPI release is authorized.
 
 ## Try the proof of concept
 
@@ -40,12 +40,12 @@ The result is a snapshot. The second operation does not change the earlier resul
 
 ## Scope
 
-- One Circuit API: construction, H/X/Y/Z/S/T/SDG/TDG/RX/RY/RZ/CX/CZ/SWAP/CCX, Bell/GHZ, import/export, composition and inverse.
-- Ideal statevector execution, terminal sampling, pure-state math and checks.
+- One Circuit API with 29 fixed logical gate types plus bounded MCX, fluent aliases and `.gates`, independent copies, composition and inverse.
+- Ideal statevector execution with explicit initial states, terminal sampling, pure-state math and checks; separate opt-in local dynamic execution.
 - Explicit amplitude/probability, Pauli expectation, deterministic Born-rule explanation, logical resource reports and native text drawing. No hardware cost estimate.
-- Rotation signatures are `gates.rx(theta, wire)`, `ry`, and `rz`; angles are finite real radians. `circuit.append(native_gate, wires)` accepts the same supported gate subset; unbound parameters and open controls are rejected.
+- Rotation signatures are `gates.rx(theta, wire)`, `ry`, and `rz`; angles are finite real radians. `circuit.append(native_gate, wires)` accepts the supported gate subset; open controls are rejected. Symbolic construction is explicit and requires complete binding before unitary execution.
 - Trace is explicit and bounded; decomposition only lowers SWAP in this spike.
-- No classical bits, mid-circuit measurement, reset, layout, metadata, unbound parameters, hardware, alternative SDK or independent compiler.
+- `Circuit.classical` supports a bounded single classical register, mid-circuit measurements, reset and conditional X/Z using the optional Aer extra. Bound unitary imports reject classical bits, unbound parameters, layout and metadata. No hardware or independent compiler.
 - Qubit zero is the least significant bit. Preserve global phase; state fidelity alone does not prove operator equivalence.
 - A memory guard estimates dense statevector payload, not total process memory. Probability and sampling dictionaries also have a configurable outcome cap.
 
@@ -129,7 +129,7 @@ Install `build` and run `python -m build` to produce a local wheel and source di
 
 ## Internal architecture (experimental)
 
-The public import remains `import ketary as q`. Internal modules separate circuit construction, Qiskit validation, result math and checks, trace, resource guards, and state factories. No new capability or production-readiness claim follows from this refactor. Internal modules are not a second public API.
+The public import remains `import ketary as q`. Internal modules separate circuit construction, Qiskit validation, result math and checks, trace, resource guards, and state factories. The developer expansion remains experimental; see the roadmap for its exact contracts and limits. Internal modules are not a second public API.
 
 ## Developer SDK expansion (experimental)
 
