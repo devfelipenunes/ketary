@@ -10,7 +10,7 @@ from pathlib import Path
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 
-ROOTS = ("qiskit", "numpy", "pytest", "coverage")
+ROOTS = ("qiskit", "numpy", "pytest", "coverage", "mypy")
 
 def inventory():
     pending = list(ROOTS)

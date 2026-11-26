@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=8,<10", "coverage>=7.6,<8"]
+test = ["pytest>=8,<10", "coverage>=7.6,<8", "mypy>=1.15,<2"]
 
 [project.urls]
 Repository = "https://github.com/devfelipenunes/ketary"
@@ -30,3 +30,6 @@ Repository = "https://github.com/devfelipenunes/ketary"
 where = ["src"]
 include = ["ketary*"]
 namespaces = false
+
+[tool.setuptools.package-data]
+ketary = ["py.typed", "*.pyi"]

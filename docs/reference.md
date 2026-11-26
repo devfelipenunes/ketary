@@ -26,3 +26,6 @@ Keyword-only arguments follow the implementation signatures; byte sizes above ar
 - Dictionary materialization has an explicit default cap of 65,536 potential outcomes. Sampling uses the smaller of shots and state dimension for this conservative bound. Callers may explicitly increase the cap. None of these estimates bounds total RSS or every temporary allocation.
 - Result retains accepted amplitudes within the normalization tolerance. Norm and amplitudes report stored values; Born probabilities, Pauli expectation, sampling, distribution distance, entropy and fidelity normalize their calculations by the state norm. State residuals compare stored amplitudes. No physical measurements or hardware support.
 - JSON replay: schema 1, 1 MiB, 22 qubits, 10,000 gates, strict keys. Producer metadata is informational; no cross-version deterministic guarantee.
+
+## Typing
+The installed package ships a PEP 561 marker and public API stubs. CI checks a strict typed consumer, including intentional invalid calls. Runtime checks still reject invalid values that static types cannot distinguish (e.g. bool as an integer).
