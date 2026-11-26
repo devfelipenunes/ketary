@@ -16,3 +16,13 @@ Consequences: fewer duplicated execution mechanisms, one trace progression
 path, no additional public abstractions. Resource caps remain conservative;
 no measured speedup claimed. Existing native and analytic tests plus prefix,
 complex-state, preflight and early-stop regressions guard semantics.
+
+## Candidate follow-up: prepared batch dispatch
+
+An explicitly preflighted run_many batch may reuse exact Result snapshots and
+ordinary basis labels without repeating width, input normalization and payload
+admission checks for every native evolution. Subclasses retain the old checks.
+The total batch payload admission and complete input preflight remain before the
+first native call. No public signature or bound changes; no additional native
+backend or persistent cache. Benchmark old and new end-to-end batch paths and
+retain only if the candidate benefits the measured workload. Pending CI.
