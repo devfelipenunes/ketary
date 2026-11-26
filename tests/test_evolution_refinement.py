@@ -5,4 +5,4 @@ from research.evolution_refinement import CASES,evaluate
 def test_public_evolution_rewrite(case,time):
     row=evaluate(case,reps=3,t=time)
     assert max(v["max_error"] for v in row["variants"].values())<1e-9
-    assert row["variants"]["public"]["basis_gates"]==row["variants"]["prototype"]["basis_gates"]
+    assert row["variants"]["public"]["basis_gates"]<=row["variants"]["prototype"]["basis_gates"]

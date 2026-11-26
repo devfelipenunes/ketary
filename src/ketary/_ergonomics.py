@@ -200,8 +200,7 @@ def _evolve(c,observable,time):
     """Exact commuting Pauli evolution; stage a single ordinary circuit."""
     from ._observable import Observable
     from ._circuit import Circuit
-    from ._validation import _angle
-    from math import fsum
+    from math import fsum,pi
     symbolic=getattr(c,"_symbolic",False)
     if c.num_clbits or not symbolic:
         c._require_bound()
@@ -251,13 +250,13 @@ def _evolve(c,observable,time):
             continue
         for wire,axis in active:
             if axis=="X":native.h(wire)
-            elif axis=="Y":native.sdg(wire);native.h(wire)
+            elif axis=="Y":native.rx(pi/2,wire)
         target=active[-1][0]
         for wire,_ in active[:-1]:native.cx(wire,target)
         native.rz(theta,target)
         for wire,_ in reversed(active[:-1]):native.cx(wire,target)
         for wire,axis in reversed(active):
             if axis=="X":native.h(wire)
-            elif axis=="Y":native.h(wire);native.s(wire)
+            elif axis=="Y":native.rx(-pi/2,wire)
     # Existing application transaction preserves phase/checkpoint semantics.
     return c.apply(block)
