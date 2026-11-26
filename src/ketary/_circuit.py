@@ -265,6 +265,11 @@ class Circuit:
     def num_qubits(self):
         return self._qc.num_qubits
 
+    @property
+    def wires(self):
+        """Logical indices in ascending order; no native allocation."""
+        return range(self.num_qubits)
+
     @classmethod
     def _from_native(cls,qc,*,owned=False):
         _validate(qc)
@@ -337,16 +342,16 @@ class Circuit:
         return _single(self,"tdg",q)
 
     def rx(self,theta,q):
-        from ._ergonomics import _single
-        return _single(self,"rx",q,theta)
+        from ._ergonomics import _rotation
+        return _rotation(self,"rx",theta,q)
 
     def ry(self,theta,q):
-        from ._ergonomics import _single
-        return _single(self,"ry",q,theta)
+        from ._ergonomics import _rotation
+        return _rotation(self,"ry",theta,q)
 
     def rz(self,theta,q):
-        from ._ergonomics import _single
-        return _single(self,"rz",q,theta)
+        from ._ergonomics import _rotation
+        return _rotation(self,"rz",theta,q)
 
     def cx(self,c,t):
         return self.gates.cx(c,t)
@@ -361,8 +366,8 @@ class Circuit:
         return self.gates.ccx(c1,c2,t)
 
     def p(self,theta,q):
-        from ._ergonomics import _single
-        return _single(self,"p",q,theta)
+        from ._ergonomics import _rotation
+        return _rotation(self,"p",theta,q)
 
     def u(self,theta,phi,lam,q):
         from ._ergonomics import _single

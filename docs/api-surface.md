@@ -2,11 +2,11 @@
 
 All declared public stub entries are classified once; constructors and dunder protocols belong to their types. Inherited methods are listed at their declaring type. The JSON inventory is checked in CI. Categories guide learning, not stability guarantees.
 
-## Core (89)
+## Core (94)
 
-- **Top-level**: `CheckResult`, `Circuit`, `ComparisonReport`, `Contract`, `Evidence`, `I`, `Observable`, `Result`, `SnapshotReport`, `VerificationReport`, `X`, `Y`, `Z`, `bell`
+- **Top-level**: `CheckResult`, `Circuit`, `ComparisonReport`, `Contract`, `Evidence`, `I`, `Observable`, `Result`, `SnapshotReport`, `VerificationReport`, `X`, `Y`, `Z`, `all_pairs`, `bell`, `chain`, `ring`, `star`
 - **CheckResult**: `actual`, `detail`, `expected`, `render`, `require`, `status`, `tolerance`
-- **Circuit**: `apply`, `apply_each`, `ccx`, `ch`, `contract`, `copy`, `cp`, `crx`, `cry`, `crz`, `cswap`, `cx`, `cy`, `cz`, `h`, `mcx`, `num_qubits`, `p`, `repeat`, `run`, `rx`, `rxx`, `ry`, `ryy`, `rz`, `rzz`, `s`, `sdg`, `swap`, `sx`, `sxdg`, `t`, `tdg`, `test`, `u`, `x`, `y`, `z`
+- **Circuit**: `apply`, `apply_each`, `ccx`, `ch`, `contract`, `copy`, `cp`, `crx`, `cry`, `crz`, `cswap`, `cx`, `cy`, `cz`, `h`, `mcx`, `num_qubits`, `p`, `repeat`, `run`, `rx`, `rxx`, `ry`, `ryy`, `rz`, `rzz`, `s`, `sdg`, `swap`, `sx`, `sxdg`, `t`, `tdg`, `test`, `u`, `wires`, `x`, `y`, `z`
 - **ComparisonReport**: `evidence`
 - **Contract**: `atol`, `expectations`, `normalized`, `num_qubits`, `probabilities`, `verify`
 - **Evidence**: `reproduce`

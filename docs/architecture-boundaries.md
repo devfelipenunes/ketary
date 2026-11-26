@@ -94,3 +94,5 @@ public API change. _result owns shared residual calculation; _validation
 owns Pauli label normalization. The all-explicit-import guard protects
 foundation/private-facade rules and baseline cyclic membership, including
 local imports. See [resource and ownership contracts](resource-contracts.md).
+
+_topology is a pure ordered logical pair generator depending only on _validation; no native imports or public facade dependency. Rotation layers reuse the existing _ergonomics and adapter boundaries.
