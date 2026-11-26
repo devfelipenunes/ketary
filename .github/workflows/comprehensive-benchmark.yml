@@ -1,0 +1,103 @@
+name: Comprehensive circuit performance matrix
+on:
+  pull_request:
+    paths:
+      - 'research/algorithm_matrix.py'
+      - 'research/compare_algorithm_matrix.py'
+      - 'research/matrix_memory.py'
+      - '.github/workflows/comprehensive-benchmark.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [algorithms,gates,corpus]
+        seed: [1101,2202,3303]
+    env:
+      OPENBLAS_NUM_THREADS: 1
+      OMP_NUM_THREADS: 1
+      MKL_NUM_THREADS: 1
+      RAYON_NUM_THREADS: 1
+      BASELINE: e995a5e9c4e2727168bb3221090a2371b8995acb
+      QUEST_COMMIT: 9d7618d7263e3bfba433b88cf1eac0647f08fa0a
+      SUITE: ${{ matrix.suite }}
+      SEED: ${{ matrix.seed }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version-file: '.python-version'
+      - name: Prepare isolated revisions and pinned engine
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/baseline" "$BASELINE"
+          for rev in before after; do
+            python -m venv "$RUNNER_TEMP/$rev"
+            dir="$GITHUB_WORKSPACE"
+            if [ "$rev" = before ]; then dir="$RUNNER_TEMP/baseline"; fi
+            (
+              cd "$dir"
+              "$RUNNER_TEMP/$rev/bin/python" -m pip install -c constraints/linux-py312.txt -r requirements.txt
+              "$RUNNER_TEMP/$rev/bin/python" -m pip install -c constraints/linux-py312.txt qiskit-aer==0.18.4
+              "$RUNNER_TEMP/$rev/bin/python" -m pip install --no-deps -e .
+            )
+            "$RUNNER_TEMP/$rev/bin/python" -m pip freeze > "$rev-env.txt"
+          done
+          "$RUNNER_TEMP/after/bin/python" -m pip install 'setuptools>=77' wheel
+          "$RUNNER_TEMP/after/bin/python" -m pip install --no-build-isolation --no-deps ./research/qiskit_capi
+          git init "$RUNNER_TEMP/quest"
+          git -C "$RUNNER_TEMP/quest" remote add origin https://github.com/QuEST-Kit/QuEST.git
+          git -C "$RUNNER_TEMP/quest" fetch --depth=1 origin "$QUEST_COMMIT"
+          git -C "$RUNNER_TEMP/quest" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/quest" rev-parse HEAD)" = "$QUEST_COMMIT"
+          cmake -S research/quest_native -B "$RUNNER_TEMP/quest-build" -DQUEST_SOURCE="$RUNNER_TEMP/quest" -DCMAKE_BUILD_TYPE=Release
+          cmake --build "$RUNNER_TEMP/quest-build" --target ketary_quest_probe --parallel 2
+          lscpu > host.txt
+          free -h >> host.txt
+          c++ --version >> host.txt
+          git rev-parse HEAD > commit.txt
+          "$RUNNER_TEMP/after/bin/python" -m pip freeze > after-env.txt
+          if [ "$SUITE" = corpus ]; then
+            "$RUNNER_TEMP/after/bin/python" research/algorithm_matrix.py --fetch-corpus "$RUNNER_TEMP/corpus"
+          fi
+      - name: Counterbalanced matched benchmark
+        run: |
+          order="before after"
+          if [ "$((SEED % 2))" = 0 ]; then order="after before"; fi
+          echo "$order" > order.txt
+          for rev in $order; do
+            flags=(--suite "$SUITE" --seed "$SEED" --label "$rev" --repetitions 30 --output "$rev.json")
+            if [ "$SUITE" = corpus ]; then flags+=(--corpus-root "$RUNNER_TEMP/corpus"); fi
+            if [ "$rev" = before ]; then flags+=(--baseline-only); else flags+=(--library "$RUNNER_TEMP/quest-build/libketary_quest_probe.so"); fi
+            "$RUNNER_TEMP/$rev/bin/python" research/algorithm_matrix.py "${flags[@]}"
+          done
+          "$RUNNER_TEMP/after/bin/python" research/compare_algorithm_matrix.py before.json after.json --output comparison.csv
+      - name: Isolated peak RSS samples
+        if: matrix.suite == 'algorithms'
+        run: |
+          for rev in before after; do
+            "$RUNNER_TEMP/$rev/bin/python" research/matrix_memory.py --label "$rev" --output "$rev-rss.json"
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: comprehensive-${{ matrix.suite }}-${{ matrix.seed }}
+          path: |
+            before.json
+            after.json
+            comparison.csv
+            before-rss.json
+            after-rss.json
+            before-env.txt
+            after-env.txt
+            host.txt
+            commit.txt
+            order.txt
