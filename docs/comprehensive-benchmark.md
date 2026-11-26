@@ -46,3 +46,7 @@ Run artifacts contain before/after JSON, comparison CSV, raw observations,
 exclusions, exact revision, environment and CPU manifest. No results
 should be claimed until the corresponding workflow completes. Dedicated
 hardware and actual GPU measurements are still separate work.
+
+## MCX synthesis regression
+
+The first gate-matrix run exposed a strict operator mismatch after native HLS lowering of MCX in circuits with spectator wires. Qiskit's transpiler defaults to qubits_initially_zero=True; that assumption is not valid for arbitrary full-width complex input. The revised explicit lowering sets qubits_initially_zero=False (including corpus import normalization) and retains complete operator checks at width <=8. An occupied-spectator MCX preflight guards the same issue. No tolerance relaxation. Results from the rejected common-basis MCX path are not benchmark claims.

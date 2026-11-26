@@ -227,7 +227,7 @@ def verify_vector(a,b):
     np.testing.assert_allclose(a,b,atol=TOL,rtol=0)
     if abs(np.vdot(b,b).real-1)>TOL:raise AssertionError("state normalization")
     return {"max_abs_error":float(np.max(np.abs(a-b))),"l2_error":float(np.linalg.norm(a-b)),
-            "infidelity":float(max(0.,1-abs(np.vdot(a,b))**2))}
+            "infidelity":float(max(0.,1-abs(np.vdot(a,b))**2/(np.vdot(a,a).real*np.vdot(b,b).real)))}
 
 def shape(c):
     return {"n":c.num_qubits,"original_gates":len(c.data),"original_depth":c.depth(),
@@ -236,7 +236,10 @@ def shape(c):
             "state_bytes":16*(1<<c.num_qubits)}
 
 def lower(c,seed):
-    return transpile(c,basis_gates=BASIS,optimization_level=0,seed_transpiler=seed)
+    # HLS otherwise assumes unused wires start in |0>, permitting clean
+    # ancilla synthesis that is NOT equivalent on arbitrary input states.
+    return transpile(c,basis_gates=BASIS,optimization_level=0,seed_transpiler=seed,
+                     qubits_initially_zero=False)
 
 def execute_case(rows,name,family,original,sdk,seed,reps,quest,sim,sim_nofusion,baseline,meta_extra=None):
     meta={"family":family,**shape(original),**(meta_extra or {})}
@@ -316,6 +319,12 @@ def shot_cases(rows,reps,seed):
 
 def run(a,quest):
     rows=[];excluded=[]
+    # Explicit strict regression for MCX synthesis with occupied spectator
+    # wires. A zero-input-only test would miss this error.
+    if not a.baseline_only:
+        probe=QuantumCircuit(5)
+        probe.mcx([0,2,4],1)
+        verify_circuit(probe,lower(probe,a.seed))
     sim=AerSimulator(method="statevector",device="CPU",precision="double",max_parallel_threads=1)
     nofusion=AerSimulator(method="statevector",device="CPU",precision="double",max_parallel_threads=1,fusion_enable=False)
     for name,family,n,native,sdk in catalog(a.suite,a.seed,a.smoke):
@@ -332,7 +341,7 @@ def run(a,quest):
                 s=q.from_qiskit(c);path="direct"
             except (TypeError,ValueError):
                 # Explicit import normalization, separate from common 11-gate basis.
-                s=q.from_qiskit(transpile(c,basis_gates=["u","cx"],optimization_level=0,seed_transpiler=a.seed))
+                s=q.from_qiskit(transpile(c,basis_gates=["u","cx"],optimization_level=0,seed_transpiler=a.seed,qubits_initially_zero=False))
                 path="u/cx import translation"
             verify_circuit(c,s)
             execute_case(rows,name,"published_qasm",c,s,a.seed,a.repetitions,quest,sim,nofusion,a.baseline_only,
