@@ -110,10 +110,61 @@ static PyObject *pack(PyObject *self,PyObject *data){
 static PyObject *pack_quest(PyObject *self,PyObject *data){
     return pack_impl(data,1);
 }
+
+/* Independent v2 format; old 8/11-gate protocols remain unchanged.
+ * Row: opcode, arity, 22 ordered wires padded with -1. */
+static const char *extended_names[]={"h","x","y","z","rx","ry","rz","cx","cz","swap","p","cp","rzz","ccx"};
+static PyObject *pack_extended(PyObject *self,PyObject *data){
+    QkCircuit *qc=qk_circuit_borrow_from_python(data);
+    if(!qc) return NULL;
+    uint32_t n=qk_circuit_num_qubits(qc);
+    size_t count=qk_circuit_num_instructions(qc);
+    if(!n || n>22 || count>100000 || qk_circuit_num_clbits(qc) ||
+       qk_circuit_num_param_symbols(qc)) return bad("unsupported circuit mode or size");
+    QkParam *phase=qk_circuit_global_phase(qc);
+    double ph=qk_param_as_real(phase);
+    qk_param_free(phase);
+    if(!isfinite(ph)) return bad("nonfinite phase");
+    PyObject *r=PyBytes_FromStringAndSize(NULL,count*24*sizeof(int32_t));
+    PyObject *p=PyBytes_FromStringAndSize(NULL,count*sizeof(double));
+    if(!r || !p){Py_XDECREF(r);Py_XDECREF(p);return NULL;}
+    for(size_t i=0;i<count;i++){
+        if(qk_circuit_instruction_kind(qc,i)!=QkOperationKind_Gate) goto reject;
+        QkCircuitInstructionView v;
+        qk_circuit_view_instruction(qc,i,&v);
+        int op=-1;
+        for(int j=0;j<14;j++)
+            if(strlen(extended_names[j])==v.name_len && memcmp(extended_names[j],v.name,v.name_len)==0){op=j;break;}
+        if(op<0) goto reject;
+        int arity=op==13?3:((op>=7&&op<=9)||op==11||op==12)?2:1;
+        int angled=(op>=4&&op<=6)||op==10||op==11||op==12;
+        if(v.num_clbits || v.num_qubits!=arity || v.num_params!=angled) goto reject;
+        int32_t row[24];for(int j=0;j<24;j++)row[j]=-1;
+        row[0]=op;row[1]=arity;
+        for(int j=0;j<arity;j++){
+            if(v.qubits[j]>=n)goto reject;
+            for(int k=0;k<j;k++)if(v.qubits[k]==v.qubits[j])goto reject;
+            row[j+2]=(int32_t)v.qubits[j];
+        }
+        double theta=0.;
+        if(angled){
+            if(qk_param_kind(v.params)!=QkParamKind_Real)goto reject;
+            theta=qk_param_as_real(v.params);
+            if(!isfinite(theta))goto reject;
+        }
+        memcpy(PyBytes_AS_STRING(r)+i*sizeof(row),row,sizeof(row));
+        memcpy(PyBytes_AS_STRING(p)+i*sizeof(theta),&theta,sizeof(theta));
+    }
+    return Py_BuildValue("iNNd",(int)n,r,p,ph);
+reject:
+    Py_DECREF(r);Py_DECREF(p);return bad("unsupported extended native instruction");
+}
+
 static PyMethodDef methods[]={
     {"build",build,METH_VARARGS,"Build native circuit from bounded packed rows."},
     {"pack",pack,METH_O,"Read native standard-gate data without Python gate objects."},
     {"pack_quest",pack_quest,METH_O,"Read QuEST-compatible packed native operations."},
+    {"pack_extended",pack_extended,METH_O,"Read extended native gate rows without lowering."},
     {NULL,NULL,0,NULL}
 };
 static struct PyModuleDef module={PyModuleDef_HEAD_INIT,"_ketary_capi_probe",NULL,-1,methods};
