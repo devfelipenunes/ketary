@@ -23,3 +23,5 @@ jobs:
           python research/agent_readability/test_pilot.py
           python research/agent_readability/ketary_eval.py --self-test
           python research/agent_readability/ketary_eval.py --compare-syntax
+          python research/agent_readability/benchmark_context.py
+          python research/agent_readability/agent_workflow.py
