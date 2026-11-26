@@ -39,15 +39,16 @@ def test_exported_phase_remains_observable_under_control():
     assert not np.allclose(Operator(exported.to_gate().control()).data, np.eye(4))
 
 
-@pytest.mark.parametrize("kind", ["measurement", "reset", "rotation", "metadata"])
+@pytest.mark.parametrize("kind", ["measurement", "reset", "unbound_rotation", "metadata"])
 def test_reject_unsupported_imports(kind):
     raw = QuantumCircuit(1, 1) if kind == "measurement" else QuantumCircuit(1)
     if kind == "measurement":
         raw.measure(0, 0)
     elif kind == "reset":
         raw.reset(0)
-    elif kind == "rotation":
-        raw.rx(0.2, 0)
+    elif kind == "unbound_rotation":
+        from qiskit.circuit import Parameter
+        raw.rx(Parameter("theta"), 0)
     else:
         raw.metadata = {"example": True}
     with pytest.raises(q.UnsupportedOperation):
