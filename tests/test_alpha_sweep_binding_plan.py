@@ -61,3 +61,16 @@ def test_sparse_path_still_validates_each_assignment(monkeypatch):
     assert len(seen)==2 and seen[0][0] is not seen[1][0]
     assert [indices for _,indices in seen]==[(3,),(3,)]
     assert all(not raw.parameters for raw,_ in seen)
+
+
+def test_dense_path_preserves_original_mapping_assignment(monkeypatch):
+    p=q.Circuit.parameter("p")
+    c=q.Circuit.symbolic(2).ry(p,[0,1]).rz(p,0)
+    original=q.Circuit._bind_numeric
+    seen=[]
+    def spy(self,bindings):
+        seen.append(bindings)
+        return original(self,bindings)
+    monkeypatch.setattr(q.Circuit,"_bind_numeric",spy)
+    c.sweep_rows([[.2],[.4]])
+    assert seen==[{p:.2},{p:.4}]
