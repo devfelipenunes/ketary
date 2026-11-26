@@ -40,7 +40,7 @@ def worker(n,method,reps):
             fields={line.split(":",1)[0]:line.split(":",1)[1].strip() for line in f if ":" in line}
         peak=int(fields["VmHWM"].split()[0])
     return {"n":n,"method":method,"status":expected,"median_ms":statistics.median(samples),
-            "p95_ms":float(np.percentile(samples,95)),"raw_ms":samples,"peak_rss_kib":peak}
+            "p95_ms":float(np.percentile(samples,95)),"raw_ms":samples,"peak_rss_kib":peak,"rss_scope":"worker process only; excludes QCEC child processes"}
 
 def study(reps,external):
     rows=[]
