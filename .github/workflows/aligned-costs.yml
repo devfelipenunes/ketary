@@ -4,6 +4,7 @@ on:
     paths:
       - 'src/ketary/**'
       - 'research/aligned_rotation_costs.py'
+      - 'research/epic_runtime_profile.py'
       - '.github/workflows/aligned-costs.yml'
   workflow_dispatch:
 permissions:
@@ -37,12 +38,16 @@ jobs:
           lscpu > host.txt
           git rev-parse HEAD > revision.txt
       - run: python -m research.aligned_rotation_costs --output costs.json --seed "$SEED" --reps 7
+      - run: |
+          python -m research.epic_runtime_profile --seed "$SEED" --reps 9 > epic-runtime.json
+          cat epic-runtime.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: aligned-costs-${{ matrix.seed }}
           path: |
             costs.json
+            epic-runtime.json
             environment.txt
             host.txt
             revision.txt

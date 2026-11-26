@@ -55,9 +55,17 @@ def _distance(a,b,ignore_global_phase):
 
 def _snapshot(a,b,label,ignore_global_phase,max_bytes):
     x,y=_outputs(a,b,label,max_bytes)
-    return {"input":label,"state_l2":_distance(x,y,ignore_global_phase),
+    # Fidelity and phase alignment use the same overlap of the original
+    # owned snapshots. Compute it once without changing either verdict scope.
+    overlap=np.vdot(y._data,x._data)
+    left=x._data
+    if ignore_global_phase and abs(overlap)>0:
+        left=left*(np.conj(overlap)/abs(overlap))
+    distance=float(np.linalg.norm(left-y._data))
+    fidelity=float(np.clip(abs(overlap)**2/(y._norm_sq*x._norm_sq),0,1))
+    return {"input":label,"state_l2":distance,
             "distribution_tv":x.test.distribution(y).actual,
-            "fidelity":x.math.fidelity(y)}
+            "fidelity":fidelity}
 
 
 def _environment():
