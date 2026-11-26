@@ -383,14 +383,23 @@ class Circuit:
         from ._ergonomics import _rotation
         return _rotation(self,"rz",theta,q)
 
-    def cx(self,c,t):
-        return self.gates.cx(c,t)
+    def cx(self,c=None,t=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.cx(c,t)
+        from ._ergonomics import _pairs
+        return _pairs(self,"cx",c,t,pairs)
 
-    def cz(self,c,t):
-        return self.gates.cz(c,t)
+    def cz(self,c=None,t=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.cz(c,t)
+        from ._ergonomics import _pairs
+        return _pairs(self,"cz",c,t,pairs)
 
-    def swap(self,a,b):
-        return self.gates.swap(a,b)
+    def swap(self,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.swap(a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"swap",a,b,pairs)
 
     def ccx(self,c1,c2,t):
         return self.gates.ccx(c1,c2,t)
@@ -403,20 +412,35 @@ class Circuit:
         from ._ergonomics import _single
         return _single(self,"u",q,theta,phi,lam)
 
-    def cp(self,theta,a,b):
-        return self.gates.cp(theta,a,b)
+    def cp(self,theta,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.cp(theta,a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"cp",a,b,pairs,theta)
 
-    def ch(self,a,b):
-        return self.gates.ch(a,b)
+    def ch(self,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.ch(a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"ch",a,b,pairs)
 
-    def crx(self,theta,a,b):
-        return self.gates.crx(theta,a,b)
+    def crx(self,theta,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.crx(theta,a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"crx",a,b,pairs,theta)
 
-    def cry(self,theta,a,b):
-        return self.gates.cry(theta,a,b)
+    def cry(self,theta,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.cry(theta,a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"cry",a,b,pairs,theta)
 
-    def crz(self,theta,a,b):
-        return self.gates.crz(theta,a,b)
+    def crz(self,theta,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.crz(theta,a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"crz",a,b,pairs,theta)
 
     def sx(self,q):
         from ._ergonomics import _single
@@ -426,20 +450,32 @@ class Circuit:
         from ._ergonomics import _single
         return _single(self,"sxdg",q)
 
-    def cy(self,a,b):
-        return self.gates.cy(a,b)
+    def cy(self,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.cy(a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"cy",a,b,pairs)
 
     def cswap(self,control,a,b):
         return self.gates.cswap(control,a,b)
 
-    def rxx(self,theta,a,b):
-        return self.gates.rxx(theta,a,b)
+    def rxx(self,theta,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.rxx(theta,a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"rxx",a,b,pairs,theta)
 
-    def ryy(self,theta,a,b):
-        return self.gates.ryy(theta,a,b)
+    def ryy(self,theta,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.ryy(theta,a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"ryy",a,b,pairs,theta)
 
-    def rzz(self,theta,a,b):
-        return self.gates.rzz(theta,a,b)
+    def rzz(self,theta,a=None,b=None,*,pairs=None):
+        if pairs is None:
+            return self.gates.rzz(theta,a,b)
+        from ._ergonomics import _pairs
+        return _pairs(self,"rzz",a,b,pairs,theta)
 
     def mcx(self,controls,target):
         return self.gates.mcx(controls,target)
