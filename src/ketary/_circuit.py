@@ -68,6 +68,11 @@ class Circuit:
         self._qc.append(gate,indices,copy=True)
         return self
 
+    def optimize(self):
+        """Return a new circuit after conservative adjacent inverse cancellation."""
+        from ._optimization import _cancel_adjacent
+        return self._from_native(_cancel_adjacent(self._qc),owned=True)
+
     def inverse(self):
         return self._from_native(self._qc.inverse(),owned=True)
 

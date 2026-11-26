@@ -74,6 +74,17 @@ print(result.math.marginal_probabilities([2, 1, 0]))
 
 The explicit oracle acts on n input wires and target wire n. The caller promises a reversible bit-flip oracle for a constant or balanced Boolean function. Ketary does not verify that promise or infer a general oracle from a Python callable. Provided constant and parity factories satisfy it. A zero input-register outcome indicates constant under that promise; nonzero indicates balanced. Marginal labels follow the supplied wire order, and all queries reuse the same state snapshot.
 
+## Logical optimization
+
+```python
+c = q.bell().gates.x(0).gates.x(0)
+optimized = c.optimize()
+c.test.equivalent(optimized).require()
+print(c.resources.summary(), optimized.resources.summary())
+```
+
+This explicit, nonmutating optimization cancels adjacent inverse pairs on identical ordered wires. It preserves global phase, does not apply approximate rotation cancellation or commute gates, and never runs a simulation. It is not device-aware transpilation. Reduced gate count is not a measured hardware speedup.
+
 ## Validation
 
 Run all tests, including upstream Qiskit probes. Missing Qiskit is a failure, not a passing skip. Historical local PoC results are not evidence of this branch's CI.
