@@ -21,3 +21,5 @@ Transforms and public import/export isolate objects. JSON is not a persistent
 mutable circuit model. Explicit calls may allocate temporary memory. Python
 3.12.x only. Review current scope in [reference](reference.md) and
 [audit](audit-l0.md). Release and human evaluation remain pending.
+
+Composition is closed over validated Circuit inputs: the native nonmutating composition result is adopted without a redundant full scan. Imports, appends and other transformations retain validation. Snapshot validation uses scalar absolute norm tolerance and retains defensive copying.

@@ -28,7 +28,7 @@ class Result:
         a = np.asarray(amplitudes, dtype=np.complex128)
         if a.ndim != 1 or a.size < 2 or a.size & (a.size-1):
             raise ValueError("state must have dimension 2**n, n>=1")
-        if not np.isfinite(a).all() or not np.isclose(np.vdot(a,a).real,1,rtol=0,atol=1e-9):
+        if not np.isfinite(a).all() or not math.isclose(float(np.vdot(a,a).real),1,rel_tol=0,abs_tol=1e-9):
             raise ValueError("state must be finite and normalized")
         self._data = a.copy()
         self._data.flags.writeable = False
