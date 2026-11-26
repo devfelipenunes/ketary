@@ -184,6 +184,13 @@ class SweepPlan:
         # Exact Circuit instances can reuse the complete finite row preflight.
         # Subclasses keep the public bind dispatch. No source snapshot is cached;
         # assignment and validation of evaluated values happen for every row.
+        # Iterating caller-owned rows/columns can also grow the source
+        # without changing parameter identities. Recheck the existing caps
+        # for the final source before creating any bound row.
+        if circuit.num_clbits:
+            raise UnsupportedOperation("sweep requires symbolic unitary circuit")
+        if circuit.num_qubits>12 or len(circuit._qc.data)>256 or len(params)>32:
+            raise ResourceLimit("sweep supports <=12 qubits, 256 operations, 32 parameters")
         if type(circuit) is Circuit:
             # Iterating caller-owned rows/columns can mutate the source.
             # Recheck completeness once after all user input is consumed,
@@ -193,7 +200,10 @@ class SweepPlan:
             bind=circuit._bind_numeric
         else:
             bind=circuit.bind
-        payloads=tuple(bind({params[name]:v for name,v in row}) for row in rows)
+        # Resolve immutable parameter identities once for the ordinary rows;
+        # preserve dictionary insertion order and subclass binding dispatch.
+        keys=tuple(params[name] for name,_ in rows[0])
+        payloads=tuple(bind(dict(zip(keys,(v for _,v in row),strict=True))) for row in rows)
         self._rows=rows
         self._payloads=payloads
         self._width=circuit.num_qubits
@@ -623,7 +633,11 @@ def _expectation_hessian(c,bindings,observables,*,max_bytes):
     circuits={}
     for k in sorted(needed):
         circuits[k]=_shifted_bound_circuit(bound,((index,offset*pi/2) for index,offset in k))
-    evaluated={k:run.run(max_bytes=max_bytes).math.expectations(obs) for k,run in circuits.items()}
+    # All shifts were staged before any execution. Release each disposable
+    # native circuit as it is evaluated, retaining only its scalar results.
+    evaluated={}
+    for k in tuple(circuits):
+        evaluated[k]=circuits.pop(k).run(max_bytes=max_bytes).math.expectations(obs)
     def shifted(terms,o):
         return _real(fsum(_real(a*evaluated[k][o]) for k,a in terms))
     output=[]

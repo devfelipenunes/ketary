@@ -115,8 +115,29 @@ def _control_block(circuit,*,controls,control_state,seed):
     state=(1<<controls)-1 if control_state is None else _int(control_state)
     if state>=1<<controls:
         raise ValueError("control state exceeds control width")
+    seed=_int(seed)
+    if seed>2**32-1:
+        raise ValueError("seed exceeds unsigned 32-bit range")
     raw=QuantumCircuit(controls+circuit.num_qubits)
     raw.append(circuit.to_qiskit().to_gate().control(controls,ctrl_state=state,annotated=False),range(raw.num_qubits))
+    # Closed/open single control over X-only blocks (including empty
+    # phase-only blocks): source phase becomes a phase on the control.
+    # Retain canonical u,cx output and strict whole-operator qualification.
+    if controls==1 and all(item.operation.name=="x" for item in circuit._qc.data):
+        from qiskit.quantum_info import Operator
+        from ._circuit import Circuit
+        candidate=QuantumCircuit(raw.num_qubits)
+        if state==0:
+            candidate.u(3.141592653589793,0,3.141592653589793,0)
+        phase=float(circuit._qc.global_phase)
+        if phase:
+            candidate.u(0,0,phase,0)
+        for item in circuit._qc.data:
+            candidate.cx(0,1+circuit._qc.find_bit(item.qubits[0]).index)
+        if state==0:
+            candidate.u(3.141592653589793,0,3.141592653589793,0)
+        if float(abs(Operator(candidate).data-Operator(raw).data).max())<=1e-9:
+            return Circuit._from_native(candidate,owned=True)
     return _synthesize_native(raw,seed=seed)
 
 
