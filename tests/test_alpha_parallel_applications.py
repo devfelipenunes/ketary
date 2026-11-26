@@ -78,7 +78,8 @@ def test_reversible_block_verification():
     reference=q.Circuit(3)
     correct.test.equivalent(reference).require()
     broken=correct.copy().z(1)
-    assert broken.test.compare(reference,inputs=["000"]).status=="PASS"
+    assert broken.test.compare(reference,inputs=["000"],complete=False).status=="INCONCLUSIVE"
+    assert broken.test.compare(reference,inputs=["000"],complete=True).status=="FAIL"
     assert broken.test.compare(reference,inputs=["+++"]).status=="FAIL"
     report=broken.test.compare(reference,inputs=["+++"],complete=False)
     assert report.evidence.reproduce()["reproduced"]
