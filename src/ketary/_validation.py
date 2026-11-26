@@ -2,6 +2,7 @@
 from __future__ import annotations
 import math
 import operator
+from numbers import Real
 import numpy as np
 
 class UnsupportedOperation(ValueError):
@@ -32,3 +33,14 @@ def _tol(value):
     if not math.isfinite(value) or value < 0:
         raise ValueError("invalid tolerance")
     return value
+
+def _angle(value):
+    if isinstance(value,(bool,np.bool_)) or not isinstance(value,Real):
+        raise ValueError("rotation angle must be a finite real number in radians")
+    try:
+        angle=float(value)
+    except (ValueError,OverflowError,TypeError) as exc:
+        raise ValueError("invalid rotation angle") from exc
+    if not math.isfinite(angle):
+        raise ValueError("rotation angle must be finite")
+    return angle

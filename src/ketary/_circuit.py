@@ -1,7 +1,7 @@
 """Circuit facade and gate operations; Qiskit owns the circuit model."""
 from __future__ import annotations
-from ._adapter import _sdk, _validate
-from ._validation import _int, _limit, UnsupportedOperation
+from ._adapter import _sdk, _validate, _validate_gate
+from ._validation import _int, _limit, _angle, UnsupportedOperation
 from ._result import Result
 from ._trace import _Debug
 
@@ -44,6 +44,15 @@ class Circuit:
         if len(indices)!=other.num_qubits or len(set(indices))!=len(indices) or any(i>=self.num_qubits for i in indices):
             raise ValueError("invalid wire mapping")
         return self._from_native(self._qc.compose(other._qc,qubits=indices,inplace=False),owned=True)
+
+    def append(self, gate, wires):
+        """Append a supported native gate after validating all inputs."""
+        _validate_gate(gate)
+        indices=[self.gates._wire(i) for i in wires]
+        if len(indices)!=gate.num_qubits or len(set(indices))!=len(indices):
+            raise ValueError("invalid gate wire mapping")
+        self._qc.append(gate,indices,copy=True)
+        return self
 
     def inverse(self):
         return self._from_native(self._qc.inverse(),owned=True)
@@ -99,6 +108,50 @@ class _Gates:
     def swap(self,a,b):
         a,b=self._pair(a,b)
         self._c._qc.swap(a,b)
+        return self._c
+
+    def y(self,q):
+        self._c._qc.y(self._wire(q))
+        return self._c
+
+    def s(self,q):
+        self._c._qc.s(self._wire(q))
+        return self._c
+
+    def t(self,q):
+        self._c._qc.t(self._wire(q))
+        return self._c
+
+    def sdg(self,q):
+        self._c._qc.sdg(self._wire(q))
+        return self._c
+
+    def tdg(self,q):
+        self._c._qc.tdg(self._wire(q))
+        return self._c
+
+    def rx(self,theta,q):
+        self._c._qc.rx(_angle(theta),self._wire(q))
+        return self._c
+
+    def ry(self,theta,q):
+        self._c._qc.ry(_angle(theta),self._wire(q))
+        return self._c
+
+    def rz(self,theta,q):
+        self._c._qc.rz(_angle(theta),self._wire(q))
+        return self._c
+
+    def cz(self,c,t):
+        c,t=self._pair(c,t)
+        self._c._qc.cz(c,t)
+        return self._c
+
+    def ccx(self,c1,c2,t):
+        c1,c2,t=(self._wire(i) for i in (c1,c2,t))
+        if len({c1,c2,t})!=3:
+            raise ValueError("duplicate wires")
+        self._c._qc.ccx(c1,c2,t)
         return self._c
 
 def from_qiskit(qc):
