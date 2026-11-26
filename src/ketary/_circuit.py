@@ -402,6 +402,9 @@ class Circuit:
         self._require_bound()
         other._require_bound()
         from itertools import islice
+        from collections.abc import Mapping
+        if isinstance(wires,(str,bytes,set,frozenset,Mapping)):
+            raise ValueError("wire mapping must be ordered")
         indices=list(range(other.num_qubits)) if wires is None else [_int(i) for i in islice(iter(wires),other.num_qubits+1)]
         if len(indices)!=other.num_qubits or len(set(indices))!=len(indices) or any(i>=self.num_qubits for i in indices):
             raise ValueError("invalid wire mapping")
@@ -417,6 +420,9 @@ class Circuit:
         """Append a supported native gate after validating all inputs."""
         _validate_gate(gate,allow_parameters=getattr(self,'_symbolic',False))
         from itertools import islice
+        from collections.abc import Mapping
+        if isinstance(wires,(str,bytes,set,frozenset,Mapping)):
+            raise ValueError("gate wire mapping must be ordered")
         indices=[self.gates._wire(i) for i in islice(iter(wires),gate.num_qubits+1)]
         if len(indices)!=gate.num_qubits or len(set(indices))!=len(indices):
             raise ValueError("invalid gate wire mapping")

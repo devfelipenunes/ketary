@@ -72,3 +72,30 @@ class SemanticDiffReport(dict):
 
     def render(self):
         return self.to_json()
+
+class SnapshotReport(_Report):
+    """Explicit snapshot predicates; not circuit equivalence."""
+    @property
+    def checks(self):
+        return self.to_dict()["checks"]
+
+class ExternalVerificationReport(_Report):
+    """The external verifier's native relation, not strict operator equality."""
+    @property
+    def external_equivalence(self):
+        return self.get("external_equivalence")
+
+class ModalOutcomeReport(_Report):
+    """A unique mode, not proof of an algorithm's correctness."""
+    @property
+    def label(self):
+        return self["label"]
+
+    @property
+    def peak_probability(self):
+        return self["peak_probability"]
+
+class PhaseEstimateReport(ModalOutcomeReport):
+    @property
+    def phase(self):
+        return self["phase"]

@@ -64,7 +64,8 @@ class Result:
     def verify(self, *, probabilities=None, expectations=None, normalized=False, atol=1e-9):
         """Aggregate named checks, never execute a circuit."""
         from ._inspection import verify_result
-        return verify_result(self,probabilities=probabilities,expectations=expectations,normalized=normalized,atol=atol)
+        from ._reports import SnapshotReport
+        return SnapshotReport(verify_result(self,probabilities=probabilities,expectations=expectations,normalized=normalized,atol=atol))
 
     def sample(self, *, shots, seed=None, max_outcomes=65536, wires=None):
         shots = _int(shots,1)

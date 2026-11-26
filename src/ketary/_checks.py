@@ -92,4 +92,5 @@ class _CircuitChecks:
 
     def external_equivalence(self,other,*,deadline=10):
         from ._external import qcec_compare
-        return qcec_compare(self._c,other,deadline=deadline)
+        from ._reports import ExternalVerificationReport
+        return ExternalVerificationReport(qcec_compare(self._c,other,deadline=deadline))
