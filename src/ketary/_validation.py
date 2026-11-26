@@ -47,6 +47,12 @@ def _tol(value):
     return value
 
 def _angle(value):
+    # Exact Python floats cannot be bool or a custom Real conversion.
+    # Preserve the existing finite check and exception text.
+    if type(value) is float:
+        if not math.isfinite(value):
+            raise ValueError("rotation angle must be finite")
+        return value
     if isinstance(value,(bool,np.bool_)) or not isinstance(value,Real):
         raise ValueError("rotation angle must be a finite real number in radians")
     try:
