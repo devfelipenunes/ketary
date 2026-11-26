@@ -48,6 +48,10 @@ class _CircuitChecks:
 
 
     def metrics(self,other,*,ignore_global_phase=False,atol=1e-9,max_bytes=16*1024**2):
+        from ._reports import OperatorMetricsReport
+        return OperatorMetricsReport(self._metrics(other,ignore_global_phase=ignore_global_phase,atol=atol,max_bytes=max_bytes))
+
+    def _metrics(self,other,*,ignore_global_phase=False,atol=1e-9,max_bytes=16*1024**2):
         """Dense numerical metrics, not formal proof; common aligned phase."""
         from ._circuit import Circuit
         from qiskit.quantum_info import Operator

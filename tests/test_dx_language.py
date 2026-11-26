@@ -116,3 +116,24 @@ def test_inconclusive_typed_report():
     assert report.status=="INCONCLUSIVE" and report.evidence is None
     with pytest.raises(AssertionError):
         report.require()
+
+
+def test_metrics_diff_and_aligned_reports():
+    a=q.bell()
+    b=a.copy().z(0)
+    diff=a.diff(b)
+    assert isinstance(diff,q.SemanticDiffReport)
+    assert not diff.structure_equal
+    assert diff.operator.status=="FAIL"
+    assert diff.operator.operator_norm==pytest.approx(2)
+    assert diff.to_dict()==json.loads(json.dumps(diff))
+    assert not hasattr(diff,"status")
+    assert isinstance(a.test.metrics(a),q.OperatorMetricsReport)
+    assert a.test.metrics(a).require().operator_norm==0
+    d=a.debug.compare_checkpoints(a,[(0,0),(2,2)])
+    assert isinstance(d,q.DiagnosticReport) and d.require() is d
+
+def test_sweep_parameter_named_bindings():
+    p=q.Circuit.parameter("bindings")
+    c=q.Circuit.symbolic(1).ry(p,0)
+    assert c.sweep(bindings=[0]).run()[0].math.probability("0")==1

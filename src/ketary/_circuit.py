@@ -251,7 +251,8 @@ class Circuit:
     def diff(self,other,*,atol=1e-9,max_bytes=64*1024**2):
         """Explicit structural, snapshot and operator comparison."""
         from ._verification import semantic_diff
-        return semantic_diff(self,other,atol=atol,max_bytes=max_bytes)
+        from ._reports import SemanticDiffReport
+        return SemanticDiffReport(semantic_diff(self,other,atol=atol,max_bytes=max_bytes))
 
     def inspect(self, *, start=0, limit=32):
         """Bounded logical operations, no copy or execution."""

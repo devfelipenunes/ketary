@@ -10,7 +10,9 @@ import json
 import tokenize
 import numpy as np
 import ketary as q
-from qiskit.quantum_info import Operator
+from qiskit import QuantumCircuit
+from qiskit.circuit import Parameter
+from qiskit.quantum_info import Operator, Statevector, Pauli
 
 CASES=[
 ("batch",
@@ -88,7 +90,7 @@ result=c.compute_action_uncompute(u,v,compute_wires=[0,1],action_wires=[1])""")
 
 
 def execute(source):
-    ns={"q":q,"json":json}
+    ns={"q":q,"json":json,"QuantumCircuit":QuantumCircuit,"Parameter":Parameter,"Statevector":Statevector,"Pauli":Pauli}
     exec(compile(source,"<authored-example>","exec"),ns)
     return ns["result"]
 
@@ -98,6 +100,31 @@ def count(source):
     return {"tokens":sum(t.type not in ignored for t in tokenize.generate_tokens(io.StringIO(source).readline)),
             "calls":sum(isinstance(n,ast.Call) for n in ast.walk(tree)),
             "numeric_literals":sum(isinstance(n,ast.Constant) and type(n.value) in (int,float) for n in ast.walk(tree))}
+
+NATIVE={
+"batch": """c=QuantumCircuit(4)
+c.h([0,2,3])
+result=c""",
+"block": """bell=QuantumCircuit(2)
+bell.h(0); bell.cx(0,1)
+c=QuantumCircuit(4)
+c.compose(bell,qubits=[0,2],inplace=True)
+result=c""",
+"local_pauli": """c=QuantumCircuit(4)
+c.h(0)
+for w in range(1,4): c.cx(w-1,w)
+result=float(Statevector.from_instruction(c).expectation_value(Pauli('ZIZI')).real)""",
+"binding": """theta=Parameter('theta')
+c=QuantumCircuit(1)
+c.ry(theta,0)
+result=c.assign_parameters({theta:.4})""",
+"reversible": """c=QuantumCircuit(2); u=QuantumCircuit(2); v=QuantumCircuit(1)
+u.cx(0,1); v.z(0)
+c.compose(u,qubits=[0,1],inplace=True)
+c.compose(v,qubits=[1],inplace=True)
+c.compose(u.inverse(),qubits=[0,1],inplace=True)
+result=c"""
+}
 
 def run():
     rows=[]
@@ -109,9 +136,17 @@ def run():
             np.testing.assert_allclose(left,right,atol=1e-12,rtol=0)
         else:
             assert left==right,name
-        rows.append({"case":name,"baseline":count(old),"candidate":count(new),"equivalent":True})
+        row={"case":name,"baseline":count(old),"candidate":count(new),"equivalent":True}
+        if name in NATIVE:
+            native=execute(NATIVE[name])
+            if isinstance(left,q.Circuit):
+                np.testing.assert_allclose(Operator(left.to_qiskit()).data,Operator(native).data,atol=1e-12,rtol=0)
+            else:
+                np.testing.assert_allclose(left,native,atol=1e-12,rtol=0)
+            row["qiskit"]=count(NATIVE[name])
+        rows.append(row)
     return {"scope":"11 authored matched snippets, source counts not productivity; no independent human evaluation",
-            "rows":rows,"equivalent":len(rows),"baseline_tokens":sum(r["baseline"]["tokens"] for r in rows),
+            "rows":rows,"equivalent":len(rows),"native_matched":sum("qiskit" in r for r in rows),"baseline_tokens":sum(r["baseline"]["tokens"] for r in rows),
             "candidate_tokens":sum(r["candidate"]["tokens"] for r in rows)}
 
 if __name__=="__main__":

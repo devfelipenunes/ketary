@@ -70,7 +70,10 @@ class SweepPlan:
             raise ValueError("sweep columns must have equal length (zipped, not Cartesian)")
         from ._validation import _angle
         rows=tuple(tuple((name,_angle(col[i])) for name,col in columns) for i in range(len(columns[0][1])))
-        payloads=tuple(circuit.bind(**dict(row)).to_json() for row in rows)
+        params={p.name:p for p in circuit.parameters}
+        if len(params)!=len(circuit.parameters):
+            raise ValueError("sweep requires unique parameter names")
+        payloads=tuple(circuit.bind({params[name]:v for name,v in row}).to_json() for row in rows)
         self._rows=rows
         self._payloads=payloads
         self._width=circuit.num_qubits

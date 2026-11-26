@@ -40,3 +40,35 @@ class DiagnosticReport(_Report):
 
 class StatisticalReport(_Report):
     pass
+
+class OperatorMetricsReport(_Report):
+    @property
+    def operator_norm(self):
+        return self.get("operator_norm")
+
+class SemanticDiffReport(dict):
+    """Separate dimensions, intentionally no aggregate PASS/FAIL."""
+    @property
+    def structure_equal(self):
+        return self["structure_equal"]
+
+    @property
+    def operator(self):
+        return OperatorMetricsReport(self["operator"])
+
+    @property
+    def zero_input(self):
+        return dict(self["zero_input"])
+
+    @property
+    def scope(self):
+        return self["scope"]
+
+    def to_dict(self):
+        return json.loads(self.to_json())
+
+    def to_json(self):
+        return json.dumps(self,sort_keys=True,allow_nan=False)
+
+    def render(self):
+        return self.to_json()

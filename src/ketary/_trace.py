@@ -130,6 +130,11 @@ class _Debug:
 
     def compare_checkpoints(self,reference,pairs,*,ignore_global_phase=True,atol=1e-9,
                             max_bytes=64*1024**2,max_steps=256):
+        from ._reports import DiagnosticReport
+        return DiagnosticReport(self._compare_checkpoints(reference,pairs,ignore_global_phase=ignore_global_phase,atol=atol,max_bytes=max_bytes,max_steps=max_steps))
+
+    def _compare_checkpoints(self,reference,pairs,*,ignore_global_phase=True,atol=1e-9,
+                            max_bytes=64*1024**2,max_steps=256):
         """Compare explicitly supplied (observed, reference) checkpoint indices.
 
         Different circuit lengths are allowed. Alignment is caller-provided,

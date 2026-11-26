@@ -10,7 +10,7 @@ remain supported.
 | ID | Candidate | Semantics |
 |---|---|---|
 | DX01 | Canonical style and 11 paired tasks | authored, not human data |
-| DX02 | ComparisonReport, DiagnosticReport, StatisticalReport | legacy dict subclasses, explicit status and scope; evidence property parses already recorded artifact |
+| DX02 | ComparisonReport, DiagnosticReport, StatisticalReport, OperatorMetricsReport, SemanticDiffReport | legacy dict subclasses, explicit status and scope; evidence property parses already recorded artifact |
 | DX03 | Single-qubit fluent gates accept ordered wire iterables | atomic candidate copy; legacy .gates scalar; no ambiguous multi-wire broadcast |
 | DX04 | apply(block,wires=...) | mutates atomically, compose still copies |
 | DX05 | register(name,wires), registers | named tuples of existing indices, no allocation; aliases may overlap |
@@ -57,7 +57,7 @@ if report.evidence is not None:
 
 Reports preserve dictionary keys, mutation and JSON compatibility. Do not
 use their truth value as a verdict; inspect status or call require().
-A mutable report is not an authenticated record. Typed evidence access
+A mutable report is not an authenticated record. SemanticDiffReport deliberately has no aggregate status; use its separate dimensions and operator report. Typed evidence access
 does not rerun circuits. A comparison can FAIL without a product witness.
 Sample-only matches remain INCONCLUSIVE.
 
@@ -82,7 +82,7 @@ report=q.decode_phase_estimation(q.phase_estimation(.375,precision=3).run(),prec
 assert report["phase"]==.375
 ```
 
-Bind by native mapping or unique names, never both. Sweep columns are zipped,
+Bind by native mapping or unique names, never both; use the native mapping if a parameter name conflicts with the bindings argument. Sweep columns are zipped,
 not Cartesian; all rows are bound and serialized at planning time, without
 simulation. Results are ideal snapshots, and bindings are available in row order.
 Decoders reuse a snapshot or ShotResult; a unique modal outcome is not proof
@@ -100,7 +100,7 @@ expanding the native gate whitelist.
 ## Evaluation
 
 Run `python research/dx_comparison.py` for 11 paired authored examples,
-token/call/numeric literal counts, and full native operator or matched
-result comparisons. These are not independent usability data. Some clearer
+token/call/numeric literal counts, full native operator or matched
+result comparisons, and five equivalent native Qiskit snippets. Native source counts are shown only for these five tasks. These are not independent usability data. Some clearer
 examples intentionally use more tokens; no claim of universal improvement.
 No human or dedicated-host experiment has been completed.

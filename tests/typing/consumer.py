@@ -62,3 +62,8 @@ assert_type(q.Circuit.symbolic(1).ry(angle,0).sweep(angle=[0,.5]).run(),tuple[q.
 
 decoded=q.decode_phase_estimation(q.phase_estimation(.25).run(),precision=3)
 assert_type(decoded['phase'], Any)
+
+assert_type(c.diff(q.bell()),q.SemanticDiffReport)
+assert_type(c.diff(q.bell()).operator,q.OperatorMetricsReport)
+assert_type(c.test.metrics(q.bell()).operator_norm,float | None)
+assert_type(comparison.require(),q.ComparisonReport)
