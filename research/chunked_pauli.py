@@ -47,6 +47,19 @@ def variance(r,H,*,chunk=4096,max_bytes=64*1024**2,max_work=1<<25):
     if not np.isfinite(value):raise ArithmeticError("observable variance is not finite")
     return value
 
+def previous(r,H):
+    from qiskit.quantum_info import Statevector
+    from qiskit.circuit.library import XGate,YGate,ZGate
+    gates={"X":XGate(),"Y":YGate(),"Z":ZGate()}
+    state=r._data/np.sqrt(r._norm_sq);out=np.zeros_like(state)
+    for label,coefficient in H.to_dict(r.num_qubits).items():
+        term=Statevector(state)
+        for wire,axis in enumerate(reversed(label)):
+            if axis!="I":term=term.evolve(gates[axis],qargs=[wire])
+        out+=coefficient*term.data
+    delta=out-np.vdot(state,out)*state
+    return float(np.vdot(delta,delta).real)
+
 def evaluate(n,count,seed=1101,reps=7):
     rng=np.random.default_rng(seed)
     v=rng.normal(size=1<<n)+1j*rng.normal(size=1<<n);v/=np.linalg.norm(v)
@@ -55,8 +68,9 @@ def evaluate(n,count,seed=1101,reps=7):
     while len(terms)<count:
         label="".join(rng.choice(list("IXYZ"),size=n));terms[label]=float(rng.uniform(-1,1))
     H=q.Observable(terms)
-    routes={"streamed":lambda:r.math.observable_variance_streamed(H),
-            "chunked":lambda:variance(r,H)}
+    routes={"streamed":lambda:previous(r,H),
+            "chunked":lambda:variance(r,H),
+            "installed":lambda:r.math.observable_variance_streamed(H)}
     reference=routes["streamed"]()
     if n<=8:
         raw=H.to_qiskit(n).to_matrix();hv=raw@v
@@ -65,7 +79,7 @@ def evaluate(n,count,seed=1101,reps=7):
     error=abs(reference-routes["chunked"]());assert error<1e-9
     samples={k:[] for k in routes};rnd=random.Random(seed)
     for _ in range(reps):
-        for k in rnd.sample(list(routes),2):
+        for k in rnd.sample(list(routes),len(routes)):
             t=time.perf_counter_ns();value=routes[k]();samples[k].append((time.perf_counter_ns()-t)/1e6)
             assert abs(value-reference)<1e-9
     return dict(n=n,terms=count,seed=seed,max_error=error,variants={k:stats(v) for k,v in samples.items()})
@@ -76,5 +90,5 @@ def main():
     for n in (4,8,12,16):
         for count in (4,16):
             row=evaluate(n,count,a.seed,5);rows.append(row);print(json.dumps(row),flush=True)
-    a.output.write_text(json.dumps(dict(scope="research chunked Pauli variance; paired shared CI, no peak RSS or public change",rows=rows),indent=2,allow_nan=False))
+    a.output.write_text(json.dumps(dict(scope="legacy native path, research and installed chunked Pauli variance; shared CI, no peak RSS claim",rows=rows),indent=2,allow_nan=False))
 if __name__=="__main__":main()
