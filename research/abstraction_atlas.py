@@ -16,10 +16,11 @@ from importlib.metadata import version
 from pathlib import Path
 import numpy as np
 import ketary as q
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile
 from qiskit.circuit.library import QFTGate, PauliEvolutionGate, StatePreparation
 from qiskit.quantum_info import Operator, Statevector, SparsePauliOp
 from research import abstraction_primitives as p
+from research import abstraction_advanced as adv
 
 # Explicit matched source, not a generated expansion counted as authored code.
 # Native library constructors included where their semantics match the task.
@@ -51,6 +52,11 @@ CASES=[
 ("walk_step","walk","c=q.Circuit(2).h(0).cx(0,1).repeat(4)","c=p.power(q.Circuit(2).h(0).cx(0,1),4)","u=QuantumCircuit(2); u.h(0); u.cx(0,1); c=u.repeat(4)"),
 ("controlled_phase","phase_estimation","c=q.Circuit(2).cp(.37,0,1)","c=p.controlled(q.Circuit(1).p(.37,0))","c=QuantumCircuit(2); c.cp(.37,0,1)"),
 ("trotter_lie","simulation","c=q.Circuit(1)\nfor _ in range(4): c.rx(.2,0).rz(.14,0)","c=p.product_formula(q.X(0)+.7*q.Z(0),.4,steps=4)","c=QuantumCircuit(1)\nfor _ in range(4): c.rx(.2,0); c.rz(.14,0)"),
+("product_state","preparation","c=q.Circuit(2).ry([.1,.3],[0,1]).rz([.2,.4],[0,1])","c=adv.product_state(rows)","c=QuantumCircuit(2); c.ry(.1,0); c.rz(.2,0); c.ry(.3,1); c.rz(.4,1)"),
+("truth_oracle","oracle","c=q.Circuit(3).x([0,1]).ccx(0,1,2).x([0,1]).ccx(0,1,2)","c=adv.truth_oracle(2,['00','11'])","c=QuantumCircuit(3); c.x([0,1]); c.ccx(0,1,2); c.x([0,1]); c.ccx(0,1,2)"),
+("add_register2","arithmetic","c=q.Circuit(4).ccx(0,2,3).cx(0,2).cx(1,3)","c=adv.add_register(2)","c=QuantumCircuit(4); c.ccx(0,2,3); c.cx(0,2); c.cx(1,3)"),
+("grover_uniform","search","c=q.grover('10',iterations=1)","c=adv.amplify(q.Circuit(2).h([0,1]),q.phase_oracle('10'),1)","c=QuantumCircuit(2,global_phase=np.pi); c.h([0,1]); c.x(0); c.cz(0,1); c.x(0); c.h([0,1]); c.x([0,1]); c.cz(0,1); c.x([0,1]); c.h([0,1])"),
+("uncompute_parity","reversible","c=q.Circuit(4).cx(pairs=[(0,2),(1,2),(2,3),(1,2),(0,2)])","c=adv.explicit_uncompute_parity(4,[0,1],2,3)","c=QuantumCircuit(4); c.cx(0,2); c.cx(1,2); c.cx(2,3); c.cx(1,2); c.cx(0,2)"),
 ]
 
 def metrics(source):
@@ -63,7 +69,7 @@ def metrics(source):
 def fixture(source):
     code=compile(source,"<authored-fixture>","exec")
     def build():
-        env={"q":q,"p":p,"np":np,"QuantumCircuit":QuantumCircuit,"QFTGate":QFTGate,
+        env={"q":q,"p":p,"adv":adv,"np":np,"QuantumCircuit":QuantumCircuit,"QFTGate":QFTGate,
              "PauliEvolutionGate":PauliEvolutionGate,"SparsePauliOp":SparsePauliOp,
              "angles":[.2,-.31,.75],"pairs":[(2,0),(1,3),(0,3)],"rows":[[.1,.2],[.3,.4]]}
         exec(code,env)
@@ -89,7 +95,11 @@ def evaluate(case,repetitions=7,seed=1101):
         error=float(np.max(np.abs(Operator(raw).data-reference)))
         se=float(np.max(np.abs(state(c,v)-expected)))
         if max(error,se)>1e-9:raise AssertionError(f"{name}/{k}: strict operator {error}, state {se}")
+        expanded=transpile(raw,basis_gates=["u","cx"],optimization_level=0,seed_transpiler=seed,qubits_initially_zero=False)
+        expanded_error=float(np.max(np.abs(Operator(expanded).data-reference)))
+        if expanded_error>1e-9:raise AssertionError(f"{name}/{k}: expanded operator error {expanded_error}")
         result[k]={"source":s,**metrics(s),"logical_instructions":len(raw.data),"logical_depth":raw.depth(),
+                   "common_basis_gates":len(expanded.data),"common_basis_depth":expanded.depth(),"expanded_operator_error":expanded_error,
                    "operator_error":error,"state_error":se,"construction_ms":[],"execution_ms":[]}
     rand=random.Random(seed)
     for _ in range(repetitions):
@@ -109,6 +119,6 @@ def main():
     rows=[]
     for case in CASES:
         row=evaluate(case,a.repetitions,a.seed);rows.append(row)
-        print(json.dumps({"name":row["name"],"variants":{k:{m:v[m] for m in ("tokens","loops","calls","logical_instructions","operator_error","state_error","construction_ms","execution_ms")} for k,v in row["variants"].items()}}),flush=True)
+        print(json.dumps({"name":row["name"],"variants":{k:{m:v[m] for m in ("tokens","loops","calls","logical_instructions","common_basis_gates","common_basis_depth","expanded_operator_error","operator_error","state_error","construction_ms","execution_ms")} for k,v in row["variants"].items()}}),flush=True)
     a.output.write_text(json.dumps({"scope":"authored matched unitary tasks; shared CI diagnostic; no human/agent evidence","seed":a.seed,"repetitions":a.repetitions,"python":platform.python_version(),"qiskit":version("qiskit"),"ketary":version("ketary"),"rows":rows},indent=2,allow_nan=False))
 if __name__=="__main__":main()
