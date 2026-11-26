@@ -280,7 +280,8 @@ class Circuit:
             raise TypeError("expected Circuit")
         self._require_bound()
         other._require_bound()
-        indices=list(range(other.num_qubits)) if wires is None else [_int(i) for i in wires]
+        from itertools import islice
+        indices=list(range(other.num_qubits)) if wires is None else [_int(i) for i in islice(iter(wires),other.num_qubits+1)]
         if len(indices)!=other.num_qubits or len(set(indices))!=len(indices) or any(i>=self.num_qubits for i in indices):
             raise ValueError("invalid wire mapping")
         # Composition of two validated logical circuits is closed under the gate
@@ -294,7 +295,8 @@ class Circuit:
     def append(self, gate, wires):
         """Append a supported native gate after validating all inputs."""
         _validate_gate(gate,allow_parameters=getattr(self,'_symbolic',False))
-        indices=[self.gates._wire(i) for i in wires]
+        from itertools import islice
+        indices=[self.gates._wire(i) for i in islice(iter(wires),gate.num_qubits+1)]
         if len(indices)!=gate.num_qubits or len(set(indices))!=len(indices):
             raise ValueError("invalid gate wire mapping")
         self._qc.append(gate,indices,copy=True)
@@ -350,7 +352,15 @@ class Circuit:
                 raise ValueError("invalid initial basis label")
             state=SV.from_label(initial_state)
         else:
-            snapshot=initial_state if isinstance(initial_state,Result) else Result(initial_state)
+            if isinstance(initial_state,Result):
+                snapshot=initial_state
+            else:
+                # Reject mismatched array shape before a complex128 copy.
+                import numpy as np
+                array=np.asarray(initial_state)
+                if array.shape!=(1<<self.num_qubits,):
+                    raise ValueError("initial state width mismatch")
+                snapshot=Result(array)
             if snapshot.num_qubits!=self.num_qubits:
                 raise ValueError("initial state width mismatch")
             state=SV(snapshot.math.statevector(max_bytes=max_bytes))

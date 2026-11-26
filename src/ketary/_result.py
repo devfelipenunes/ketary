@@ -258,6 +258,33 @@ class _Math:
             raise ValueError("expected 1..256 Pauli terms")
         return math.fsum(_real(coefficient)*self.expectation(label) for label,coefficient in terms.items())
 
+    def observable_variance(self, terms, *, max_bytes=64*1024**2):
+        """Variance of a real weighted Pauli sum using a bounded native matrix."""
+        from collections.abc import Mapping
+        from qiskit.quantum_info import SparsePauliOp
+        if not isinstance(terms,Mapping) or not 1<=len(terms)<=256:
+            raise ValueError("expected 1..256 Pauli terms")
+        n=self._r._n
+        # Dense matrix payload only, not total RSS; use an eight-wire hard cap.
+        if n>8:
+            raise ResourceLimit("observable variance limited to eight wires")
+        _limit(2*n,budget=max_bytes)
+        _limit(n,budget=max_bytes)
+        validated=[]
+        for label,coefficient in terms.items():
+            if type(label) is not str or len(label)!=n or set(label)-set("IXYZ"):
+                raise ValueError("invalid Pauli label")
+            validated.append((label,_real(coefficient)))
+        operator=SparsePauliOp.from_list(validated).to_matrix()
+        state=self._r._data/math.sqrt(self._r._norm_sq)
+        transformed=operator@state
+        mean=np.vdot(state,transformed)
+        delta=transformed-mean*state
+        value=float(np.vdot(delta,delta).real)
+        if not math.isfinite(value):
+            raise ArithmeticError("observable variance is not finite")
+        return value
+
     def variance(self,pauli):
         """Variance of a Hermitian Pauli string, whose square is identity."""
         expectation=self.expectation(pauli)

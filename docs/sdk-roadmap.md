@@ -6,16 +6,16 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 |---|---|---|
 | SDK01 | strict numeric expectation checks, bounded inputs and edge tests | continuous regression testing |
 | SDK02 | direct gates, copy, atomic H batch; retain .gates/analyze compatibility | owner API review |
-| SDK03 | inspect/evidence/verify, immutable Contract and VerificationReport | report schema review |
-| SDK04 | explicit basis, array or Result initial state | broader resource tests |
+| SDK03 | inspect/evidence/verify, immutable Contract and VerificationReport | owner review of public report schema |
+| SDK04 | explicit basis, array or Result initial state | shape preflight and bounded resource regression tests |
 | SDK05 | 29 fixed gate types plus bounded MCX; central registry | broader multi-control synthesis and backend boundary |
-| SDK06 | reduced density, purity, weighted Pauli expectation, Dirac, conditional probability, Schmidt, pure-state trace distance, Pauli variance, top-k | general mixed-state metrics and observable variance |
+| SDK06 | reduced density, purity, weighted Pauli expectation, Dirac, conditional probability, Schmidt, pure-state trace distance, Pauli and weighted-observable variance, top-k | general mixed-state metrics deliberately excluded |
 | SDK07 | incremental aligned comparison, selected checkpoint, explicit cross-length alignment | automatic alignment deliberately excluded |
 | SDK08 | native binding, explicit symbolic Circuit and full binding, copy, compose | partial binding and symbolic transforms deliberately excluded |
 | SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover, superdense, phase-gate QPE, Simon oracle iteration and GF(2) recovery, teleportation | generic QPE and larger algorithms as later work |
 | SDK10 | SVG histogram, ordered circuit schematic and Bloch vector schematic, executed how-to/notebook, paired density and Pauli query benchmarks | dedicated machine benchmark and richer layout/interactive graphics |
 | SDK11 | terminal marginal sampling; explicit one-register dynamic Circuit, measure/reset, conditional X/Z, native shot results and teleportation | multi-register and general control flow deliberately excluded |
-| SDK12 | existing package CI and release checklist | owner review, dependency/license re-review, controlled benchmark, release authorization |
+| SDK12 | existing package CI and release checklist | final owner review, dedicated host benchmark, redistribution review and release authorization |
 
 ## Contracts and scope
 
@@ -95,3 +95,7 @@ metadata inventory is not license approval. See IBM Qiskit dynamic circuit docs
 The core and dynamic CI suites report branch coverage separately. Dynamic CI executes all core/probe tests plus native shot/teleportation tests. No coverage exclusion or oracle relaxation. SVG schematics are bounded to 12 wires/64 gates and display ordered operands by position (0 = first operand), not device routing. Bloch SVG is a 2D projection with exact coordinates labeled. Symbolic and dynamic circuits retain native text drawing; unitary SVG rejects those modes explicitly. Iterables in marginal/entropy queries are bounded before materialization.
 
 Explicit `debug.compare_checkpoints(reference, pairs)` accepts 1–32 monotonic pairs of indices, including circuits with different lengths. It checks zero-input states, not operators or inferred causal alignment. Prefix evolution is explicit and bounded to eight qubits and 256 steps per index.
+
+### Completion boundary
+
+The SDK candidate covers all twelve roadmap areas within its documented bounded scope. This is not a release approval. Remaining work is validation and owner acceptance, not an obligation to add arbitrary quantum algorithms or backend integrations. Weighted-observable variance uses a native dense matrix with an eight-wire cap and an explicit payload budget. `append` and `compose` bound wire iterables before mutation or composition. `run` rejects array shape mismatches before converting to a Result snapshot. Input conversion and native allocations are not a hard RSS bound.

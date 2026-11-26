@@ -44,3 +44,5 @@ assert_type(c.visualize.svg(),str)
 assert_type(r.visualize.bloch_svg(),str)
 
 assert_type(q.recover_simon(['000','010','101'],3),str | None)
+
+assert_type(r.math.observable_variance({'XX':.5,'ZZ':.5}),float)

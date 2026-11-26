@@ -50,3 +50,5 @@ See [SDK roadmap](sdk-roadmap.md) for direct gate aliases, the expanded gate reg
 - `phase_estimation(phase,precision=3)`, `simon(secret)`, `teleportation(theta,phi,verify=False)`: bounded teaching circuits, not general algorithm solvers.
 - `Circuit.classical(n,num_clbits)`, `measure(wire,bit)`, `reset(wire)`, `if_x/if_z(wire,bit,value=1)`, `run_shots(shots=1024,seed=None,max_bytes=...)`: local native Aer optional extra. One register, no unitary run, replay, trace or transform. `ShotResult.counts` defensive dict, `probabilities()` empirical frequencies.
 - `Circuit.visualize.svg()` and `Result.visualize.bloch_svg(wire=0)` return bounded SVG schematics. The former supports bound unitary circuits only.
+
+- `Result.math.observable_variance(terms,max_bytes=...)`: real weighted Pauli sum, dense native matrix, eight-wire cap; variance is the squared norm of the centered operator applied to the normalized snapshot. Not a general mixed-state calculation.

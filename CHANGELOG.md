@@ -15,3 +15,5 @@
 The default bound unitary Circuit and Result behavior is preserved. The dynamic
 extra and symbolic mode are explicit opt-ins. No hardware or public release is
 approved. See docs/sdk-roadmap.md for limitations and release gates.
+
+- Bounded wire iterables for append/compose, initial-state shape preflight and weighted-observable variance.
