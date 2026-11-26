@@ -41,16 +41,8 @@ class _Debug:
         if len(qc.data)>_int(max_steps):
             raise ResourceLimit("trace step limit exceeded")
         _limit(qc.num_qubits,len(qc.data)+1,budget=max_bytes)
-        _,SV=_sdk()
-        a=np.zeros(1<<qc.num_qubits,dtype=complex)
-        a[0]=np.exp(1j*float(qc.global_phase))
-        state=SV(a)
-        steps=[TraceStep("initial (global phase applied)",(),Result(state.data))]
-        for item in qc.data:
-            wires=tuple(qc.find_bit(w).index for w in item.qubits)
-            state=state.evolve(item.operation,qargs=list(wires))
-            steps.append(TraceStep(item.operation.name,wires,Result(state.data)))
-        return tuple(steps)
+        cursor=_Cursor(self._c)
+        return tuple(cursor.at(i) for i in range(len(qc.data)+1))
 
     def checkpoint(self,index,*,max_bytes=64*1024**2,max_steps=256):
         """Explicit zero-input evolution through one requested checkpoint."""
@@ -62,18 +54,7 @@ class _Debug:
         if qc.num_qubits>8 or index>_int(max_steps):
             raise ResourceLimit("checkpoint limit exceeded")
         _limit(qc.num_qubits,budget=max_bytes)
-        _,SV=_sdk()
-        a=np.zeros(1<<qc.num_qubits,dtype=complex)
-        a[0]=np.exp(1j*float(qc.global_phase))
-        state=SV(a)
-        operation="initial (global phase applied)"
-        wires=()
-        for i in range(index):
-            item=qc.data[i]
-            wires=tuple(qc.find_bit(w).index for w in item.qubits)
-            operation=item.operation.name
-            state=state.evolve(item.operation,qargs=list(wires))
-        return TraceStep(operation,wires,Result(state.data))
+        return _Cursor(self._c).at(index)
 
     def compare(self,reference,*,ignore_global_phase=True,atol=1e-9,
                 max_bytes=64*1024**2,max_steps=256):
@@ -107,15 +88,9 @@ class _Debug:
         # Preserve the historical conservative budget contract, but evolve
         # only two current states and stop at the first observed divergence.
         def checkpoints(c):
-            _,SV=_sdk()
-            initial=np.zeros(1<<c.num_qubits,dtype=complex)
-            initial[0]=np.exp(1j*float(c._qc.global_phase))
-            state=SV(initial)
-            yield TraceStep("initial (global phase applied)",(),Result(state.data))
-            for item in c._qc.data:
-                wires=tuple(c._qc.find_bit(w) for w in item.qubits)
-                state=state.evolve(item.operation,qargs=[w.index for w in wires])
-                yield TraceStep(item.operation.name,tuple(w.index for w in wires),Result(state.data))
+            cursor=_Cursor(c)
+            for index in range(len(c._qc.data)+1):
+                yield cursor.at(index)
         actual=checkpoints(a)
         expected=checkpoints(b)
         largest=0.0
@@ -139,7 +114,7 @@ class _Debug:
 
         Different circuit lengths are allowed. Alignment is caller-provided,
         not inferred. At most 32 strictly increasing index pairs; an index
-        may repeat on one side. Each requested prefix is explicitly evolved.
+        may repeat on one side. Each cursor advances monotonically; previous gates are not replayed.
         """
         from itertools import islice
         from collections.abc import Mapping
