@@ -23,11 +23,11 @@ def _selection(c,wires):
 def _native_batch(c,append):
     """Run a preflighted, phase-neutral native append as a suffix transaction.
 
-    Symbolic and classical modes retain independent staging: a failed native
-    parameter insertion must not leak a parameter-table or classical change.
-    The bound path only uses standard native gate methods.
+    Classical mode retains independent staging. For unitary gate batches
+    (including symbolic parameters), native data deletion restores the
+    parameter table on ordinary append failures. Not used for composition.
     """
-    if c.num_clbits or getattr(c,"_symbolic",False):
+    if c.num_clbits:
         candidate=c._qc.copy()
         append(candidate)
         c._qc=candidate
