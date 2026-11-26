@@ -113,6 +113,9 @@ jobs:
           python -m research.alpha_register_addition --reps 5 > alpha-register-addition.json
           python -m research.alpha_controlled_profile --reps 5 > alpha-controlled-profile.json
           python -m research.alpha_toy_h2 --reps 3 > alpha-toy-h2.json
+          python -m research.alpha_six_unitary > alpha-six-unitary.json
+          python -m research.alpha_six_variational > alpha-six-variational.json
+          python -m research.alpha_six_verification > alpha-six-verification.json
           python -m research.priority_architecture_audit > closure-architecture.json
           python -m research.architecture_inventory > architecture-inventory.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -146,6 +149,9 @@ jobs:
             alpha-register-addition.json
             alpha-controlled-profile.json
             alpha-toy-h2.json
+            alpha-six-unitary.json
+            alpha-six-variational.json
+            alpha-six-verification.json
             closure-architecture.json
             architecture-inventory.json
             environment.txt
@@ -270,7 +276,9 @@ jobs:
           python -m coverage json -o dynamic-coverage.json
           python -m research.coverage_evidence dynamic-coverage.json --scope dynamic --baseline docs/coverage-count-baseline.json --output dynamic-coverage-gaps.json
       - name: Matched local protocol diagnostics
-        run: python -m research.wave1_dynamic_protocols > wave1-dynamic-protocols.json
+        run: |
+          python -m research.wave1_dynamic_protocols > wave1-dynamic-protocols.json
+          python -m research.alpha_six_dynamic > alpha-six-dynamic.json
       - name: Audit dynamic dependencies
         run: |
           python -m venv audit-venv
@@ -286,6 +294,7 @@ jobs:
             dynamic-coverage-gaps.json
             dynamic-test-results.xml
             wave1-dynamic-protocols.json
+            alpha-six-dynamic.json
             dynamic-license-inventory.json
             dynamic-audited-requirements.txt
             dynamic-vulnerability-report.json
