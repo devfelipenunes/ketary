@@ -79,10 +79,16 @@ def _bound_validation_indices(qc):
     data=qc.data
     affected=[]
     threshold=len(data)//2
+    # Dense prefixes conservatively decline the sparse path earlier. This
+    # is only a profitability heuristic; rejected plans use full validation.
+    probe=min(8,len(data))
     for i,item in enumerate(data):
         symbolic=False
         for value in item.params:
-            if getattr(value,"parameters",()):
+            if type(value) is float:
+                if not math.isfinite(value):
+                    raise ValueError("rotation angle must be finite")
+            elif getattr(value,"parameters",()):
                 symbolic=True
             else:
                 _angle(value)
@@ -90,6 +96,8 @@ def _bound_validation_indices(qc):
             affected.append(i)
             if len(affected)>threshold:
                 return None
+        if i+1==probe and len(affected)*2>probe:
+            return None
     return tuple(affected)
 
 

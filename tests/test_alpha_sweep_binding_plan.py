@@ -74,3 +74,20 @@ def test_dense_path_preserves_original_mapping_assignment(monkeypatch):
     monkeypatch.setattr(q.Circuit,"_bind_numeric",spy)
     c.sweep_rows([[.2],[.4]])
     assert seen==[{p:.2},{p:.4}]
+
+
+def test_dense_prefix_may_decline_globally_sparse_plan():
+    p=q.Circuit.parameter("p")
+    c=q.Circuit.symbolic(2).ry(p,[0,1]).rz(p,[0,1]).rx(p,[0,1])
+    for _ in range(24):c.h(0).cx(0,1)
+    assert _bound_validation_indices(c._qc) is None
+    for v,out in zip((.3,.7),c.sweep_rows([(.3,),(.7,)])._payloads,strict=True):
+        assert out.to_qiskit()==c.bind({p:v}).to_qiskit()
+
+def test_one_row_retains_full_validation(monkeypatch):
+    from ketary import _adapter
+    p=q.Circuit.parameter("p")
+    c=q.Circuit.symbolic(2).h(0).cx(0,1).ry(p,0)
+    def fail(*args):pytest.fail("single-row discovery should not run")
+    monkeypatch.setattr(_adapter,"_bound_validation_indices",fail)
+    assert c.sweep_rows([(.3,)])._payloads[0].to_qiskit()==c.bind({p:.3}).to_qiskit()

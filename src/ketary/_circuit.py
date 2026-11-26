@@ -320,7 +320,8 @@ class Circuit:
     def _bind_sweep_rows(self,rows,keys):
         """Bind complete preflighted rows with one native-order validation plan."""
         from ._adapter import _bound_validation_indices,_validate_bound_values
-        indices=_bound_validation_indices(self._qc)
+        # A single row cannot amortize discovery. Keep the existing mapping path.
+        indices=_bound_validation_indices(self._qc) if len(rows)>1 else None
         if indices is None:
             # Paired measurements showed no reliable dense-route gain.
             return tuple(self._bind_numeric(dict(zip(keys,(v for _,v in row),strict=True)))
