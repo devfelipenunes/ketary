@@ -57,7 +57,13 @@ class Circuit:
         indices=list(range(other.num_qubits)) if wires is None else [_int(i) for i in wires]
         if len(indices)!=other.num_qubits or len(set(indices))!=len(indices) or any(i>=self.num_qubits for i in indices):
             raise ValueError("invalid wire mapping")
-        return self._from_native(self._qc.compose(other._qc,qubits=indices,inplace=False),owned=True)
+        # Composition of two validated logical circuits is closed under the gate
+        # whitelist. Native imports, append and non-closed transforms retain
+        # their validation. Do not scan both gate lists again on this path.
+        native=self._qc.compose(other._qc,qubits=indices,inplace=False)
+        composed=Circuit.__new__(Circuit)
+        composed._qc=native
+        return composed
 
     def append(self, gate, wires):
         """Append a supported native gate after validating all inputs."""
