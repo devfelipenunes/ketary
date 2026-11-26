@@ -99,6 +99,26 @@ def _pairs(c,name,a,b,pairs,*params):
         raise ValueError("expected at least one wire pair")
     if len(selected)>10000:
         raise ResourceLimit("pair batch supports at most 10000 pairs")
+    # Only single-angle gates support aligned rows. Keep the established
+    # native scalar broadcast unchanged, including symbolic parameters.
+    if len(params)==1:
+        theta=params[0]
+        if isinstance(theta,(str,bytes,Mapping,set,frozenset)):
+            raise ValueError("expected scalar angle or ordered angle sequence")
+        try:
+            angles=iter(theta)
+        except TypeError:
+            pass
+        else:
+            values=tuple(islice(angles,len(selected)+1))
+            if len(values)!=len(selected):
+                raise ValueError("angle and pair sequences must have equal length")
+            values=tuple(c._gate_angle(v) for v in values)
+            def append(native):
+                method=getattr(native,name)
+                for (first,second),angle in zip(selected,values,strict=True):
+                    method(angle,first,second)
+            return _native_batch(c,append)
     values=tuple(c._gate_angle(p) for p in params)
     first,second=zip(*selected,strict=True)
     return _native_batch(c,lambda native:getattr(native,name)(*values,list(first),list(second)))
