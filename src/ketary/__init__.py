@@ -1,12 +1,12 @@
 """Experimental Ketary SDK; one public circuit API."""
 from ._validation import ResourceLimit, UnsupportedOperation, _limit
 from ._result import CheckResult, Result
-from ._trace import TraceStep
+from ._trace import TraceStep, TraceComparison
 from ._circuit import Circuit, from_qiskit
 from ._algorithms import bell, ghz
 from ._resources import ResourceReport
 
 __all__ = [
-    "Circuit", "Result", "CheckResult", "TraceStep", "ResourceReport",
+    "Circuit", "Result", "CheckResult", "TraceStep", "TraceComparison", "ResourceReport",
     "ResourceLimit", "UnsupportedOperation", "from_qiskit", "bell", "ghz",
 ]
