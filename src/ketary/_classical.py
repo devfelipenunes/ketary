@@ -52,7 +52,11 @@ def run_shots(circuit,*,shots,seed,max_bytes):
     result=backend.run(compiled,shots=shots,seed_simulator=seed).result()
     if not result.success:
         raise RuntimeError("native shot execution failed")
-    counts=result.get_counts()
+    from qiskit.exceptions import QiskitError
+    try:
+        counts=result.get_counts()
+    except QiskitError as exc:
+        raise RuntimeError("native shot counts unavailable") from exc
     if len(qc.cregs)>1:
         # Register boundaries appear reversed in Qiskit memory labels.
         # Import requires contiguous, non-overlapping registers in bit order.
