@@ -33,3 +33,6 @@ assert_type(r.math.top_probabilities(k=2), dict[str,float])
 assert_type(q.Circuit(4).mcx([0,1,2],3),q.Circuit)
 assert_type(q.phase_estimation(.125),q.Circuit)
 assert_type(q.simon('101'),q.Circuit)
+
+angle=q.Circuit.parameter('angle')
+assert_type(q.Circuit.symbolic(2).rx(angle,0).bind({angle:.5}),q.Circuit)

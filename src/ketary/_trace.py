@@ -34,6 +34,7 @@ class _Debug:
         self._c=c
 
     def trace(self,*,max_bytes=64*1024**2,max_steps=256):
+        self._c._require_bound()
         qc=self._c._qc
         if qc.num_qubits > 8:
             raise ResourceLimit("trace supports at most eight qubits in PoC")
@@ -53,6 +54,7 @@ class _Debug:
 
     def checkpoint(self,index,*,max_bytes=64*1024**2,max_steps=256):
         """Explicit zero-input evolution through one requested checkpoint."""
+        self._c._require_bound()
         qc=self._c._qc
         index=_int(index)
         if index>len(qc.data):
@@ -90,6 +92,8 @@ class _Debug:
         if type(ignore_global_phase) is not bool:
             raise ValueError("ignore_global_phase must be bool")
         a,b=self._c,reference
+        a._require_bound()
+        b._require_bound()
         if a.num_qubits!=b.num_qubits or len(a._qc.data)!=len(b._qc.data):
             return TraceComparison(CheckResult("UNSUPPORTED",None,None,t,
                 "checkpoint alignment requires equal qubit and operation counts"))

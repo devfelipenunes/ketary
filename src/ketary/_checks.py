@@ -36,6 +36,8 @@ class _CircuitChecks:
             raise ValueError("ignore_global_phase must be bool")
         if not isinstance(other,Circuit):
             raise TypeError("expected Circuit")
+        self._c._require_bound()
+        other._require_bound()
         n=self._c.num_qubits
         if n!=other.num_qubits:
             return CheckResult("FAIL",None,None,t,"different qubit counts")

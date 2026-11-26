@@ -17,7 +17,7 @@ def _gate_classes():
     from qiskit.circuit import library
     return Gate,{getattr(library,spec[0]):(name,spec) for name,spec in SPECS.items()}
 
-def _validate_gate(gate):
+def _validate_gate(gate,*,allow_parameters=False):
     Gate,classes=_gate_classes()
     from qiskit.circuit.library import MCXGate
     from ._gate_specs import MCX_MIN_WIRES,MCX_MAX_WIRES
@@ -35,9 +35,16 @@ def _validate_gate(gate):
     if len(gate.params)!=params:
         raise UnsupportedOperation("invalid gate parameter count")
     for value in gate.params:
-        _angle(value)
+        _gate_angle(value,allow_parameters=allow_parameters)
     if controls and gate.ctrl_state!=(1<<controls)-1:
         raise UnsupportedOperation("open controls are outside the logical whitelist")
+
+def _gate_angle(value,*,allow_parameters=False):
+    if allow_parameters:
+        from qiskit.circuit import ParameterExpression
+        if isinstance(value,ParameterExpression) and value.parameters:
+            return value
+    return _angle(value)
 
 def _validate(qc):
     QC,_=_sdk()

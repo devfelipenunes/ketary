@@ -11,7 +11,7 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 | SDK05 | 29 fixed gate types plus bounded MCX; central registry | broader multi-control synthesis and backend boundary |
 | SDK06 | reduced density, purity, weighted Pauli expectation, Dirac, conditional probability, Schmidt, pure-state trace distance, Pauli variance, top-k | general mixed-state metrics and observable variance |
 | SDK07 | incremental aligned comparison, selected checkpoint, historical budget retained | nontrivial alignment |
-| SDK08 | native template binding, independent copy, compose | symbolic Circuit lifecycle RFC |
+| SDK08 | native binding, explicit symbolic Circuit and full binding, copy, compose | partial binding and symbolic transforms deliberately excluded |
 | SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover, superdense, phase-gate QPE and Simon oracle iteration | generic QPE, Simon GF(2) solver and larger algorithms |
 | SDK10 | SVG histogram, Bloch coordinates, executed how-to/notebook, paired density and Pauli query benchmarks | full graphical circuit/Bloch sphere and dedicated machine benchmark |
 | SDK11 | terminal sampling of selected wires | classical registers, measurement/collapse/reset/control flow RFC |
@@ -68,3 +68,7 @@ from construction and execution. Existing process RSS measurements remain
 statevector scenarios, not a bound on every query.
 
 MCX supports 1–7 closed controls (CX/CCX canonical for 1/2), distinct wires; replay accepts bounded variable width. `phase_estimation(phase, precision)` estimates a known phase-gate eigenvalue on |1>, not arbitrary unitary. `simon(secret)` constructs one iteration with a known two-to-one oracle, yielding orthogonal samples; classical recovery remains external.
+
+### Symbolic lifecycle
+
+`Circuit.symbolic(n)` opts in to native Qiskit `ParameterExpression` angles. `Circuit.parameter(name)` creates a native parameter. `bind({parameter: real_value})` covers exactly the free parameters and returns an independent normal Circuit. Default builders reject symbolic angles; unbound execution, replay, inspect, optimization, operator checks and trace fail explicitly. No second IR; no implicit binding or partial binding.

@@ -1,6 +1,6 @@
 """Circuit facade and gate operations; Qiskit owns the circuit model."""
 from __future__ import annotations
-from ._adapter import _sdk, _validate, _validate_gate
+from ._adapter import _sdk, _validate, _validate_gate, _gate_angle
 from ._validation import _int, _limit, _angle, UnsupportedOperation
 from ._result import Result
 from ._trace import _Debug
@@ -13,6 +13,35 @@ class Circuit:
     def __init__(self,n):
         QC,_=_sdk()
         self._qc=QC(_int(n,1))
+
+    @classmethod
+    def symbolic(cls,n):
+        """Explicit opt-in to native symbolic gate parameters."""
+        c=cls(n)
+        c._symbolic=True
+        return c
+
+    @staticmethod
+    def parameter(name):
+        if type(name) is not str or not name or len(name)>128:
+            raise ValueError("expected a nonempty parameter name up to 128 characters")
+        from qiskit.circuit import Parameter
+        return Parameter(name)
+
+    @property
+    def parameters(self):
+        return tuple(self._qc.parameters)
+
+    def bind(self,bindings):
+        """Return an independent fully bound circuit; source is unchanged."""
+        return self.from_parameterized(self._qc,bindings)
+
+    def _require_bound(self):
+        if self._qc.parameters:
+            raise UnsupportedOperation("bind all symbolic parameters before this operation")
+
+    def _gate_angle(self,value):
+        return _gate_angle(value,allow_parameters=getattr(self,"_symbolic",False))
 
     @property
     def gates(self):
@@ -65,6 +94,7 @@ class Circuit:
 
     def inspect(self, *, start=0, limit=32):
         """Bounded logical operations, no copy or execution."""
+        self._require_bound()
         from ._inspection import inspect_circuit
         return inspect_circuit(self,start=start,limit=limit)
 
@@ -161,6 +191,10 @@ class Circuit:
 
     def copy(self):
         """Independent logical circuit with identical ordered operations."""
+        if getattr(self,"_symbolic",False):
+            c=self.symbolic(self.num_qubits)
+            c._qc=self._qc.copy()
+            return c
         return self._from_native(self._qc.copy(),owned=True)
 
     def h_many(self,wires):
@@ -179,6 +213,8 @@ class Circuit:
     def compose(self,other,*,wires=None):
         if not isinstance(other,Circuit):
             raise TypeError("expected Circuit")
+        self._require_bound()
+        other._require_bound()
         indices=list(range(other.num_qubits)) if wires is None else [_int(i) for i in wires]
         if len(indices)!=other.num_qubits or len(set(indices))!=len(indices) or any(i>=self.num_qubits for i in indices):
             raise ValueError("invalid wire mapping")
@@ -192,7 +228,7 @@ class Circuit:
 
     def append(self, gate, wires):
         """Append a supported native gate after validating all inputs."""
-        _validate_gate(gate)
+        _validate_gate(gate,allow_parameters=getattr(self,'_symbolic',False))
         indices=[self.gates._wire(i) for i in wires]
         if len(indices)!=gate.num_qubits or len(set(indices))!=len(indices):
             raise ValueError("invalid gate wire mapping")
@@ -201,6 +237,7 @@ class Circuit:
 
     def to_json(self):
         """Serialize the supported logical circuit to a bounded versioned artifact."""
+        self._require_bound()
         from ._replay import _encode
         return _encode(self)
 
@@ -216,22 +253,27 @@ class Circuit:
         No backend, target, coupling map or layout is accepted. Limited to
         eight qubits because strict phase-preserving equivalence is checked.
         """
+        self._require_bound()
         from ._transpilation import _lower
         return _lower(self,basis_gates=basis_gates,seed=seed)
 
     def optimize(self):
         """Return a new circuit after conservative adjacent inverse cancellation."""
+        self._require_bound()
         from ._optimization import _cancel_adjacent
         return self._from_native(_cancel_adjacent(self._qc),owned=True)
 
     def inverse(self):
+        self._require_bound()
         return self._from_native(self._qc.inverse(),owned=True)
 
     def decompose(self,*,reps=1):
         # Selective SWAP lowering: general decomposition leaves the whitelist.
+        self._require_bound()
         return self._from_native(self._qc.decompose(gates_to_decompose=["swap"], reps=_int(reps,1)),owned=True)
 
     def run(self,*,mode="statevector",max_bytes=64*1024**2,initial_state=None):
+        self._require_bound()
         if mode!="statevector":
             raise UnsupportedOperation("only ideal statevector in PoC")
         _limit(self.num_qubits,budget=max_bytes)
@@ -312,15 +354,15 @@ class _Gates:
         return self._c
 
     def rx(self,theta,q):
-        self._c._qc.rx(_angle(theta),self._wire(q))
+        self._c._qc.rx(self._c._gate_angle(theta),self._wire(q))
         return self._c
 
     def ry(self,theta,q):
-        self._c._qc.ry(_angle(theta),self._wire(q))
+        self._c._qc.ry(self._c._gate_angle(theta),self._wire(q))
         return self._c
 
     def rz(self,theta,q):
-        self._c._qc.rz(_angle(theta),self._wire(q))
+        self._c._qc.rz(self._c._gate_angle(theta),self._wire(q))
         return self._c
 
     def cz(self,c,t):
@@ -337,15 +379,15 @@ class _Gates:
 
     def p(self,theta,q):
         from qiskit.circuit.library import PhaseGate
-        return self._c.append(PhaseGate(_angle(theta)),[q])
+        return self._c.append(PhaseGate(self._c._gate_angle(theta)),[q])
 
     def u(self,theta,phi,lam,q):
         from qiskit.circuit.library import UGate
-        return self._c.append(UGate(_angle(theta),_angle(phi),_angle(lam)),[q])
+        return self._c.append(UGate(self._c._gate_angle(theta),self._c._gate_angle(phi),self._c._gate_angle(lam)),[q])
 
     def cp(self,theta,a,b):
         from qiskit.circuit.library import CPhaseGate
-        return self._c.append(CPhaseGate(_angle(theta)),[a,b])
+        return self._c.append(CPhaseGate(self._c._gate_angle(theta)),[a,b])
 
     def ch(self,a,b):
         from qiskit.circuit.library import CHGate
@@ -353,15 +395,15 @@ class _Gates:
 
     def crx(self,theta,a,b):
         from qiskit.circuit.library import CRXGate
-        return self._c.append(CRXGate(_angle(theta)),[a,b])
+        return self._c.append(CRXGate(self._c._gate_angle(theta)),[a,b])
 
     def cry(self,theta,a,b):
         from qiskit.circuit.library import CRYGate
-        return self._c.append(CRYGate(_angle(theta)),[a,b])
+        return self._c.append(CRYGate(self._c._gate_angle(theta)),[a,b])
 
     def crz(self,theta,a,b):
         from qiskit.circuit.library import CRZGate
-        return self._c.append(CRZGate(_angle(theta)),[a,b])
+        return self._c.append(CRZGate(self._c._gate_angle(theta)),[a,b])
 
     def sx(self,q):
         from qiskit.circuit.library import SXGate
@@ -381,15 +423,15 @@ class _Gates:
 
     def rxx(self,theta,a,b):
         from qiskit.circuit.library import RXXGate
-        return self._c.append(RXXGate(_angle(theta)),[a,b])
+        return self._c.append(RXXGate(self._c._gate_angle(theta)),[a,b])
 
     def ryy(self,theta,a,b):
         from qiskit.circuit.library import RYYGate
-        return self._c.append(RYYGate(_angle(theta)),[a,b])
+        return self._c.append(RYYGate(self._c._gate_angle(theta)),[a,b])
 
     def rzz(self,theta,a,b):
         from qiskit.circuit.library import RZZGate
-        return self._c.append(RZZGate(_angle(theta)),[a,b])
+        return self._c.append(RZZGate(self._c._gate_angle(theta)),[a,b])
 
     def mcx(self,controls,target):
         """Bounded closed controls, with CX/CCX canonical for one/two controls."""
