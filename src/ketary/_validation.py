@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 import operator
 from numbers import Real
+from collections.abc import Mapping
 import numpy as np
 
 class UnsupportedOperation(ValueError):
@@ -55,3 +56,19 @@ def _angle(value):
     if not math.isfinite(angle):
         raise ValueError("rotation angle must be finite")
     return angle
+
+def _pauli_label(n,value):
+    if not isinstance(value,Mapping):
+        return value
+    if len(value)>n:
+        raise ValueError("Pauli mapping exceeds width")
+    label=["I"]*n
+    seen=set()
+    for wire,axis in value.items():
+        wire=_int(wire)
+        if wire>=n or wire in seen or type(axis) is not str or axis not in ("I","X","Y","Z"):
+            raise ValueError("invalid local Pauli wire or axis")
+        seen.add(wire)
+        label[n-1-wire]=axis
+    return "".join(label)
+

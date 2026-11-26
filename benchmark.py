@@ -162,6 +162,40 @@ def main(reps):
     assert build(8,ops,"native")==fluent_fixed().to_qiskit()
     data["cases"].append({"operation":"fluent_build","n":8,"gates":1000,
                           **paired(lambda:build(8,ops,"native"),fluent_fixed,reps)})
+    # Repeated fixed-size appends: compare equal native instruction sequences.
+    # Historical copy baseline measured only at 100/1000 gates to bound CI.
+    def repeated(kind,count,variant):
+        c=QuantumCircuit(4) if variant=="native" else q.Circuit(4)
+        block=QuantumCircuit(2); block.h(0); block.cx(0,1)
+        logical=q.from_qiskit(block)
+        for _ in range(count//2):
+            if kind=="batch":
+                if variant=="native":
+                    c.h([3,0])
+                elif variant=="copy_baseline":
+                    candidate=c.copy()
+                    candidate.h(3).h(0)
+                    c=candidate
+                else:
+                    c.h([3,0])
+            elif variant=="native":
+                c.compose(block,qubits=[3,0],inplace=True)
+            elif variant=="copy_baseline":
+                c=c.compose(logical,wires=[3,0])
+            else:
+                c.apply(logical,wires=[3,0])
+        return c
+    for kind in ("batch","block"):
+        for count in (100,1000,10000):
+            expected=repeated(kind,count,"native")
+            assert expected==repeated(kind,count,"sdk").to_qiskit()
+            data["cases"].append({"operation":"repeated_"+kind,"n":4,"gates":count,
+                **paired(lambda:repeated(kind,count,"native"),lambda:repeated(kind,count,"sdk"),reps)})
+            if count<=1000:
+                assert expected==repeated(kind,count,"copy_baseline").to_qiskit()
+                data["cases"].append({"operation":"repeated_"+kind+"_copy_baseline","n":4,"gates":count,
+                    "native_label":"historical copy path","sdk_label":"candidate append path",
+                    **paired(lambda:repeated(kind,count,"copy_baseline"),lambda:repeated(kind,count,"sdk"),reps)})
     variants=["native","sdk"]*3; random.Random(42).shuffle(variants)
     for variant in variants:
         raw=subprocess.check_output([sys.executable,__file__,"--rss-worker",variant],text=True)

@@ -92,3 +92,49 @@ def test_eager_internal_import_graph_is_acyclic():
     assert not graph["_gate_specs"]
     assert not graph["_execution"]-{"_adapter","_result","_validation"}
     assert "__init__" not in set().union(*(deps for module,deps in graph.items() if module!="__init__"))
+
+
+def test_all_explicit_internal_import_rules():
+    """Check local as well as eager imports; not a dynamic call graph."""
+    root=Path(q.__file__).parent
+    modules={p.stem for p in root.glob("*.py")}
+    graph={name:set() for name in modules}
+    for path in root.glob("*.py"):
+        for node in ast.walk(ast.parse(path.read_text())):
+            if isinstance(node,ast.ImportFrom):
+                if node.level==1:
+                    names=[node.module.split(".")[0]] if node.module else [a.name for a in node.names]
+                    if not node.module and any(n not in modules for n in names):
+                        names.append("__init__")
+                elif node.level==0 and node.module=="ketary":
+                    names=["__init__"]
+                elif node.level==0 and node.module and node.module.startswith("ketary."):
+                    names=[node.module.split(".")[1]]
+                else:
+                    names=[]
+            elif isinstance(node,ast.Import):
+                names=["__init__" if a.name=="ketary" else a.name.split(".")[1]
+                       for a in node.names if a.name=="ketary" or a.name.startswith("ketary.")]
+            else:
+                continue
+            graph[path.stem].update(n for n in names if n in modules)
+    for name in ("_validation","_gate_specs"):
+        assert not graph[name]
+    assert all("__init__" not in edges for name,edges in graph.items() if name!="__init__")
+    assert graph["_execution"]<={"_adapter","_result","_validation"}
+    assert "_checks" not in graph["_result"]
+    assert "_ergonomics" not in graph["_result"]
+    # Baseline SCC is a ceiling on membership, not a claim of acyclicity.
+    allowed={"_checks","_circuit","_contracts","_ergonomics","_execution","_external",
+             "_inspection","_plan","_reports","_result","_trace","_transpilation","_verification"}
+    def reach(node):
+        seen=set()
+        stack=list(graph[node])
+        while stack:
+            child=stack.pop()
+            if child not in seen:
+                seen.add(child)
+                stack.extend(graph[child])
+        return seen
+    cyclic={name for name in modules if name in reach(name)}
+    assert cyclic<=allowed,cyclic-allowed

@@ -31,6 +31,20 @@ class CheckResult:
     def __bool__(self):
         raise TypeError("use .status or .require()")
 
+def _residual(actual,expected,ignore_global_phase,atol):
+    t=_tol(atol)
+    if type(ignore_global_phase) is not bool:
+        raise ValueError("ignore_global_phase must be bool")
+    if actual.shape!=expected.shape:
+        raise ValueError("dimension mismatch")
+    if ignore_global_phase:
+        overlap=np.vdot(expected,actual)
+        if abs(overlap)>0:
+            actual=actual*(np.conj(overlap)/abs(overlap))
+    error=float(np.max(np.abs(actual-expected)))
+    return CheckResult("PASS" if error<=t else "FAIL",error,0,t,
+                       "max absolute residual; phase "+("ignored" if ignore_global_phase else "preserved"))
+
 class Result:
     """Independent ideal pure-state snapshot; no circuit reference or re-execution."""
 
@@ -151,7 +165,7 @@ class _Math:
         from ._observable import Observable
         if isinstance(pauli,Observable):
             return self.observable(pauli.to_dict(self._r._n))
-        from ._ergonomics import _pauli_label
+        from ._validation import _pauli_label
         pauli=_pauli_label(self._r._n,pauli)
         if not isinstance(pauli,str) or len(pauli)!=self._r._n or any(p not in "IXYZ" for p in pauli):
             raise ValueError("expected a full-width uppercase I/X/Y/Z Pauli label")
@@ -449,6 +463,5 @@ class _Checks:
 
     def state(self,target,*,ignore_global_phase=True,atol=1e-9):
         """Maximum amplitude residual after optional phase alignment."""
-        from ._checks import _residual
         other=target if isinstance(target,Result) else Result(target)
         return _residual(self._r._data,other._data,ignore_global_phase,atol)

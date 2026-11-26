@@ -2,7 +2,7 @@
 from collections.abc import Mapping
 from itertools import islice
 import operator
-from ._validation import _int,_limit,ResourceLimit,UnsupportedOperation
+from ._validation import _int,_limit,ResourceLimit,UnsupportedOperation,_pauli_label
 
 def _name(name):
     if type(name) is not str or not name.isidentifier() or len(name)>64:
@@ -25,26 +25,22 @@ def _single(c,name,wire,*params):
     if type(wire) is int or hasattr(wire,"__index__"):
         return getattr(c.gates,name)(*params,wire)
     selected=_selection(c,wire)
-    candidate=c.copy()
-    for w in selected:
-        getattr(candidate.gates,name)(*params,w)
-    c._qc=candidate._qc
+    if c.num_clbits or getattr(c,"_symbolic",False):
+        # Preserve parameter conflict and dynamic-mode semantics until their
+        # dedicated staging contracts have been validated.
+        candidate=c.copy()
+        for w in selected:
+            getattr(candidate.gates,name)(*params,w)
+        c._qc=candidate._qc
+        return c
+    from ._circuit import Circuit
+    from ._adapter import _append_bound_block
+    staged=Circuit(len(selected))
+    for w in range(len(selected)):
+        getattr(staged.gates,name)(*params,w)
+    _append_bound_block(c._qc,staged._qc,selected)
     return c
 
-def _pauli_label(n,value):
-    if not isinstance(value,Mapping):
-        return value
-    if len(value)>n:
-        raise ValueError("Pauli mapping exceeds width")
-    label=["I"]*n
-    seen=set()
-    for wire,axis in value.items():
-        wire=_int(wire)
-        if wire>=n or wire in seen or type(axis) is not str or axis not in ("I","X","Y","Z"):
-            raise ValueError("invalid local Pauli wire or axis")
-        seen.add(wire)
-        label[n-1-wire]=axis
-    return "".join(label)
 
 class SweepPlan:
     """Frozen bound circuit payloads, zipped rows, never an implicit simulation."""

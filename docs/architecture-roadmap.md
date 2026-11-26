@@ -81,3 +81,12 @@ solely on reduced lines or shared CI.
 
 Use [AGENTS.md](../AGENTS.md) as contributor guardrails and
 [ADRs](architecture.md#8-architecture-decisions) as decision history.
+
+## Audit follow-up
+
+AUD-A01: bound batch/apply append candidate, repeated 100/1k/10k gate
+benchmark; historical copy comparison at 100/1k only. AUD-A02: remove two
+reverse dependencies, no claim of eliminating the SCC. AUD-A03/04/06:
+[resource and ownership contracts](resource-contracts.md), no breaking
+wire migration or new budgets. AUD-A05: all explicit imports guarded.
+Exact-head CI and review required; dedicated host still pending.

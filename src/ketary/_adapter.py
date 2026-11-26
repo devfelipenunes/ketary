@@ -58,3 +58,22 @@ def _validate(qc):
         _validate_gate(item.operation)
     if not math.isfinite(float(qc.global_phase)):
         raise ValueError("invalid global phase")
+
+
+def _append_bound_block(target,block,wires):
+    """Append a validated bound logical block; rollback appended suffix on error.
+
+    No concurrent mutation contract. Both circuits and the complete mapping
+    are validated by the caller. Only self-application copies the source.
+    """
+    start=len(target.data)
+    phase=target.global_phase
+    source=block.copy() if target is block else block
+    try:
+        target.compose(source,qubits=list(wires),inplace=True)
+    except Exception:
+        # Native compose appends to the instruction suffix. Preserve the
+        # original phase even if native validation fails after updating it.
+        del target.data[start:]
+        target.global_phase=phase
+        raise
