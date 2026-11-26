@@ -51,6 +51,11 @@ class Result:
     def test(self):
         return _Checks(self)
 
+    @property
+    def visualize(self):
+        from ._visualization import _ResultVisualize
+        return _ResultVisualize(self)
+
     def evidence(self, *, bits=(), paulis=()):
         """Research candidate: explicit evidence from this snapshot."""
         from ._inspection import result_evidence

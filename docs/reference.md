@@ -39,3 +39,6 @@ For distribution boundaries and licensing review see [third-party review](third-
 ## Experimental developer extensions
 
 See [SDK roadmap](sdk-roadmap.md) for direct gate aliases, the expanded gate registry, initial states, selective inspection, verification, density matrices, parameter binding and algorithm contracts. Existing `.gates` remains supported.
+
+- `Result.visualize.histogram(k=8)` returns SVG text; bars are actual probabilities, with omitted mass shown. `bloch(wire=0)` returns reduced-state coordinates.
+- `Contract(n, probabilities=..., expectations=..., normalized=..., atol=...)` is immutable; `verify(result)` returns a typed report without simulation.

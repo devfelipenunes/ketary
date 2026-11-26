@@ -134,3 +134,5 @@ The public import remains `import ketary as q`. Internal modules separate circui
 ## Developer SDK expansion (experimental)
 
 See [SDK roadmap and usage](docs/sdk-roadmap.md) for fluent gates, explicit initial states, mathematical reports, bounded algorithms and remaining boundaries.
+
+Try the [developer notebook](examples/quantum_engineering.ipynb) for a complete ideal-state workflow.

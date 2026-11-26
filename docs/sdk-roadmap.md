@@ -13,7 +13,7 @@ No agents, MCP, new simulator, or DSL. Python 3.12 only; Qiskit authoritative.
 | SDK07 | incremental aligned comparison, selected checkpoint, historical budget retained | nontrivial alignment |
 | SDK08 | native template binding, independent copy, compose | symbolic Circuit lifecycle RFC |
 | SDK09 | Bernstein-Vazirani, QFT/inverse, small Grover and superdense | QPE, Simon and larger algorithms |
-| SDK10 | text/math rendering and executed how-to examples | graphical extra, notebooks, dedicated machine benchmark |
+| SDK10 | SVG histogram, Bloch coordinates, executed how-to/notebook, paired density and Pauli query benchmarks | full graphical circuit/Bloch sphere and dedicated machine benchmark |
 | SDK11 | terminal sampling of selected wires | classical registers, measurement/collapse/reset/control flow RFC |
 | SDK12 | existing package CI and release checklist | owner review, dependency/license re-review, controlled benchmark, release authorization |
 
@@ -56,3 +56,13 @@ from arbitrary classical outcomes into a pure Result. First validate terminal
 measurements and register mapping against the chosen native backend; only then
 consider dynamic circuits and mixed/noisy execution. Current marginal sampling
 does not implement this model. Do not ship it without the RFC and oracle tests.
+
+## Developer visualization
+
+`result.visualize.histogram(k=8)` returns bounded SVG text (no new dependency).
+`result.visualize.bloch(wire=0)` returns the three Bloch coordinates, not a
+sphere image. The notebook `examples/quantum_engineering.ipynb` demonstrates
+construction, contracts, mathematical queries, diagnosis and search; its cells
+are exercised by pytest. Query benchmarks compare equal outputs separately
+from construction and execution. Existing process RSS measurements remain
+statevector scenarios, not a bound on every query.

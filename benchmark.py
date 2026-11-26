@@ -132,6 +132,19 @@ def main(reps):
         a=build(n,ops,"native"); b=build(n,ops,"sdk")
         np.testing.assert_allclose(execute(a,"native"),execute(b,"sdk"),atol=1e-9,rtol=0)
         data["cases"].append({"operation":"mixed_statevector","n":n,"gates":count,**paired(lambda:execute(a,"native"),lambda:execute(b,"sdk"),reps)})
+    # Matched snapshot queries, separate from circuit construction/execution.
+    from qiskit.quantum_info import partial_trace,Pauli
+    native=Statevector.from_instruction(q.ghz(8).to_qiskit())
+    sdk=q.ghz(8).run()
+    native_density=lambda:partial_trace(native,list(range(1,8))).data.copy()
+    sdk_density=lambda:sdk.math.density_matrix([0])
+    np.testing.assert_allclose(native_density(),sdk_density(),atol=1e-9,rtol=0)
+    data["cases"].append({"operation":"reduced_density","n":8,"gates":8,**paired(native_density,sdk_density,reps)})
+    pauli="X"*8
+    native_pauli=lambda:float(native.expectation_value(Pauli(pauli)).real)
+    sdk_pauli=lambda:sdk.math.expectation(pauli)
+    np.testing.assert_allclose(native_pauli(),sdk_pauli(),atol=1e-9,rtol=0)
+    data["cases"].append({"operation":"snapshot_pauli","n":8,"gates":8,**paired(native_pauli,sdk_pauli,reps)})
     variants=["native","sdk"]*3; random.Random(42).shuffle(variants)
     for variant in variants:
         raw=subprocess.check_output([sys.executable,__file__,"--rss-worker",variant],text=True)
