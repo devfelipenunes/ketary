@@ -8,7 +8,7 @@ Python objects, serialization, allocator fragmentation and child processes.
 | Path | Work / retained data | Preflight and caveat |
 |---|---|---|
 | Circuit.run | Gate evolution, one returned snapshot | State payload cap before native execution; temporary arrays extra |
-| Bound batch / apply | Validate/stage incoming operations, append to native program | No whole-prefix Ketary copy on ordinary bound path; self-application copies source, symbolic/classical batch retains old path |
+| Bound batch / apply | Validate incoming selections/angles; append standard gates by native broadcast or ordered scalar calls; compose bound blocks | No whole-prefix or staging-circuit copy for ordinary bound gate batches; suffix rollback on native error; self-application copies source, symbolic/classical batches stage a native copy |
 | Result.math.expectation | One native Pauli query over existing state | No implicit simulation; full-state work |
 | Observable / aggregate | Up to 256 terms per observable, up to 32 predicates | Up to 8192 Pauli evaluations; no aggregate time guarantee |
 | Density / Schmidt | State-sized input and output, matrix work | Existing separate payload/rank bounds, not scratch/RSS |

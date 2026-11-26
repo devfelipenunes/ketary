@@ -95,3 +95,5 @@ Exact-head CI and review required; dedicated host still pending.
 
 See [ABS01–ABS36](high-level-abstraction-map.md) for the proposed next design
 cycle. No new public API is approved by that inventory.
+
+PERF01 candidate: direct native broadcast for scalar-angle single-wire batches and ordered native calls for aligned angle batches. All inputs preflight; bound append suffix/phase rollback; symbolic/classical native copies retain transaction isolation. Compare exact native sequences and operators and repeat matched benchmark before drawing performance conclusions.
