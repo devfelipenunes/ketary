@@ -23,7 +23,7 @@ import ketary as q
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from benchmark import mixed_workload, memory_kib
-from circuit_writing_study import run as writing_study, metrics
+from research.circuit_writing_study import run as writing_study, metrics
 
 TOL=1e-9
 
