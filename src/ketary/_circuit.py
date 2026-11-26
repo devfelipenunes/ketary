@@ -164,6 +164,10 @@ class Circuit:
         bound=template.assign_parameters({key:_angle(value) for key,value in bindings.items()},inplace=False)
         return cls._from_native(bound,owned=True)
 
+    def plan(self,*,bits=(),paulis=(),subsystems=()):
+        from ._plan import QueryPlan
+        return QueryPlan(self,bits=bits,paulis=paulis,subsystems=subsystems)
+
     def diff(self,other,*,atol=1e-9,max_bytes=64*1024**2):
         """Explicit structural, snapshot and operator comparison."""
         from ._verification import semantic_diff

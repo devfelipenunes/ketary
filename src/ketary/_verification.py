@@ -78,6 +78,9 @@ class Evidence:
     """Immutable content-addressed counterexample. Hash is not authentication."""
     _payload: str
 
+    def __init__(self):
+        raise TypeError('use Evidence.from_json')
+
     @classmethod
     def from_json(cls,payload):
         if type(payload) is not str:
@@ -202,6 +205,7 @@ def compare(a,b,*,inputs=None,complete=True,ignore_global_phase=False,atol=1e-9,
 
 
 def semantic_diff(a,b,*,atol=1e-9,max_bytes=64*1024**2):
+    atol=_tol(atol)
     _pair(a,b,max_bytes)
     left,right=(json.loads(c.to_json()) for c in (a,b))
     for d in (left,right):

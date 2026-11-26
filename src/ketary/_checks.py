@@ -84,3 +84,7 @@ class _CircuitChecks:
         from ._verification import compare
         return compare(self._c,other,inputs=inputs,complete=complete,ignore_global_phase=ignore_global_phase,
                        atol=atol,max_bytes=max_bytes)
+
+    def external_equivalence(self,other,*,deadline=10):
+        from ._external import qcec_compare
+        return qcec_compare(self._c,other,deadline=deadline)
