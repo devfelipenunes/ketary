@@ -275,7 +275,8 @@
     "Observable.anticommutator",
     "Circuit.prepare_state",
     "Circuit.from_unitary",
-    "Circuit.evolve_exact"
+    "Circuit.evolve_exact",
+    "Circuit.quantum_geometric_tensor"
   ],
   "Native": [
     "Circuit.append",

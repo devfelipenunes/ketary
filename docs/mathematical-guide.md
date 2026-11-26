@@ -62,4 +62,6 @@ Controlled rotations have generator eigenvalues 0, +1/2, -1/2. Their expectation
 
 For duplicate Pauli labels and bounded pairwise products, finite rounded real and imaginary contributions are aggregated using compensated fsum independently. No numerical truncation or Hermitian tolerance is applied to imported imaginary residuals. This reduces cancellation error, but is not arbitrary precision: individual products still round and overflow is explicitly rejected.
 
+QGT: Q_ij = <d_i psi | (I-|psi><psi|) | d_j psi> for normalized pure state. For a Pauli or controlled Pauli rotation, generator eigenvalues are in {0,+/-1/2}; the state derivative is (psi(theta+pi/2)-psi(theta-pi/2))/(2 sqrt(2)). For P/CP the generator phase eigenvalues are {0,1}; the coefficient is 1/2. Sum occurrence derivatives with the chain rule, then project away the state direction, including symbolic global phase. Re(Q) is the metric; Im(Q) depends on curvature convention. Finite precision applies; no arbitrary generator, mixed state or optimizer guarantee.
+
 Local channel application embeds K_r on the ordered selected wires, leaving other bits untouched. The complete state evolves by sum_r K_r rho K_r^dagger. The input native Kraus map is validated before execution; composition of maps may be constructed explicitly through native Kraus composition, subject to existing final input caps.
