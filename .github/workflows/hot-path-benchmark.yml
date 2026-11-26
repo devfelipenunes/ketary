@@ -1,0 +1,61 @@
+name: Hot path revision benchmark
+on:
+  pull_request:
+    paths:
+      - 'research/hot_path_benchmark.py'
+      - '.github/workflows/hot-path-benchmark.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        seed: [1101,2202,3303]
+    env:
+      OPENBLAS_NUM_THREADS: 1
+      OMP_NUM_THREADS: 1
+      MKL_NUM_THREADS: 1
+      BASELINE: e995a5e9c4e2727168bb3221090a2371b8995acb
+      SEED: ${{ matrix.seed }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version-file: '.python-version'
+      - run: |
+          git worktree add --detach "$RUNNER_TEMP/baseline" "$BASELINE"
+          for variant in before after; do
+            python -m venv "$RUNNER_TEMP/$variant"
+            dir="$GITHUB_WORKSPACE"
+            if [ "$variant" = before ]; then dir="$RUNNER_TEMP/baseline"; fi
+            (cd "$dir"; "$RUNNER_TEMP/$variant/bin/python" -m pip install -c constraints/linux-py312.txt -r requirements.txt; "$RUNNER_TEMP/$variant/bin/python" -m pip install --no-deps -e .)
+            "$RUNNER_TEMP/$variant/bin/python" -m pip freeze > "$variant-env.txt"
+          done
+          lscpu > host.txt
+          git rev-parse HEAD > commit.txt
+      - run: |
+          order="before after"
+          if [ "$((SEED % 2))" = 0 ]; then order="after before"; fi
+          echo "$order" > order.txt
+          for variant in $order; do
+            "$RUNNER_TEMP/$variant/bin/python" research/hot_path_benchmark.py --seed "$SEED" --output "$variant.json"
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: hot-path-${{ matrix.seed }}
+          path: |
+            before.json
+            after.json
+            before-env.txt
+            after-env.txt
+            host.txt
+            commit.txt
+            order.txt
