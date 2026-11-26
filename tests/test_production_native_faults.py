@@ -169,3 +169,14 @@ def test_native_complex_malformed_and_overflow(monkeypatch):
         m.setattr(SparsePauliOp,"to_list",lambda self:[("I",object())])
         with pytest.raises(ValueError):r.math.expectation_complex(op)
     with pytest.raises(ArithmeticError):r.math.expectation_complex(SparsePauliOp.from_list([("I",1e308),("I",1e308)]))
+
+
+def test_synthesis_output_limit_isolated(monkeypatch):
+    # The oversized output must otherwise be exactly the reference identity.
+    # Removing only the size guard must trigger DID NOT RAISE, not a different
+    # rejection from the strict operator oracle.
+    raw=QuantumCircuit(1)
+    too_many=QuantumCircuit(1)
+    for _ in range(10001):too_many.u(0,0,0,0)
+    monkeypatch.setattr(qiskit,"transpile",lambda *a,**k:too_many)
+    with pytest.raises(q.ResourceLimit,match="10000"):q.Circuit.from_synthesized(raw)
