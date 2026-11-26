@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 import ketary as q
-from qiskit.quant_info import Operator
+from qiskit.quantum_info import Operator
 from ketary._gate_specs import SPECS
 
 I=np.eye(2,dtype=complex)
