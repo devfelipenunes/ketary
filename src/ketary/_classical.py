@@ -1,5 +1,6 @@
 """Bounded native local shot execution, separate from pure Result snapshots."""
 from dataclasses import dataclass
+from collections.abc import Mapping
 from ._validation import _int,_limit,ResourceLimit,UnsupportedOperation
 
 @dataclass(frozen=True)
@@ -51,8 +52,8 @@ def run_shots(circuit,*,shots,seed,max_bytes):
     if not result.success:
         raise RuntimeError("native shot execution failed")
     counts=result.get_counts()
-    if (sum(counts.values())!=shots or any(len(label)!=qc.num_clbits or set(label)-{"0","1"}
-        or type(count) is not int or count<=0 for label,count in counts.items())):
+    if (not isinstance(counts,Mapping) or any(type(label) is not str or len(label)!=qc.num_clbits or set(label)-{"0","1"}
+        or type(count) is not int or count<=0 for label,count in counts.items()) or sum(counts.values())!=shots):
         raise RuntimeError("unexpected native count schema")
     from importlib.metadata import version
     measurements=tuple((i+1,qc.find_bit(item.qubits[0]).index,qc.find_bit(item.clbits[0]).index)
