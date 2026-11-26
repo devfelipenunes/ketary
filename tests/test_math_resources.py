@@ -10,7 +10,7 @@ def test_born_rule_and_complex_amplitude():
     assert r.math.amplitude("1")==pytest.approx(1j/np.sqrt(2))
     assert r.math.probability("1")==pytest.approx(.5)
     assert r.math.probability("1")==r.math.probabilities()["1"]
-    assert r.math.explain_probability("1")=="p(|1>) = |0+0.707106781187j|^2 = 0.5"
+    assert r.math.explain_probability("1")=="p(|1>) = |0+0.707106781187j|^2 / 1 = 0.5"
 
 @pytest.mark.parametrize("bad",["", "0", "000", "0x", 1])
 def test_invalid_basis_label(bad):
