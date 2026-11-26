@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "scope": "Primary responsibility, not a layer or dependency direction; runtime Python modules only",
+  "groups": {
+    "facade": [
+      "__init__"
+    ],
+    "construction": [
+      "_circuit",
+      "_algorithms",
+      "_ergonomics",
+      "_topology"
+    ],
+    "mathematics": [
+      "_result",
+      "_observable",
+      "_contracts",
+      "_statistical"
+    ],
+    "verification": [
+      "_checks",
+      "_trace",
+      "_verification"
+    ],
+    "native": [
+      "_adapter",
+      "_execution",
+      "_classical",
+      "_external",
+      "_transpilation"
+    ],
+    "artifacts": [
+      "_replay",
+      "_inspection",
+      "_plan"
+    ],
+    "transformation": [
+      "_optimization",
+      "_gate_specs"
+    ],
+    "presentation": [
+      "_reports",
+      "_resources",
+      "_visualization"
+    ],
+    "foundation": [
+      "_validation"
+    ]
+  }
+}
