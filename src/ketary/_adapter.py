@@ -67,7 +67,29 @@ def _validate(qc,*,allow_parameters=False):
         raise ValueError("invalid global phase")
 
 
-def _validate_bound_values(qc):
+def _bound_validation_indices(qc):
+    """Call-local sweep plan for a validated native template.
+
+    Native assignment changes only symbolic slots and global phase. Validate
+    unchanged numeric slots once; inspect every affected instruction per row.
+    Dense templates keep the sequential full scan to avoid indexed overhead.
+    No plan or mutable native circuit is cached between public calls.
+    """
+    data=qc.data
+    affected=[]
+    for i,item in enumerate(data):
+        symbolic=False
+        for value in item.params:
+            if getattr(value,"parameters",()):
+                symbolic=True
+            else:
+                _angle(value)
+        if symbolic:
+            affected.append(i)
+    return tuple(affected) if len(affected)*2<=len(data) else None
+
+
+def _validate_bound_values(qc,indices=None):
     """Assignment on an already validated, exclusively owned unitary circuit.
 
     Native assign_parameters preserves instruction kind, operands and layout.
@@ -76,7 +98,8 @@ def _validate_bound_values(qc):
     """
     if qc.parameters:
         raise UnsupportedOperation("bind all symbolic parameters before this operation")
-    for item in qc.data:
+    data=qc.data
+    for item in (data if indices is None else (data[i] for i in indices)):
         for value in item.params:
             # CircuitInstruction exposes native parameters without constructing
             # a Python Gate. Exact floats are the ordinary native numeric case.
