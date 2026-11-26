@@ -107,3 +107,7 @@ assert_type(q.Circuit.classical(3,3).measure([2,0],[0,2]).reset(range(3)),q.Circ
 assert_type(c.cx(pairs=[(0,1)]).cz(pairs=q.chain(c.wires)),q.Circuit)
 assert_type(c.rzz(.2,pairs=[(0,1)]),q.Circuit)
 assert_type(q.Circuit.symbolic(2).crx(angle,pairs=[(0,1)]),q.Circuit)
+
+assert_type(c.run_many(["00","11"]),tuple[q.Result,...])
+assert_type(q.Circuit.symbolic(1).ry(angle,0).sweep_rows([[.1],[.2]]).run(),tuple[q.Result,...])
+assert_type(r.math.probabilities(bits=["00","11"]),dict[str,float])
