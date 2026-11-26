@@ -2,7 +2,6 @@
 from __future__ import annotations
 from ._adapter import _sdk, _validate, _validate_gate, _gate_angle
 from ._validation import _int, _limit, _angle, UnsupportedOperation
-from ._result import Result
 from ._trace import _Debug
 from ._resources import _Resources, _Visualize
 from ._checks import _CircuitChecks
@@ -471,27 +470,8 @@ class Circuit:
         if mode!="statevector":
             raise UnsupportedOperation("only ideal statevector in PoC")
         _limit(self.num_qubits,budget=max_bytes)
-        _,SV=_sdk()
-        if initial_state is None:
-            return Result(SV.from_instruction(self._qc).data)
-        if isinstance(initial_state,str):
-            if len(initial_state)!=self.num_qubits or set(initial_state)-{"0","1"}:
-                raise ValueError("invalid initial basis label")
-            state=SV.from_label(initial_state)
-        else:
-            if isinstance(initial_state,Result):
-                snapshot=initial_state
-            else:
-                # Reject mismatched array shape before a complex128 copy.
-                import numpy as np
-                array=np.asarray(initial_state)
-                if array.shape!=(1<<self.num_qubits,):
-                    raise ValueError("initial state width mismatch")
-                snapshot=Result(array)
-            if snapshot.num_qubits!=self.num_qubits:
-                raise ValueError("initial state width mismatch")
-            state=SV(snapshot.math.statevector(max_bytes=max_bytes))
-        return Result(state.evolve(self._qc).data)
+        from ._execution import execute_ideal
+        return execute_ideal(self._qc,initial_state,max_bytes)
 
 class _Gates:
     def __init__(self,c):

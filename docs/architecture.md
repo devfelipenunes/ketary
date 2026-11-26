@@ -17,7 +17,9 @@ protocol is introduced.
 The public API is a driving boundary for Python applications, notebooks,
 tests and other libraries. Optional Aer and QCEC integrations are narrow
 technology-specific boundaries. The native Qiskit dependency also appears
-inside circuit, math, checking, replay, and transpilation modules. Dependency
+inside circuit, math, checking, replay, and transpilation modules. The private
+_execution module owns ideal evolution after facade preflight; trace paths
+share a monotonic native cursor. Dependency
 inversion is selective, not universal. A generic execution backend is not
 currently implemented.
 
@@ -86,14 +88,18 @@ second circuit state exists. Public native export returns an independent copy.
 sequenceDiagram
     participant U as Python caller
     participant C as Circuit
+    participant E as Private _execution
     participant Q as Qiskit Statevector
     participant R as Result
     participant O as Contract / Observable
     U->>C: run(initial_state, max_bytes)
     C->>C: bound-mode and payload validation
-    C->>Q: native ideal evolution
-    Q-->>C: amplitudes
-    C->>R: validate and defensively copy
+    C->>E: execute_ideal(native, initial_state, max_bytes)
+    E->>Q: native ideal evolution
+    Q-->>E: amplitudes
+    E->>R: validate and defensively copy
+    R-->>E: snapshot
+    E-->>C: Result
     C-->>U: Result
     U->>O: verify(result)
     O->>R: evaluate selected predicates
@@ -142,6 +148,9 @@ jobs protect the interface. See [architecture boundaries](architecture-boundarie
 - [ADR 001 — Native authoritative representation](adr/001-native-representation.md)
 - [ADR 002 — One facade, selective adapters](adr/002-selective-adapters.md)
 - [ADR 003 — Explicit execution and numerical guarantees](adr/003-explicit-execution.md)
+- [ADR 004 — Private execution and trace progression](adr/004-private-execution-and-trace.md)
+
+See [architecture progression](architecture-roadmap.md) for scaling and extension gates.
 
 References: [Cockburn, Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/),
 [Simon Brown, C4 model](https://c4model.com/),

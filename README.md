@@ -76,6 +76,7 @@ Native interoperability is explicit. Existing aliases continue to work.
 - [Verification guide](docs/verification-guide.md)
 - [API reference](docs/reference.md)
 - [Architecture and decision records](docs/architecture.md)
+- [Architecture progression and scalability](docs/architecture-roadmap.md)
 - [Complete surface map](docs/api-surface.md)
 - [Known limitations](docs/known-limitations.md)
 - [Compatibility policy](docs/compatibility.md)
