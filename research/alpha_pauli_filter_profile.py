@@ -5,7 +5,7 @@ import json
 import random
 import time
 import ketary as q
-from ketary._observable import _pauli_product,_sum_complex
+from ketary._observable import Observable,_pauli_product,_sum_complex
 from ketary._validation import _real,ResourceLimit
 from research.circuit_rewrite_ladder import stats
 
