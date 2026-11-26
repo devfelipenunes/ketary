@@ -27,6 +27,17 @@ class Circuit:
         return c
 
     @property
+    def capabilities(self):
+        """Runtime capability report, not a second circuit model."""
+        classical=bool(self.num_clbits)
+        unbound=bool(self._qc.parameters)
+        return {"mode":"classical" if classical else "symbolic" if getattr(self,"_symbolic",False) else "unitary",
+                "run_statevector":not classical and not unbound,
+                "run_shots":classical and not unbound,
+                "bound_transforms":not classical and not unbound,
+                "bind":not classical,"logical_replay":not classical and not unbound}
+
+    @property
     def num_clbits(self):
         return self._qc.num_clbits
 

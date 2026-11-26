@@ -26,6 +26,19 @@ class VerificationReport:
         return self
 
 
+def _evaluate(result,probabilities,expectations,normalized,atol):
+    records=[]
+    if normalized:
+        records.append(("normalized",result.test.normalized(atol=atol)))
+    records.extend(("probability:"+label,result.test.probability(label,value,atol=atol))
+                   for label,value in probabilities)
+    records.extend(("expectation:"+label,result.test.expectation(label,value,atol=atol))
+                   for label,value in expectations)
+    statuses={check.status for _,check in records}
+    status="FAIL" if "FAIL" in statuses else "UNSUPPORTED" if not statuses or "UNSUPPORTED" in statuses else "PASS"
+    return VerificationReport(status,tuple(records))
+
+
 def _predicates(values,n,alphabet,low,high):
     if values is None:
         return ()
@@ -74,13 +87,8 @@ class Contract:
             raise TypeError("expected Result snapshot")
         if result.num_qubits!=self.num_qubits:
             raise ValueError("contract/result width mismatch")
-        records=[]
-        if self.normalized:
-            records.append(("normalized",result.test.normalized(atol=self.atol)))
-        records.extend(("probability:"+label,result.test.probability(label,value,atol=self.atol))
-                       for label,value in self.probabilities)
-        records.extend(("expectation:"+label,result.test.expectation(label,value,atol=self.atol))
-                       for label,value in self.expectations)
-        statuses={check.status for _,check in records}
-        status="FAIL" if "FAIL" in statuses else "UNSUPPORTED" if "UNSUPPORTED" in statuses else "PASS"
-        return VerificationReport(status,tuple(records))
+        return _evaluate(result,self.probabilities,self.expectations,self.normalized,self.atol)
+
+    def to_dict(self):
+        return {"num_qubits":self.num_qubits,"probabilities":dict(self.probabilities),
+                "expectations":dict(self.expectations),"normalized":self.normalized,"atol":self.atol}

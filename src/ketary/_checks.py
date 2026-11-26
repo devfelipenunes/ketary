@@ -45,3 +45,36 @@ class _CircuitChecks:
             return CheckResult("UNSUPPORTED",None,None,t,"operator payload or eight-qubit limit exceeded")
         from qiskit.quantum_info import Operator
         return _residual(Operator(self._c._qc).data,Operator(other._qc).data,ignore_global_phase,t)
+
+
+    def metrics(self,other,*,ignore_global_phase=False,atol=1e-9,max_bytes=16*1024**2):
+        """Dense numerical metrics, not formal proof; common aligned phase."""
+        from ._circuit import Circuit
+        from qiskit.quantum_info import Operator
+        if not isinstance(other,Circuit):
+            raise TypeError("expected Circuit")
+        self._c._require_bound()
+        other._require_bound()
+        t=_tol(atol)
+        budget=_int(max_bytes,1)
+        if type(ignore_global_phase) is not bool:
+            raise ValueError("ignore_global_phase must be bool")
+        n=self._c.num_qubits
+        report={"schema_version":1,"scope":"complete ideal unitary matrices; numerical tolerance",
+                "phase_policy":"overlap alignment" if ignore_global_phase else "strict",
+                "atol":t}
+        if n!=other.num_qubits:
+            return dict(report,status="FAIL",reason="width mismatch")
+        if n>8 or 48*(1<<(2*n))>budget:
+            return dict(report,status="UNSUPPORTED",reason="three matrix payload budget or width exceeded")
+        a,b=Operator(self._c._qc).data,Operator(other._qc).data
+        overlap=np.vdot(b,a)
+        fidelity=float(np.clip(abs(overlap)**2/(a.shape[0]**2),0,1))
+        if ignore_global_phase and abs(overlap)>0:
+            a=a*(np.conj(overlap)/abs(overlap))
+        delta=a-b
+        spectral=float(np.linalg.norm(delta,ord=2))
+        return dict(report,status="PASS" if spectral<=t else "FAIL",
+                    max_element_error=float(np.max(np.abs(delta))),
+                    frobenius_norm=float(np.linalg.norm(delta)),
+                    operator_norm=spectral,process_fidelity=fidelity)
