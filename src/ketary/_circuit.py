@@ -320,9 +320,13 @@ class Circuit:
     def _bind_sweep_rows(self,rows,keys):
         """Bind complete preflighted rows with one native-order validation plan."""
         from ._adapter import _bound_validation_indices,_validate_bound_values
+        indices=_bound_validation_indices(self._qc)
+        if indices is None:
+            # Paired measurements showed no reliable dense-route gain.
+            return tuple(self._bind_numeric(dict(zip(keys,(v for _,v in row),strict=True)))
+                         for row in rows)
         order={key:i for i,key in enumerate(keys)}
         positions=tuple(order[p] for p in self._qc.parameters)
-        indices=_bound_validation_indices(self._qc)
         payloads=[]
         for row in rows:
             values=tuple(row[i][1] for i in positions)
@@ -330,10 +334,7 @@ class Circuit:
                 bound=self._qc.assign_parameters(values,inplace=False)
             except (ZeroDivisionError,OverflowError) as exc:
                 raise ValueError("parameter expression must evaluate to a finite real number") from exc
-            if indices is None:
-                _validate_bound_values(bound)
-            else:
-                _validate_bound_values(bound,indices)
+            _validate_bound_values(bound,indices)
             c=Circuit.__new__(Circuit)
             c._qc=bound
             payloads.append(c)
