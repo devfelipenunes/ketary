@@ -1661,6 +1661,16 @@
       "category": "Advanced",
       "group": "composition",
       "lifecycle": "supported_advanced"
+    },
+    "Circuit.run_channel": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "_Math.expectation_complex": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
     }
   }
 }

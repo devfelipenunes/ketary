@@ -50,12 +50,13 @@ All declared public stub entries are classified once; constructors and dunder pr
 - **_ResultVisualize**: `bloch`, `bloch_svg`, `histogram`
 - **_Visualize**: `svg`, `text`
 
-## Native (17)
+## Native (19)
 
-- **Circuit**: `append`, `from_dynamic`, `from_parameterized`, `from_symbolic`, `from_synthesized`, `run_density`, `run_noisy`, `to_qiskit`, `transpile`, `transpile_for`
+- **Circuit**: `append`, `from_dynamic`, `from_parameterized`, `from_symbolic`, `from_synthesized`, `run_channel`, `run_density`, `run_noisy`, `to_qiskit`, `transpile`, `transpile_for`
 - **Top-level**: `ExternalVerificationReport`, `from_qiskit`
 - **Observable**: `commutator`, `from_qiskit`, `product`, `to_qiskit`
 - **_CircuitChecks**: `external_equivalence`
+- **_Math**: `expectation_complex`
 
 ## Compatibility (34)
 

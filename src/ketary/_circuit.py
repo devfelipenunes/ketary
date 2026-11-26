@@ -124,6 +124,11 @@ class Circuit:
         from ._classical import _run_density
         return _run_density(self,initial_state,max_bytes=max_bytes)
 
+    def run_channel(self,channel,initial_state=None,*,max_bytes=64*1024**2):
+        """Apply an explicit full-width CPTP Kraus channel after ideal evolution."""
+        from ._classical import _run_channel
+        return _run_channel(self,channel,initial_state,max_bytes=max_bytes)
+
     def run_noisy(self,noise_model,*,seed=None,max_bytes=64*1024**2):
         """Explicit optional Aer density-matrix noise simulation."""
         from ._classical import _run_noisy

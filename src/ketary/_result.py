@@ -220,6 +220,37 @@ class _Math:
             raise ArithmeticError("invalid Hermitian Pauli expectation")
         return float(np.clip(value.real/self._r._norm_sq,-1,1))
 
+    def expectation_complex(self,operator,*,max_work=64*1024**2):
+        """Explicit native complex Pauli expectation; no Hermitian coercion."""
+        from qiskit.quantum_info import SparsePauliOp
+        if not isinstance(operator,SparsePauliOp):
+            raise TypeError("expected native SparsePauliOp")
+        if operator.num_qubits!=self._r._n:
+            raise ValueError("expected full-width Pauli operator")
+        if not 1<=operator.size<=256:
+            raise ResourceLimit("complex expectation supports 1..256 Pauli terms")
+        work=_int(max_work,1)
+        if operator.size*self._r._data.size>work:
+            raise ResourceLimit("complex expectation work exceeds Pauli-state budget")
+        terms=[]
+        for label,coefficient in operator.to_list():
+            if type(label) is not str or len(label)!=self._r._n or set(label)-set("IXYZ"):
+                raise ValueError("expected canonical native Pauli labels")
+            try:
+                value=complex(coefficient)
+            except (TypeError,ValueError,OverflowError) as exc:
+                raise ValueError("expected finite complex coefficient") from exc
+            terms.append((label,_real(value.real),_real(value.imag)))
+        cache={label:self.expectation(label) for label in sorted({row[0] for row in terms})}
+        try:
+            real=math.fsum(re*cache[label] for label,re,im in terms)
+            imag=math.fsum(im*cache[label] for label,re,im in terms)
+        except (OverflowError,ValueError) as exc:
+            raise ArithmeticError("complex expectation is not finite") from exc
+        if not math.isfinite(real) or not math.isfinite(imag):
+            raise ArithmeticError("complex expectation is not finite")
+        return complex(real,imag)
+
     def expectations(self,observables,*,max_work=64*1024**2):
         """Ordered real expectations; validate first, reuse unique Pauli terms."""
         from collections.abc import Mapping
