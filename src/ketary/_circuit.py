@@ -99,6 +99,48 @@ class Circuit:
     def ccx(self,c1,c2,t):
         return self.gates.ccx(c1,c2,t)
 
+    def p(self,theta,q):
+        return self.gates.p(theta,q)
+
+    def u(self,theta,phi,lam,q):
+        return self.gates.u(theta,phi,lam,q)
+
+    def cp(self,theta,a,b):
+        return self.gates.cp(theta,a,b)
+
+    def ch(self,a,b):
+        return self.gates.ch(a,b)
+
+    def crx(self,theta,a,b):
+        return self.gates.crx(theta,a,b)
+
+    def cry(self,theta,a,b):
+        return self.gates.cry(theta,a,b)
+
+    def crz(self,theta,a,b):
+        return self.gates.crz(theta,a,b)
+
+    def sx(self,q):
+        return self.gates.sx(q)
+
+    def sxdg(self,q):
+        return self.gates.sxdg(q)
+
+    def cy(self,a,b):
+        return self.gates.cy(a,b)
+
+    def cswap(self,control,a,b):
+        return self.gates.cswap(control,a,b)
+
+    def rxx(self,theta,a,b):
+        return self.gates.rxx(theta,a,b)
+
+    def ryy(self,theta,a,b):
+        return self.gates.ryy(theta,a,b)
+
+    def rzz(self,theta,a,b):
+        return self.gates.rzz(theta,a,b)
+
     def copy(self):
         """Independent logical circuit with identical ordered operations."""
         return self._from_native(self._qc.copy(),owned=True)
@@ -274,6 +316,62 @@ class _Gates:
             raise ValueError("duplicate wires")
         self._c._qc.ccx(c1,c2,t)
         return self._c
+
+    def p(self,theta,q):
+        from qiskit.circuit.library import PhaseGate
+        return self._c.append(PhaseGate(_angle(theta)),[q])
+
+    def u(self,theta,phi,lam,q):
+        from qiskit.circuit.library import UGate
+        return self._c.append(UGate(_angle(theta),_angle(phi),_angle(lam)),[q])
+
+    def cp(self,theta,a,b):
+        from qiskit.circuit.library import CPhaseGate
+        return self._c.append(CPhaseGate(_angle(theta)),[a,b])
+
+    def ch(self,a,b):
+        from qiskit.circuit.library import CHGate
+        return self._c.append(CHGate(),[a,b])
+
+    def crx(self,theta,a,b):
+        from qiskit.circuit.library import CRXGate
+        return self._c.append(CRXGate(_angle(theta)),[a,b])
+
+    def cry(self,theta,a,b):
+        from qiskit.circuit.library import CRYGate
+        return self._c.append(CRYGate(_angle(theta)),[a,b])
+
+    def crz(self,theta,a,b):
+        from qiskit.circuit.library import CRZGate
+        return self._c.append(CRZGate(_angle(theta)),[a,b])
+
+    def sx(self,q):
+        from qiskit.circuit.library import SXGate
+        return self._c.append(SXGate(),[q])
+
+    def sxdg(self,q):
+        from qiskit.circuit.library import SXdgGate
+        return self._c.append(SXdgGate(),[q])
+
+    def cy(self,a,b):
+        from qiskit.circuit.library import CYGate
+        return self._c.append(CYGate(),[a,b])
+
+    def cswap(self,control,a,b):
+        from qiskit.circuit.library import CSwapGate
+        return self._c.append(CSwapGate(),[control,a,b])
+
+    def rxx(self,theta,a,b):
+        from qiskit.circuit.library import RXXGate
+        return self._c.append(RXXGate(_angle(theta)),[a,b])
+
+    def ryy(self,theta,a,b):
+        from qiskit.circuit.library import RYYGate
+        return self._c.append(RYYGate(_angle(theta)),[a,b])
+
+    def rzz(self,theta,a,b):
+        from qiskit.circuit.library import RZZGate
+        return self._c.append(RZZGate(_angle(theta)),[a,b])
 
 def from_qiskit(qc):
     return Circuit._from_native(qc)

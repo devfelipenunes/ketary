@@ -156,6 +156,47 @@ class _Math:
         marginal=p.transpose(axes+rest).reshape(1<<len(wires),-1).sum(axis=1)
         return {format(i,f"0{len(wires)}b"):float(v) for i,v in enumerate(marginal)}
 
+    def density_matrix(self, wires=None, *, max_bytes=64*1024**2):
+        """Reduced density matrix; first supplied wire is the high-order axis."""
+        from itertools import islice
+        n=self._r._n
+        selected=tuple(range(n-1,-1,-1)) if wires is None else tuple(_int(w) for w in islice(iter(wires),n+1))
+        if not selected or len(set(selected))!=len(selected) or any(w>=n for w in selected):
+            raise ValueError("invalid density matrix wires")
+        # Bound state-sized input and dense output payloads separately.
+        _limit(n,budget=max_bytes)
+        _limit(2*len(selected),budget=max_bytes)
+        axes=[n-1-w for w in selected]
+        rest=[i for i in range(n) if i not in axes]
+        a=self._r._data.reshape((2,)*n).transpose(axes+rest).reshape(1<<len(selected),-1)
+        return (a@a.conj().T)/self._r._norm_sq
+
+    def purity(self, wires=None, *, max_bytes=64*1024**2):
+        if wires is None:
+            return 1.0
+        rho=self.density_matrix(wires,max_bytes=max_bytes)
+        return float(np.clip(np.vdot(rho,rho).real,0,1))
+
+    def observable(self, terms):
+        """Expectation of a bounded real linear combination of full-width Paulis."""
+        from collections.abc import Mapping
+        if not isinstance(terms,Mapping) or not 1<=len(terms)<=256:
+            raise ValueError("expected 1..256 Pauli terms")
+        return math.fsum(_real(coefficient)*self.expectation(label) for label,coefficient in terms.items())
+
+    def dirac(self, *, max_terms=16, atol=1e-12):
+        """Return first non-negligible amplitudes, with explicit truncation."""
+        cap=_int(max_terms,1)
+        tolerance=_tol(atol)
+        rows=[]
+        for i,a in enumerate(self._r._data):
+            if abs(a)>tolerance:
+                if len(rows)==cap:
+                    rows.append("...")
+                    break
+                rows.append(f"({a.real:.8g}{a.imag:+.8g}j)|{i:0{self._r._n}b}>")
+        return " + ".join(rows) if rows else "no terms above tolerance"
+
     def fidelity(self, target):
         other = target if isinstance(target,Result) else Result(target)
         if other._data.shape != self._r._data.shape:

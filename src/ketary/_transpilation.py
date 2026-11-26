@@ -1,7 +1,8 @@
 """Narrow, explicitly checked Qiskit transpilation experiment."""
 from ._validation import _int, ResourceLimit, UnsupportedOperation
 
-_BASIS=frozenset(("h","x","y","z","s","sdg","t","tdg","rx","ry","rz","cx","cz","swap","ccx"))
+from ._gate_specs import SPECS
+_BASIS=frozenset(SPECS)
 
 def _lower(circuit, *, basis_gates, seed):
     if circuit.num_qubits>8:

@@ -15,7 +15,7 @@ def test_logical_lowering_phase_and_isolation():
     lowered.gates.x(0)
     assert c.to_qiskit()==native
 
-@pytest.mark.parametrize("basis",[[],["cx","cx"],["u"],"h"])
+@pytest.mark.parametrize("basis",[[],["cx","cx"],["unknown"],"h"])
 def test_bad_basis(basis):
     with pytest.raises(ValueError): q.bell().transpile(basis_gates=basis)
 

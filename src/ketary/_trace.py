@@ -78,8 +78,20 @@ class _Debug:
             _limit(a.num_qubits,2*(count+1),budget=budget)
         except ResourceLimit as exc:
             return TraceComparison(CheckResult("UNSUPPORTED",None,None,t,str(exc)))
-        actual=a.debug.trace(max_bytes=budget,max_steps=steps)
-        expected=b.debug.trace(max_bytes=budget,max_steps=steps)
+        # Preserve the historical conservative budget contract, but evolve
+        # only two current states and stop at the first observed divergence.
+        def checkpoints(c):
+            _,SV=_sdk()
+            initial=np.zeros(1<<c.num_qubits,dtype=complex)
+            initial[0]=np.exp(1j*float(c._qc.global_phase))
+            state=SV(initial)
+            yield TraceStep("initial (global phase applied)",(),Result(state.data))
+            for item in c._qc.data:
+                wires=tuple(c._qc.find_bit(w) for w in item.qubits)
+                state=state.evolve(item.operation,qargs=[w.index for w in wires])
+                yield TraceStep(item.operation.name,tuple(w.index for w in wires),Result(state.data))
+        actual=checkpoints(a)
+        expected=checkpoints(b)
         largest=0.0
         for i,(x,y) in enumerate(zip(actual,expected,strict=True)):
             check=x.result.test.state(y.result,ignore_global_phase=ignore_global_phase,atol=t)

@@ -11,11 +11,8 @@ _SCHEMA=1
 _MAX_BYTES=1024*1024
 _MAX_QUBITS=22
 _MAX_GATES=10000
-_ARITY={
-    "h":1,"x":1,"y":1,"z":1,"s":1,"sdg":1,"t":1,"tdg":1,
-    "rx":1,"ry":1,"rz":1,"cx":2,"cz":2,"swap":2,"ccx":3,
-}
-_ROTATIONS={"rx","ry","rz"}
+from ._gate_specs import SPECS
+_ARITY={name:spec[1] for name,spec in SPECS.items()}
 
 def _keys(value,expected):
     if type(value) is not dict or set(value)!=set(expected):
@@ -99,7 +96,7 @@ def _decode(payload):
             or any(type(w) is not int or w<0 or w>=n for w in wires)
             or len(set(wires))!=len(wires)):
             raise ValueError("invalid replay wires")
-        if type(params) is not list or len(params)!=(1 if name in _ROTATIONS else 0):
+        if type(params) is not list or len(params)!=SPECS[name][2]:
             raise ValueError("invalid replay parameter count")
         validated.append((name,tuple(_angle(p) for p in params),tuple(wires)))
     QC,_=_sdk()
