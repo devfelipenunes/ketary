@@ -149,6 +149,7 @@ jobs protect the interface. See [architecture boundaries](architecture-boundarie
 - [ADR 002 — One facade, selective adapters](adr/002-selective-adapters.md)
 - [ADR 003 — Explicit execution and numerical guarantees](adr/003-explicit-execution.md)
 - [ADR 004 — Private execution and trace progression](adr/004-private-execution-and-trace.md)
+- [ADR 005 — Call-local native Pauli query ownership](adr/005-pauli-query-ownership.md)
 
 See [architecture progression](architecture-roadmap.md) for scaling and extension gates.
 
