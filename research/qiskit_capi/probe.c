@@ -56,12 +56,18 @@ static PyObject *build(PyObject *self,PyObject *args){
     return qk_circuit_to_python_full(qc);
 }
 
-static PyObject *pack(PyObject *self,PyObject *data){
+static const char *quest_names[]={"h","x","y","z","rx","ry","rz","cx","cz","swap","p"};
+static int quest_decode(const QkCircuitInstructionView *v){
+    for(int i=0;i<11;i++)
+        if(strlen(quest_names[i])==v->name_len && memcmp(quest_names[i],v->name,v->name_len)==0) return i;
+    return -1;
+}
+static PyObject *pack_impl(PyObject *data,int quest){
     QkCircuit *qc=qk_circuit_borrow_from_python(data);
     if(!qc) return NULL;
     uint32_t n=qk_circuit_num_qubits(qc);
     size_t count=qk_circuit_num_instructions(qc);
-    if(!n || n>4096 || count>100000 || qk_circuit_num_clbits(qc) ||
+    if(!n || n>(quest?22:4096) || count>100000 || qk_circuit_num_clbits(qc) ||
        qk_circuit_num_param_symbols(qc)) return bad("unsupported circuit mode or size");
     QkParam *phase=qk_circuit_global_phase(qc);
     double ph=qk_param_as_real(phase);
@@ -75,17 +81,20 @@ static PyObject *pack(PyObject *self,PyObject *data){
         if(qk_circuit_instruction_kind(qc,i)!=QkOperationKind_Gate) goto reject;
         QkCircuitInstructionView v;
         qk_circuit_view_instruction(qc,i,&v);
-        int op=decode(&v);
-        if(op<0 || v.num_clbits || v.num_qubits!=(two(op)?2:1) ||
-           v.num_params!=(angle(op)?1:0)) goto reject;
-        if(v.qubits[0]>=n || (two(op)&&(v.qubits[1]>=n || v.qubits[0]==v.qubits[1]))) goto reject;
+        int op=quest?quest_decode(&v):decode(&v);
+        if(op<0) goto reject;
+        int is_two=quest?(op>=7 && op<=9):two(op);
+        int is_angle=quest?((op>=4 && op<=6)||op==10):angle(op);
+        if(v.num_clbits || v.num_qubits!=(is_two?2:1) ||
+           v.num_params!=(is_angle?1:0)) goto reject;
+        if(v.qubits[0]>=n || (is_two&&(v.qubits[1]>=n || v.qubits[0]==v.qubits[1]))) goto reject;
         double theta=0.;
-        if(angle(op)){
+        if(is_angle){
             if(qk_param_kind(v.params)!=QkParamKind_Real) goto reject;
             theta=qk_param_as_real(v.params);
             if(!isfinite(theta)) goto reject;
         }
-        int32_t row[3]={op,(int32_t)v.qubits[0],two(op)?(int32_t)v.qubits[1]:-1};
+        int32_t row[3]={op,(int32_t)v.qubits[0],is_two?(int32_t)v.qubits[1]:-1};
         memcpy(PyBytes_AS_STRING(r)+i*sizeof(row),row,sizeof(row));
         memcpy(PyBytes_AS_STRING(p)+i*sizeof(theta),&theta,sizeof(theta));
     }
@@ -95,9 +104,16 @@ reject:
     Py_DECREF(r);Py_DECREF(p);return bad("unsupported native instruction");
 }
 
+static PyObject *pack(PyObject *self,PyObject *data){
+    return pack_impl(data,0);
+}
+static PyObject *pack_quest(PyObject *self,PyObject *data){
+    return pack_impl(data,1);
+}
 static PyMethodDef methods[]={
     {"build",build,METH_VARARGS,"Build native circuit from bounded packed rows."},
     {"pack",pack,METH_O,"Read native standard-gate data without Python gate objects."},
+    {"pack_quest",pack_quest,METH_O,"Read QuEST-compatible packed native operations."},
     {NULL,NULL,0,NULL}
 };
 static struct PyModuleDef module={PyModuleDef_HEAD_INIT,"_ketary_capi_probe",NULL,-1,methods};
