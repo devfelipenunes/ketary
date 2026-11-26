@@ -16,9 +16,18 @@ closed duplicates as completed implementations.
   qualified, consolidated, not planned, historical closed and open
   dispositions. 13 rewrite fixtures, 100 LANG cases, 27 parameter rows,
   paired longitudinal diagnostics and 37 original bounded functional
-  alternatives already qualified. Cross-family #163 teleportation
-  matched source/cost and independent held-out writing remain explicit
-  gaps; no claim of all 51 implemented or of independent study.
+  alternatives already qualified. Cross-family #163 local measured teleportation was found in the exact
+  #502 dynamic artifact 15159225277, SHA256
+  cc281c069b626ebb64e5fb388bbe107522f41d5c420fba91961d703ed02f380d
+  (CRC verified): six matched cases, three repetitions per route, 2048
+  shots, 124/167 builder tokens (Ketary/native), pooled p50 build
+  .520475/.3644365 ms, run 71.2408195/70.338011 ms, max observed
+  marginal error .0400390625 on both routes, logical instructions
+  equal per case. Includes conditional blocks, not physical gate counts;
+  native execution helper excluded from both builder counts. This is
+  local measured execution, not coherent operator/process tomography or
+  hardware. Independent held-out writing remains an explicit gap;
+  no claim of all 51 implemented or of independent study.
 - #110: exact QCEC optional inventory previously found no installed
   notice hashes for ANTLR4 4.13.2 and nanobind-backend 1.0.0. The new
   narrow workflow downloads only the two hash-pinned public wheels

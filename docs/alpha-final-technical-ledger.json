@@ -175,7 +175,7 @@
       "issue": 163,
       "title": "ABS23 [P1]: Algorithm composition recipes and cross-family reuse",
       "disposition": "consolidated",
-      "evidence": "#345 cross-family recipes: QFT/QPE, QAOA, VQE, Trotter, Grover, graph and addition covered; teleportation matched source/cost reconciliation outstanding",
+      "evidence": "#345 cross-family recipes: QFT/QPE, QAOA, VQE, Trotter, Grover, graph and addition matched; local measured teleportation artifact 15159225277 contains six analytic cases and paired source/build/run, 2048 shots, 3 repeats per route. Distinct measured vs coherent scope; no physical gate claim.",
       "source": "research/abstraction_atlas.py"
     },
     {
