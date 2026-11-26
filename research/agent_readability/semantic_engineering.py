@@ -16,7 +16,7 @@ def _bounded(c):
     return c.inspect(limit=256)
 
 
-def semantic_inspect(c):
+def semantic_inspect(c,*,source=None):
     """Wire-order dependency graph, not proof of physical causation."""
     page=_bounded(c)
     last={}
@@ -29,8 +29,19 @@ def semantic_inspect(c):
         for w in op["wires"]:
             last[w]=idx
             wires[str(w)].append(idx)
+    provenance={"status":"UNAVAILABLE","reason":"no literal source supplied"}
+    if source is not None:
+        from source_reader import read_source
+        parsed=read_source(source)
+        if (parsed["status"]=="PASS" and parsed["num_qubits"]==c.num_qubits
+            and page["global_phase"]==0
+            and [_signature(x) for x in parsed["operations"]]==[_signature(x) for x in page["operations"]]):
+            provenance={"status":"MATCH","scope":"literal source matches runtime operations; not proof of execution origin",
+                        "locations":[{k:op[k] for k in ("index","line","column","end_column")} for op in parsed["operations"]]}
+        else:
+            provenance={"status":"UNSUPPORTED","reason":"literal source unavailable or does not match runtime"}
     return {"schema_version":1,"scope":"structural wire ordering only; no entanglement or causal proof",
-            "circuit":page,"wire_operations":wires,"dependencies":dependencies}
+            "circuit":page,"wire_operations":wires,"dependencies":dependencies,"provenance":provenance}
 
 
 def diagnose(observed,reference,*,paulis=()):
