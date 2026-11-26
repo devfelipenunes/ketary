@@ -110,3 +110,5 @@ mathematical frequency rules, distinct caps and preflight ordering. No
 new import edge or cyclic component; extraction stays in the same module
 so the current dependency graph is preserved. A late staging failure must
 precede every simulation. No performance claim from code deduplication.
+
+The [current inventory](current-architecture-inventory.md) records the exact local import sites and reviewed cyclic-edge purposes, AST branch and duplicate-body signals. Static metrics do not justify cosmetic extraction.
