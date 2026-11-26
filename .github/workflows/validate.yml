@@ -212,8 +212,8 @@ jobs:
           cp examples/first_verification.py "$RUNNER_TEMP/first_verification.py"
           cd "$RUNNER_TEMP"
           "$RUNNER_TEMP/ketary-wheel/bin/python" "$RUNNER_TEMP/first_verification.py"
-          cp examples/run_documentation.py README.md "$RUNNER_TEMP/"
-          cp docs/getting-started.md docs/core-api.md docs/tutorial.md docs/how-to.md "$RUNNER_TEMP/"
+          cp "$GITHUB_WORKSPACE/examples/run_documentation.py" "$GITHUB_WORKSPACE/README.md" "$RUNNER_TEMP/"
+          cp "$GITHUB_WORKSPACE/docs/getting-started.md" "$GITHUB_WORKSPACE/docs/core-api.md" "$GITHUB_WORKSPACE/docs/tutorial.md" "$GITHUB_WORKSPACE/docs/how-to.md" "$RUNNER_TEMP/"
           (cd "$RUNNER_TEMP" && "$RUNNER_TEMP/ketary-wheel/bin/python" run_documentation.py)
           "$RUNNER_TEMP/ketary-wheel/bin/python" -c 'import ketary as q; from importlib.metadata import version; assert version("ketary") == "0.1.0.dev0"; from pathlib import Path; assert Path(q.__file__).with_name("py.typed").is_file(); assert Path(q.__file__).with_name("__init__.pyi").is_file(); assert q.bell().run().test.probability("00", 0.5).status == "PASS"; print(q.__file__)'
       - name: Install dynamic extra from wheel in clean environment
