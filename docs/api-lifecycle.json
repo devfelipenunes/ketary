@@ -1676,6 +1676,11 @@
       "category": "Advanced",
       "group": "execution",
       "lifecycle": "supported_advanced"
+    },
+    "Circuit.expectation_hessian": {
+      "category": "Advanced",
+      "group": "execution",
+      "lifecycle": "supported_advanced"
     }
   }
 }
