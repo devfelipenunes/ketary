@@ -45,11 +45,28 @@ def metrics(source):
         d=depth+int(isinstance(node,(ast.For,ast.While,ast.If,ast.comprehension)))
         return max([d]+[nested(x,d) for x in ast.iter_child_nodes(node)])
     calls=[x.func.attr for x in nodes if isinstance(x,ast.Call) and isinstance(x.func,ast.Attribute)]
+    # Count literal arguments at known gate positions only; computed
+    # expressions, keyword wire lists and indirect calls are not inferred.
+    positions={"h":(0,1),"x":(0,1),"y":(0,1),"z":(0,1),"s":(0,1),"sdg":(0,1),
+               "t":(0,1),"tdg":(0,1),"cx":(0,2),"cz":(0,2),"swap":(0,2),
+               "rx":(1,1),"ry":(1,1),"rz":(1,1),"p":(1,1),"cp":(1,2),
+               "rxx":(1,2),"ryy":(1,2),"rzz":(1,2),"u":(3,1),"ccx":(0,3)}
+    gate_calls=[x for x in nodes if isinstance(x,ast.Call) and isinstance(x.func,ast.Attribute) and x.func.attr in positions]
+    def literal(x):
+        return isinstance(x,ast.Constant) and type(x.value) in (int,float) or (
+            isinstance(x,ast.UnaryOp) and isinstance(x.op,(ast.USub,ast.UAdd)) and
+            isinstance(x.operand,ast.Constant) and type(x.operand.value) in (int,float))
+    wire_literals=angle_literals=0
+    for call in gate_calls:
+        angles,wires=positions[call.func.attr]
+        angle_literals+=sum(literal(x) for x in call.args[:angles])
+        wire_literals+=sum(literal(x) for x in call.args[angles:angles+wires])
     # Count repeated nontrivial expression/statement shapes, not trivial names
     # or constants. This is exact syntactic duplication, not semantics.
     duplicates=Counter(ast.dump(x,include_attributes=False) for x in nodes
                        if isinstance(x,(ast.expr,ast.stmt)) and sum(1 for _ in ast.walk(x))>=5)
-    return dict(duplicate_ast_groups=sum(v>1 for v in duplicates.values()),
+    return dict(explicit_gate_calls=len(gate_calls),positional_wire_literals=wire_literals,positional_angle_literals=angle_literals,
+                duplicate_ast_groups=sum(v>1 for v in duplicates.values()),
                 duplicate_ast_excess=sum(v-1 for v in duplicates.values() if v>1),
                 tokens=tokens,ast_nodes=len(nodes),statements=sum(isinstance(x,ast.stmt) for x in nodes),
                 loops=sum(isinstance(x,(ast.For,ast.While,ast.comprehension)) for x in nodes),

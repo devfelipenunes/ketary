@@ -212,6 +212,8 @@ jobs:
           python -m coverage report --precision=6 --fail-under=95
           python -m coverage json -o dynamic-coverage.json
           python -m research.coverage_evidence dynamic-coverage.json --scope dynamic --baseline docs/coverage-count-baseline.json --output dynamic-coverage-gaps.json
+      - name: Matched local protocol diagnostics
+        run: python -m research.wave1_dynamic_protocols > wave1-dynamic-protocols.json
       - name: Audit dynamic dependencies
         run: |
           python -m venv audit-venv
@@ -226,6 +228,7 @@ jobs:
             dynamic-coverage.json
             dynamic-coverage-gaps.json
             dynamic-test-results.xml
+            wave1-dynamic-protocols.json
             dynamic-license-inventory.json
             dynamic-audited-requirements.txt
             dynamic-vulnerability-report.json
