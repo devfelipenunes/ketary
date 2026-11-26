@@ -29,7 +29,7 @@ shared and excluded, opaque native evolution is not a fair universal
 speed comparator. Keep research-only until public contract, stubs and
 promotion approval. No new public API in this cycle.
 
-50 candidate jobs across five PRs, each checked on exact head; trees
+55 candidate jobs across five PRs, each checked on exact head; trees
 reconciled with disjoint earlier merged files. Do not sum separate branch
 test counts. Combined PR runs the SDK suite and integration fixture; push
 CI remains unverified. Independent usability, controlled host/RSS,
