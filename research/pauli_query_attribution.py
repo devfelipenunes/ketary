@@ -74,7 +74,17 @@ def evaluate(n,count,seed,repetitions):
     snapshot=q.Result(data)
     original=snapshot.math.statevector()
     expected=tuple(independent(data,label) for label in labels)
-    variants={"sdk":lambda:snapshot.math.expectations(labels),
+    # Emulate prior public grouped path for this same canonical-label subset:
+    # validate all labels, sort, call scalar expectation once per unique label,
+    # and restore the caller order. No general weighted-input speedup claim.
+    def previous_grouped():
+        if len(labels)*snapshot._data.size>64*1024**2:
+            raise q.ResourceLimit("grouped expectation work exceeds budget")
+        if any(len(label)!=n or set(label)-set("IXYZ") for label in labels):
+            raise ValueError("invalid labels")
+        cache={label:snapshot.math.expectation(label) for label in sorted(labels)}
+        return tuple(math.fsum((cache[label],)) for label in labels)
+    variants={"previous_grouped_subset":previous_grouped,"sdk":lambda:snapshot.math.expectations(labels),
               "fresh_native":lambda:_query(snapshot,labels,reuse=False),
               "reused_native":lambda:_query(snapshot,labels,reuse=True)}
     errors={}

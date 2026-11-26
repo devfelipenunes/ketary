@@ -98,3 +98,8 @@ local imports. See [resource and ownership contracts](resource-contracts.md).
 _topology is a pure ordered logical pair generator depending only on _validation; no native imports or public facade dependency. Rotation layers reuse the existing _ergonomics and adapter boundaries.
 
 QGT uses a function-local NumPy import in _ergonomics for the bounded projected derivative Gram matrix; no new distribution, eager import or optional backend dependency. The exact AST inventory is expanded, not relaxed.
+
+Grouped real and explicit native complex Pauli expectation now share private
+single-label numerical acceptance and a call-local native handle in _result.
+No new module/import edge, cache, native state mutation or public API.
+See ADR 005. Existing legacy observable mapping path remains unchanged.

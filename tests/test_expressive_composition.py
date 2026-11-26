@@ -118,13 +118,15 @@ def test_grouped_math_native_and_shared_terms(monkeypatch):
     native=SparsePauliOp.from_list([("IIZ",.3),("YIX",.8)]).to_matrix()
     z=SparsePauliOp("IIZ").to_matrix()
     expected=[np.vdot(v,native@v).real,np.vdot(v,z@v).real,np.vdot(v,z@v).real,np.vdot(v,native@v).real]
-    cls=type(r.math)
-    orig=cls.expectation
+    # Count actual native evaluations rather than a public wrapper call:
+    # exactly the same distinct labels, once each, and zero on preflight failure.
+    from qiskit.quantum_info import Statevector
+    orig=Statevector.expectation_value
     calls=[]
-    def tracked(self,label):
-        calls.append(label)
-        return orig(self,label)
-    monkeypatch.setattr(cls,"expectation",tracked)
+    def tracked(self,operator,*args,**kwargs):
+        calls.append(operator.to_label())
+        return orig(self,operator,*args,**kwargs)
+    monkeypatch.setattr(Statevector,"expectation_value",tracked)
     monkeypatch.setattr(q.Circuit,"run",lambda *a,**k:pytest.fail("implicit execution"))
     np.testing.assert_allclose(r.math.expectations(iter(terms)),expected,atol=1e-12,rtol=0)
     assert calls==["IIZ","YIX"]

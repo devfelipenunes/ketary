@@ -213,12 +213,22 @@ class _Math:
         pauli=_pauli_label(self._r._n,pauli)
         if not isinstance(pauli,str) or len(pauli)!=self._r._n or any(p not in "IXYZ" for p in pauli):
             raise ValueError("expected a full-width uppercase I/X/Y/Z Pauli label")
-        from qiskit.quantum_info import Pauli, Statevector
-        # Native Pauli evaluation operates on the snapshot, not a dense operator.
-        value=complex(Statevector(self._r._data).expectation_value(Pauli(pauli)))
+        from qiskit.quantum_info import Statevector
+        return self._native_pauli_value(Statevector(self._r._data),pauli)
+
+    def _native_pauli_value(self,state,label):
+        """One validated Pauli query; common numerical acceptance policy."""
+        from qiskit.quantum_info import Pauli
+        value=complex(state.expectation_value(Pauli(label)))
         if not math.isfinite(value.real) or not math.isfinite(value.imag) or abs(value.imag)>1e-9:
             raise ArithmeticError("invalid Hermitian Pauli expectation")
         return float(np.clip(value.real/self._r._norm_sq,-1,1))
+
+    def _native_pauli_values(self,labels):
+        """Call-local native handle, only after complete caller preflight."""
+        from qiskit.quantum_info import Statevector
+        state=Statevector(self._r._data)
+        return {label:self._native_pauli_value(state,label) for label in labels}
 
     def expectation_complex(self,operator,*,max_work=64*1024**2):
         """Explicit native complex Pauli expectation; no Hermitian coercion."""
@@ -241,7 +251,7 @@ class _Math:
             except (TypeError,ValueError,OverflowError) as exc:
                 raise ValueError("expected finite complex coefficient") from exc
             terms.append((label,_real(value.real),_real(value.imag)))
-        cache={label:self.expectation(label) for label in sorted({row[0] for row in terms})}
+        cache=self._native_pauli_values(sorted({row[0] for row in terms}))
         try:
             real=math.fsum(re*cache[label] for label,re,im in terms)
             imag=math.fsum(im*cache[label] for label,re,im in terms)
@@ -282,7 +292,7 @@ class _Math:
             labels.update(terms)
         if len(labels)*self._r._data.size>work:
             raise ResourceLimit("grouped expectation work exceeds Pauli-state entry budget")
-        cache={label:self.expectation(label) for label in sorted(labels)}
+        cache=self._native_pauli_values(sorted(labels))
         values=tuple(math.fsum(coefficient*cache[label] for label,coefficient in row) for row in rows)
         if not all(math.isfinite(value) for value in values):
             raise ArithmeticError("observable expectation is not finite")
