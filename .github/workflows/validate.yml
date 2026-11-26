@@ -32,7 +32,8 @@ jobs:
       - name: Required tests and upstream probes
         run: |
           python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes --junitxml=core-test-results.xml
-          python -m coverage report -m
+          python -m coverage report -m --precision=2
+          python -m coverage report --precision=6 --fail-under=95
           python -m coverage json -o coverage.json
       - name: Verification calibration against native Qiskit
         run: |
@@ -202,7 +203,8 @@ jobs:
           python tools/audit_dependencies.py --scope dynamic
           python -m pip freeze > dynamic-environment.txt
           python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes tests_dynamic --junitxml=dynamic-test-results.xml
-          python -m coverage report -m
+          python -m coverage report -m --precision=2
+          python -m coverage report --precision=6 --fail-under=95
           python -m coverage json -o dynamic-coverage.json
       - name: Audit dynamic dependencies
         run: |
