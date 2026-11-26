@@ -89,6 +89,9 @@ jobs:
           cat verification-scaling.json
           python research/priority_sampling_rss.py --quick > priority-sampling-rss.json
           cat priority-sampling-rss.json
+          python -m research.closure_sampling_pinned --quick > closure-sampling-pinned.json
+          python -m research.closure_arithmetic_compare > closure-arithmetic.json
+          python -m research.closure_qec_metrics > closure-qec.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: benchmark-results
@@ -96,6 +99,9 @@ jobs:
             benchmark_results.json
             verification-scaling.json
             priority-sampling-rss.json
+            closure-sampling-pinned.json
+            closure-arithmetic.json
+            closure-qec.json
             environment.txt
 
   dependency-review:
