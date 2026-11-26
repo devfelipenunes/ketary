@@ -21,7 +21,7 @@ def cancellation(n,shift,theta):
     r,h,centered,want=analytic_case(n,shift,theta)
     before=r.math.statevector()
     routes={"streamed":r.math.observable_variance_streamed,
-            "fallback":lambda op:r.math.observable_variance_streamed(op,max_bytes=64*(1<<n))}
+            "minimum_budget":lambda op:r.math.observable_variance_streamed(op,max_bytes=64*(1<<n))}
     if n<=8:routes["dense"]=r.math.observable_variance
     values={}
     for key,fn in routes.items():
@@ -76,7 +76,7 @@ def main():
     a=p.parse_args()
     if a.worker:print(json.dumps(worker(a.n,a.count,a.variant,a.repetitions),allow_nan=False));return
     if not a.output:p.error("output required")
-    cases=[cancellation(n,s,t) for n in (2,8,12) for s in (0.,2.**16,2.**30,2.**45) for t in (0.,1e-6,.37)]
+    cases=[cancellation(n,s,t) for n in (1,2,8,12) for s in (0.,2.**16,2.**30,2.**45) for t in (0.,1e-6,.37)]
     rows=[]
     for n in (4,8,12,16):
         for count in (4,16):
