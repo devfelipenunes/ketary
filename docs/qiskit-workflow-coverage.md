@@ -34,3 +34,5 @@ separate scoped architectural decisions. No automatic lowering, hidden runs,
 unbounded matrices, silent metadata loss or publication.
 
 Initial head e99b13bc, CI 45790487697: 37/37 tests; 17 direct and five interop matched; 15 tested direct routes rejected; maximum matched error 2.23e-15 (rounded up). Recovery rows require independent CI. No runtime change.
+
+Wave 1/2 promotion rows reattempt eight existing tasks using explicit public APIs; do not increase the denominator of 37. Dynamic sequence fixtures check width and instruction count; independent execution tests check actual asymmetric counts. Complex native bridge is not a new general Ketary operator type. The mixed-state fixture is native density, not pure Result. Metadata and barrier preservation remain distinct gaps. Hardware target handoff has a local fake-provider test only.

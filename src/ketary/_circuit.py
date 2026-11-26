@@ -112,6 +112,29 @@ class Circuit:
         return run_shots(self,shots=shots,seed=seed,max_bytes=max_bytes)
 
     @classmethod
+    def from_dynamic(cls,template):
+        """Import an independent bounded native dynamic circuit."""
+        from ._classical import _dynamic_snapshot
+        c=cls.__new__(cls)
+        c._qc=_dynamic_snapshot(template)
+        return c
+
+    def run_density(self,initial_state=None,*,max_bytes=64*1024**2):
+        """Explicit ideal density-matrix evolution; returns native DensityMatrix."""
+        from ._classical import _run_density
+        return _run_density(self,initial_state,max_bytes=max_bytes)
+
+    def run_noisy(self,noise_model,*,seed=None,max_bytes=64*1024**2):
+        """Explicit optional Aer density-matrix noise simulation."""
+        from ._classical import _run_noisy
+        return _run_noisy(self,noise_model,seed=seed,max_bytes=max_bytes)
+
+    def transpile_for(self,backend,*,optimization_level=0,seed=0):
+        """Return an explicitly target-transpiled native circuit, never submit a job."""
+        from ._transpilation import _transpile_for
+        return _transpile_for(self,backend,optimization_level=optimization_level,seed=seed)
+
+    @classmethod
     def symbolic(cls,n):
         """Explicit opt-in to native symbolic gate parameters."""
         c=cls(n)

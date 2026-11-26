@@ -1626,6 +1626,26 @@
       "category": "Native",
       "group": "native",
       "lifecycle": "explicit_native"
+    },
+    "Circuit.from_dynamic": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Circuit.run_density": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Circuit.run_noisy": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
+    },
+    "Circuit.transpile_for": {
+      "category": "Native",
+      "group": "native",
+      "lifecycle": "explicit_native"
     }
   }
 }

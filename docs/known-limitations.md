@@ -9,10 +9,10 @@
   before execution. Explicit partial binding and symbolic import are available within limits; no symbolic replay.
 - Dynamic mode: optional Aer, one classical register, X/Z conditional operations,
   12 wires/bits, 1024 top-level operations, 10000 shots. No generic control
-  flow, external dynamic import, noise model or pure-state conversion.
+  flow or pure-state conversion; explicit bounded dynamic import is described below.
   Logical resource summaries count top-level operations, not branch-expanded
   costs. Text drawing is available; unitary SVG is not.
-- Result pure snapshots, no general mixed-state execution. Dense operator
+- Result pure snapshots; explicit mixed-state execution returns native DensityMatrix. Dense operator
   checks <=8 wires; witness comparison <=12 wires/256 gates; QCEC external
   adapter <=22 wires/256 gates with explicit deadline. QCEC is installed
   separately, not an automatically installed dependency.
@@ -28,4 +28,6 @@
 
 - Core designation is a recommended experimental entry path, not a stable 1.0 guarantee. Aggregate expressions require hashable Observable keys or full-width strings; no general symbolic predicate language. Named annotations remain local, not serialized.
 
-Explicit synthesis accepts trusted bound gate-only circuits up to five wires; direct native import remains strict. Noncommuting product evolution is explicitly approximate. Complex Pauli products and commutators return native SparsePauliOp; Observable stays real Hermitian. No new noise/hardware/mixed-state mode.
+Explicit synthesis accepts trusted bound gate-only circuits up to five wires; direct native import remains strict. Noncommuting product evolution is explicitly approximate. Complex Pauli products and commutators return native SparsePauliOp; Observable stays real Hermitian. The original pure-state Result remains unchanged; explicit native density/noise modes are described below.
+
+Explicit from_dynamic supports a bounded native subset with multiple classical registers and gate-only conditional branches. run_density/run_noisy return native density matrices, not Result; local noise uses optional Aer. transpile_for accepts an explicit native target and returns a native circuit with layout; no job submission or verified hardware execution. Original pure/shot and strict import contracts unchanged.

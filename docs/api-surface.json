@@ -287,7 +287,11 @@
     "Circuit.from_symbolic",
     "Circuit.from_synthesized",
     "Observable.product",
-    "Observable.commutator"
+    "Observable.commutator",
+    "Circuit.from_dynamic",
+    "Circuit.run_density",
+    "Circuit.run_noisy",
+    "Circuit.transpile_for"
   ],
   "Compatibility": [
     "Circuit.analyze",

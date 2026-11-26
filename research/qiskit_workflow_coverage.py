@@ -151,6 +151,35 @@ CASES.extend([
 "c=QuantumCircuit(2); c.append(XXPlusYYGate(.4,.2),[0,1]); out=q.from_qiskit(transpile(c,basis_gates=['u','cx'],optimization_level=0,qubits_initially_zero=False))"),
 ])
 
+
+# New public candidate routes: keep original negative fixtures intact.
+CASES.extend([
+("promotion_symbolic_import","Native symbolic import followed by complete binding","operator","interop",
+"p=Parameter('t'); c=QuantumCircuit(1); c.ry(p,0); c.global_phase=p; out=c.assign_parameters({p:.3})",
+"p=Parameter('t'); c=QuantumCircuit(1); c.ry(p,0); c.global_phase=p; out=q.Circuit.from_symbolic(c).bind({p:.3})"),
+("promotion_partial_binding","Partial binding and later complete assignment","operator","direct",
+"a,b=Parameter('a'),Parameter('b'); c=QuantumCircuit(1); c.ry(a,0); c.rz(b,0); out=c.assign_parameters({a:.3}).assign_parameters({b:.4})",
+"a,b=q.Circuit.parameter_vector('p',2); out=q.Circuit.symbolic(1).ry(a,0).rz(b,0).bind_partial({a:.3}).bind({b:.4})"),
+("promotion_arbitrary_unitary","Verified native unitary synthesis","operator","interop",
+"c=QuantumCircuit(1); c.unitary(np.array([[0,1j],[1j,0]]),[0]); out=c",
+"c=QuantumCircuit(1); c.unitary(np.array([[0,1j],[1j,0]]),[0]); out=q.Circuit.from_synthesized(c)"),
+("promotion_control","Controlled composite with strict phase","operator","direct",
+"b=QuantumCircuit(1); b.ry(.4,0); b.global_phase=.3; c=QuantumCircuit(2); c.append(b.to_gate().control(1),[0,1]); out=c",
+"out=q.Circuit(1).ry(.4,0).evolve(q.I(),time=-.3).control()"),
+("promotion_complex_algebra","Compute a complex non-Hermitian Pauli sum through explicit native bridge","numeric","interop",
+"out=SparsePauliOp.from_list([('X',1j),('Z',.3)]).to_matrix()",
+"out=(1j*q.X(0).to_qiskit()+.3*q.Z(0).to_qiskit()).to_matrix()"),
+("promotion_mixed_state","Evolve a mixed state","numeric","interop",
+"out=DensityMatrix(np.eye(2)/2).data",
+"out=q.Circuit(1).run_density(DensityMatrix(np.eye(2)/2)).data"),
+("promotion_dynamic_import","Preserve one-level conditional native sequence","sequence","interop",
+"c=QuantumCircuit(2,1); c.h(0); c.measure(0,0)\nwith c.if_test((c.clbits[0],1)): c.x(1)\nout=c",
+"c=QuantumCircuit(2,1); c.h(0); c.measure(0,0)\nwith c.if_test((c.clbits[0],1)): c.x(1)\nout=q.Circuit.from_dynamic(c)"),
+("promotion_multi_register","Preserve native multiple classical registers","sequence","interop",
+"c=QuantumCircuit(QuantumRegister(2),ClassicalRegister(1,'a'),ClassicalRegister(1,'b')); c.measure([0,1],[0,1]); out=c",
+"c=QuantumCircuit(QuantumRegister(2),ClassicalRegister(1,'a'),ClassicalRegister(1,'b')); c.measure([0,1],[0,1]); out=q.Circuit.from_dynamic(c)"),
+])
+
 def shape(s):
     tree=ast.parse(s)
     return dict(tokens=sum(t.type not in (tokenize.ENDMARKER,tokenize.NEWLINE,tokenize.NL,tokenize.INDENT,tokenize.DEDENT,tokenize.COMMENT) for t in tokenize.generate_tokens(io.StringIO(s).readline)),calls=sum(isinstance(n,ast.Call) for n in ast.walk(tree)),statements=sum(isinstance(n,ast.stmt) for n in ast.walk(tree)))
