@@ -16,3 +16,12 @@ Raw timings and p50/p95 retained, no timing assertion or dedicated host
 claim. Oracle after memory measurement. HWM includes preparation;
 increments are not allocation counts. Cancellation deviations at large
 shifts are limitations to review, not a certification of accuracy.
+
+Follow-up: the original 36-case audit found 16 route violations at shifts
+2^30 and 2^45 (max 1.9379016801659987e-4). The minimum-budget route
+is not always the native fallback: at one wire it is, at larger widths
+it may use short chunks. The follow-up includes one-wire fixtures and
+labels this route accurately. The runtime now validates all coefficients
+then removes the exact identity offset prior to both variance paths.
+Strict 1e-12 analytic tests cover shifts through max finite double,
+negative shifts, identity-only, preflight and noncommuting sums.

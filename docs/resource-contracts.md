@@ -105,3 +105,10 @@ Exact tuple pair rows avoid redundant materialization, retaining _pair wire
 validation. Exact Circuit ordered selections reuse a call-local _Gates
 wrapper, not a cached mutable circuit. All other input and subclass paths,
 preflight limits and suffix transaction remain unchanged.
+
+Real observable variance removes a validated full-width identity offset
+before matrix construction or streamed accumulation, using Var(H+aI)=Var(H).
+Original term count, byte/work preflight, label and finite coefficient checks
+remain unchanged, including identity-only inputs. Identity-only variance is
+exactly zero after validation. This avoids cancellation from large scalar
+energy offsets; not a guarantee for all ill-conditioned nonidentity sums.

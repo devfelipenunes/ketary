@@ -457,7 +457,13 @@ class _Math:
         for label,coefficient in terms.items():
             if type(label) is not str or len(label)!=n or set(label)-set("IXYZ"):
                 raise ValueError("invalid Pauli label")
-            validated.append((label,_real(coefficient)))
+            numeric=_real(coefficient)
+            # Var(H + aI) = Var(H). Validate a first, then remove the
+            # identity offset before any floating-point matrix/state action.
+            if label!="I"*n:
+                validated.append((label,numeric))
+        if not validated:
+            return 0.0
         operator=SparsePauliOp.from_list(validated).to_matrix()
         state=self._r._data/math.sqrt(self._r._norm_sq)
         transformed=operator@state
@@ -485,7 +491,13 @@ class _Math:
         for label,coefficient in terms.items():
             if type(label) is not str or len(label)!=n or set(label)-set("IXYZ"):
                 raise ValueError("invalid Pauli label")
-            validated.append((label,_real(coefficient)))
+            numeric=_real(coefficient)
+            # Var(H + aI) = Var(H). Validate a first, then remove the
+            # identity offset before any floating-point matrix/state action.
+            if label!="I"*n:
+                validated.append((label,numeric))
+        if not validated:
+            return 0.0
         state=self._r._data/math.sqrt(self._r._norm_sq)
         result=np.zeros_like(state)
         # Retain the existing four-state payload admission and work cap.
