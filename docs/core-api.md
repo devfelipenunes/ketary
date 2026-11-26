@@ -70,3 +70,5 @@ execution cost, return type, error contract, scope, compatibility effect,
 and native mathematical oracle. Add a function only if a demonstrated
 workflow cannot be expressed adequately with existing abstractions.
 See [compatibility](compatibility.md) and [acceptance](core-acceptance.md).
+
+For implementation boundaries and ownership flows, see [architecture](architecture.md).

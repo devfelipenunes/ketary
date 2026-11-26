@@ -18,5 +18,4 @@ text drawings and dictionaries also allocate memory. Use small examples,
 explicit limits and targeted queries.
 
 Logical gate cancellation is conservative, not device-aware optimization.
-Qiskit hardware transpilation, noise, symbolic parameters, mid-circuit
-measurement and a second backend are not part of the validated L0 API.
+Hardware execution and noise remain outside scope. Symbolic binding and restricted mid-circuit measurement/control via optional Aer were added after the original L0 spike. Logical transpilation is bounded and not device-aware. See [architecture](architecture.md) for current modes and boundaries.
