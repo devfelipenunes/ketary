@@ -317,6 +317,25 @@ class Circuit:
         c._qc=bound
         return c
 
+    def _bind_sweep_rows(self,rows,keys):
+        """Bind complete preflighted rows with one native-order validation plan."""
+        from ._adapter import _bound_validation_indices,_validate_bound_values
+        order={key:i for i,key in enumerate(keys)}
+        positions=tuple(order[p] for p in self._qc.parameters)
+        indices=_bound_validation_indices(self._qc)
+        payloads=[]
+        for row in rows:
+            values=tuple(row[i][1] for i in positions)
+            try:
+                bound=self._qc.assign_parameters(values,inplace=False)
+            except (ZeroDivisionError,OverflowError) as exc:
+                raise ValueError("parameter expression must evaluate to a finite real number") from exc
+            _validate_bound_values(bound,indices)
+            c=Circuit.__new__(Circuit)
+            c._qc=bound
+            payloads.append(c)
+        return tuple(payloads)
+
     def expectation_jacobian(self,bindings,observables,*,max_bytes=64*1024**2):
         """Explicit ideal expectation derivatives in observable/native parameter order."""
         from ._ergonomics import _expectation_jacobian
