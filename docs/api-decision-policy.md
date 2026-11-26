@@ -8,8 +8,8 @@ stability guarantee. No public symbol is removed or renamed.
 ## Lifecycle and canonical language
 
 Every declared entry is classified in api-lifecycle.json and cross-checked
-with api-surface.json. Core (94), Advanced (170), Native (9), Compatibility
-(34): 307 declarations including types and accessors, not 307 algorithms.
+with api-surface.json. Core (94), Advanced (171), Native (9), Compatibility
+(34): 308 declarations including types and accessors, not 307 algorithms.
 Core remains the learning path. Advanced is supported when its distinct
 semantics matter; Native is explicit interoperability. Compatibility stays
 callable and typed but is not taught as a parallel API. Candidate research
@@ -115,3 +115,5 @@ signature/mode, ownership, resource budget, semantic oracle, invalid
 inputs, compatibility, stub/inventory/lifecycle coverage, executable
 examples, and full CI. Use the smallest compatible change. No new
 runtime dependency, second IR, generic DSL, or publication from this policy.
+
+Ordered local observable reuse: `H.on(wires, width=n)` returns a new real Pauli Observable with local wire i mapped to wires[i]. This is explicit mathematical embedding, not circuit placement, a new IR or implicit execution. #239/#269 established cross-workflow benefit; #279 qualifies the public contract.
