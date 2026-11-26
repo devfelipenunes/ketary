@@ -26,6 +26,7 @@ def test_sweep_matches_native_and_freezes_all_rows(route):
 def test_sweep_preflights_every_row_before_assignment(route,monkeypatch):
     p=q.Circuit.parameter("p");c=q.Circuit.symbolic(2).ry(p,0)
     monkeypatch.setattr(q.Circuit,"_bind_numeric",lambda *a:pytest.fail("assigned before full row preflight"))
+    monkeypatch.setattr(q.Circuit,"_bind_sweep_rows",lambda *a:pytest.fail("assigned before full row preflight"))
     with pytest.raises(ValueError):
         if route=="named":c.sweep(p=[.2,float("nan")])
         else:c.sweep_rows([[.2],[float("nan")]])
@@ -63,6 +64,7 @@ def test_sweep_rejects_source_changed_by_input_iterator(route,monkeypatch):
         c.ry(r,1)
         yield .2 if route=="named" else [.2]
     monkeypatch.setattr(q.Circuit,"_bind_numeric",lambda *a:pytest.fail("assigned stale parameter identities"))
+    monkeypatch.setattr(q.Circuit,"_bind_sweep_rows",lambda *a:pytest.fail("assigned stale parameter identities"))
     with pytest.raises(ValueError,match="bindings must cover"):
         if route=="named":c.sweep(p=values())
         else:c.sweep_rows(values())
