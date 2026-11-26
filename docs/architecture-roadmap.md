@@ -16,8 +16,9 @@ purity is not a goal by itself. Pre-alpha is not a production guarantee.
 | ARCH06 | Stabilize extension policy | Criteria for new APIs, algorithms, integrations; exact-head CI, review and merged tree; no public release |
 | ARCH07 | Future portability decision | Only when a real second target requires it: approved ADR, compatibility matrix, PoC and equivalent benchmarks |
 
-ARCH01 implemented in #42. ARCH02/03 and ARCH06 policy are candidate changes
-in this PR. ARCH04 is a conditional maintenance review, not a mandate to split
+ARCH01 implemented in #42. ARCH02/03 and ARCH06 policy integrated in #43.
+See the [architecture audit](architecture-audit-2026-11-26.md) for observed
+coupling, resource and API scaling risks and prioritized next steps. ARCH04 is a conditional maintenance review, not a mandate to split
 files by size. ARCH05 existing diagnostic suite remains required; controlled
 dedicated-host data and human evaluation are outstanding. ARCH07 is deferred,
 not a commitment to add a backend.
