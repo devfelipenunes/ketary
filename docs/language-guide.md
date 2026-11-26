@@ -82,6 +82,25 @@ report=q.decode_phase_estimation(q.phase_estimation(.375,precision=3).run(),prec
 assert report.phase==.375
 ```
 
+Symbolic targets also accept reusable symbolic blocks without binding first:
+
+```python
+theta = q.Circuit.parameter("theta")
+layer = q.Circuit.symbolic(2).ry(theta, 0).cx(0, 1)
+template = q.Circuit.symbolic(4).apply_each(layer, placements=[(0, 1), (2, 3)])
+result = template.bind(theta=.3).run()
+```
+
+`apply`, `apply_each` and `repeat` preserve native parameter identity. A
+reused parameter is shared, not cloned into independent layer parameters.
+Use distinct explicitly named parameters when independent weights are
+needed. Same-name distinct native parameters fail before mutation. Unbound
+blocks require an explicitly symbolic target; ordinary bound circuits and
+classical circuits do not accept them. All native symbolic composition is
+staged on an independent copy; source blocks remain unchanged. `compose`,
+execution and logical serialization still require fully bound parameters.
+Existing expansion bounds and wire ordering apply unchanged.
+
 Bind by native mapping or unique names, never both; use the native mapping if a parameter name conflicts with the bindings argument. Sweep columns are zipped,
 not Cartesian; all rows are bound and serialized at planning time, without
 simulation. Results are ideal snapshots, and bindings are available in row order.
