@@ -11,3 +11,16 @@ archives. Content differences fail; byte differences are retained as negative
 evidence and do not close the reproducibility gate. One runner is not cross-
 platform reproducibility. The existing installation and dependency checks
 remain mandatory. No published artifact changes or legal approval.
+
+
+## Deterministic archive creation candidate
+
+The stock PEP 517 backend remains the baseline. In a research-only subprocess
+using pinned setuptools 84.2.1, intercept the sdist release-tree archive creation
+once and emit a sorted tar stream with fixed epoch, owner and gzip header. No
+existing artifact is rewritten and no installed package or configured build
+backend is changed. Compare both independently generated candidate sdists,
+both wheels built from those sdists, and original stock member contents.
+Reject symlinks and unexpected archive formats; fail on content divergence or
+candidate byte divergence. This is a qualification experiment, not a release
+procedure or general cross-platform reproducibility guarantee.
