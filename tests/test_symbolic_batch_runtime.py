@@ -9,7 +9,8 @@ from qiskit.quantum_info import Operator
 def test_symbolic_partial_failure_restores_phase_parameters_and_metadata(kind,monkeypatch):
     p=q.Circuit.parameter("p");r=q.Circuit.parameter("r")
     c=q.Circuit.symbolic(3).ry(p,0).evolve(q.I(),time=p)
-    c.checkpoint("prefix").register("w",[2,0])
+    c.register("w",[2,0])
+    with pytest.raises(q.UnsupportedOperation):c.checkpoint("prefix")
     before=c.to_qiskit();method=getattr(QuantumCircuit,kind)
     def fail(self,*a,**k):
         method(self,*a,**k)
@@ -21,7 +22,7 @@ def test_symbolic_partial_failure_restores_phase_parameters_and_metadata(kind,mo
         patch.setattr(QuantumCircuit,kind,fail)
         with pytest.raises(RuntimeError):calls[kind]()
     assert c.to_qiskit()==before and c.parameters==(p,)
-    assert c.checkpoints=={"prefix":1} and c.registers=={"w":(2,0)}
+    assert c.checkpoints=={} and c.registers=={"w":(2,0)}
     c.ry(r,2);before.ry(r,2)
     np.testing.assert_allclose(Operator(c.bind({p:.2,r:.7}).to_qiskit()).data,
                                Operator(before.assign_parameters({p:.2,r:.7})).data,rtol=0,atol=1e-9)
@@ -41,3 +42,14 @@ def test_classical_staging_remains(monkeypatch):
     monkeypatch.setattr(QuantumCircuit,"copy",copy)
     c.h([1,2])
     assert len(calls)==1 and calls[0] is raw and c._qc is not raw
+
+
+def test_checkpoint_before_symbolic_insert_survives_failure(monkeypatch):
+    p=q.Circuit.parameter("p");c=q.Circuit.symbolic(3).h(0).checkpoint("prefix")
+    before=c.to_qiskit();method=QuantumCircuit.ry
+    def fail(self,*a,**k):
+        method(self,*a,**k);raise RuntimeError("partial insert")
+    with monkeypatch.context() as patch:
+        patch.setattr(QuantumCircuit,"ry",fail)
+        with pytest.raises(RuntimeError):c.ry(p,[1,2])
+    assert c.to_qiskit()==before and not c.parameters and c.checkpoints=={"prefix":1}
