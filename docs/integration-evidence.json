@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "scope": "experimental integration evidence, not release qualification",
+  "baseline": {
+    "main_sha": "e12895cd0881183495a49dcfb3f2dc9e2a74224c",
+    "candidate_sha": "201d9183d9cb9e1b31b0f821111103c64e0eba8c",
+    "integration_pr": 412,
+    "included_prs": [
+      407,
+      408,
+      409,
+      410,
+      411
+    ],
+    "same_file_tree": true,
+    "exact_head_run": {
+      "id": 45855236519,
+      "jobs": [
+        "tests",
+        "dynamic",
+        "dependency-review",
+        "external-verifier",
+        "benchmark",
+        "packaging"
+      ],
+      "conclusion": "success"
+    },
+    "post_merge_run": null,
+    "core": {
+      "passed": 4570,
+      "skipped": 66,
+      "coverage": 96.775324
+    },
+    "dynamic": {
+      "passed": 4647,
+      "coverage": 96.79285
+    },
+    "warnings_per_suite": 38
+  },
+  "historical": [
+    {
+      "pr": 79,
+      "runs": [
+        45764869707,
+        45764869826
+      ]
+    },
+    {
+      "pr": 81,
+      "runs": [
+        45765241303,
+        45765241266
+      ]
+    },
+    {
+      "pr": 83,
+      "runs": [
+        45765639002,
+        45765639015,
+        45765638853
+      ]
+    },
+    {
+      "pr": 85,
+      "runs": [
+        45766023430,
+        45766023461
+      ]
+    },
+    {
+      "pr": 87,
+      "runs": [
+        45766497621,
+        45766497643,
+        45766497577,
+        45766497645
+      ]
+    }
+  ],
+  "historical_source": "docs/technical-consolidation.md (reported candidate runs, not reverified here)",
+  "reconciliation": {
+    "closed_previously": [
+      68,
+      70,
+      72,
+      76,
+      78,
+      82,
+      84
+    ],
+    "closed_current": [
+      282,
+      311
+    ],
+    "still_open": [
+      22,
+      35,
+      52,
+      55,
+      56,
+      66,
+      74,
+      86
+    ],
+    "open_reasons": {
+      "22": "independent research and held-out evaluation",
+      "35": "dedicated host, legal and release authorization",
+      "52": "longitudinal matched evidence and controlled host",
+      "55": "pair grammar evidence and acceptance audit",
+      "56": "symbolic layer evidence and held-out evaluation",
+      "66": "paired revision and held-out task evidence",
+      "74": "authorized GPU/multinode/host evidence",
+      "86": "remaining hardware qualification"
+    }
+  },
+  "exclusions": [
+    "post-merge push run not available through current query",
+    "dedicated host performance/RSS",
+    "independent human/agent evaluation",
+    "legal redistribution and owner release approval"
+  ]
+}
