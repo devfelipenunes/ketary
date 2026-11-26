@@ -116,6 +116,9 @@ jobs:
           python -m research.alpha_six_unitary > alpha-six-unitary.json
           python -m research.alpha_six_variational > alpha-six-variational.json
           python -m research.alpha_six_verification > alpha-six-verification.json
+          python -m research.alpha_api_usage > alpha-api-usage.json
+          python -m research.alpha_four_parity --reps 5 > alpha-four-parity.json
+          python -m research.alpha_four_verification --reps 5 > alpha-four-verification.json
           python -m research.priority_architecture_audit > closure-architecture.json
           python -m research.architecture_inventory > architecture-inventory.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -152,6 +155,9 @@ jobs:
             alpha-six-unitary.json
             alpha-six-variational.json
             alpha-six-verification.json
+            alpha-api-usage.json
+            alpha-four-parity.json
+            alpha-four-verification.json
             closure-architecture.json
             architecture-inventory.json
             environment.txt
@@ -324,6 +330,7 @@ jobs:
           python research/verification_comparison.py --external > external-comparison.json
           cat external-comparison.json
           python research/verification_scaling.py --external > external-scaling.json
+          python -m research.alpha_four_verification --external --reps 3 > alpha-four-external-rss.json
           cat external-scaling.json
       - name: Audit external comparison dependencies
         run: |
@@ -338,6 +345,7 @@ jobs:
             external-environment.txt
             external-comparison.json
             external-scaling.json
+            alpha-four-external-rss.json
             external-license-inventory.json
             external-audited-requirements.txt
             external-vulnerability-report.json
