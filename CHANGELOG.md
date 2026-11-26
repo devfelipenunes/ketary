@@ -17,3 +17,5 @@ extra and symbolic mode are explicit opt-ins. No hardware or public release is
 approved. See docs/sdk-roadmap.md for limitations and release gates.
 
 - Bounded wire iterables for append/compose, initial-state shape preflight and weighted-observable variance.
+
+- Experimental verification engineering: shared checks, operator metrics, witness search and replay, semantic diff, explicit checkpoints, statistical contracts, query plans, streamed observable variance and isolated external verifier comparison.

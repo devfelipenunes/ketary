@@ -33,10 +33,16 @@ jobs:
           python -m coverage run --branch --source=ketary -m pytest -q -rs tests research/probes
           python -m coverage report -m
           python -m coverage json -o coverage.json
+      - name: Verification calibration against native Qiskit
+        run: |
+          python research/verification_comparison.py > verification-comparison.json
+          cat verification-comparison.json
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: coverage.json
+          path: |
+            coverage.json
+            verification-comparison.json
 
   benchmark:
     needs: tests
@@ -176,3 +182,42 @@ jobs:
             dynamic-license-inventory.json
             dynamic-audited-requirements.txt
             dynamic-vulnerability-report.json
+
+  external-verifier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: '.python-version'
+      - name: Install isolated experimental QCEC comparison dependencies
+        run: |
+          python -m pip install -c constraints/linux-py312.txt -r requirements.txt
+          python -m pip install --no-deps -e .
+          python -m pip install -c constraints/linux-py312.txt 'mqt.qcec[qiskit]==3.12.0'
+          python -m pip check
+          python tools/audit_dependencies.py --scope external
+          python -m pip freeze > external-environment.txt
+      - name: Native QCEC smoke and matched calibration
+        run: |
+          python -m pytest -q tests_external
+          python research/verification_comparison.py --external > external-comparison.json
+          cat external-comparison.json
+      - name: Audit external comparison dependencies
+        run: |
+          python -m venv audit-venv
+          audit-venv/bin/python -m pip install pip-audit
+          audit-venv/bin/python -m pip_audit --no-deps --disable-pip -r external-audited-requirements.txt -f json -o external-vulnerability-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: external-verification
+          path: |
+            external-environment.txt
+            external-comparison.json
+            external-license-inventory.json
+            external-audited-requirements.txt
+            external-vulnerability-report.json
