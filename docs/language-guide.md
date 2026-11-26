@@ -104,3 +104,5 @@ token/call/numeric literal counts, full native operator or matched
 result comparisons, and five equivalent native Qiskit snippets. Native source counts are shown only for these five tasks. These are not independent usability data. Some clearer
 examples intentionally use more tokens; no claim of universal improvement.
 No human or dedicated-host experiment has been completed.
+
+For end-to-end mathematical calibration run `python research/complete_workflows.py`. See the [developer pilot protocol](developer-pilot.md) for a separate formative human evaluation; no participant results yet.
