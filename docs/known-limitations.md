@@ -23,3 +23,5 @@
 - CI benchmarks and small authored defect adaptations are initial evidence,
   not independent research or proof of improved productivity.
 - No published distribution; use a verified checkout or build artifact.
+
+- Named selections/checkpoint annotations are local conveniences; logical replay preserves operators, not names. General controlled blocks and automatic ancilla cleanup are not supported. Sweep plans are bounded zipped ideal simulations, not hardware jobs. Typed report dictionaries retain mutable legacy behavior.

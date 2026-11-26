@@ -1,4 +1,4 @@
-from typing import assert_type
+from typing import Any, assert_type
 import ketary as q
 from numpy.typing import NDArray
 import numpy as np
@@ -59,3 +59,6 @@ assert_type(r.math.expectation({0:"X",1:"Z"}),float)
 assert_type(r.test.expectations({"XX":1}),q.VerificationReport)
 assert_type(c.debug.verify_checkpoints({"bell":c.contract(expectations={"XX":1})}),q.DiagnosticReport)
 assert_type(q.Circuit.symbolic(1).ry(angle,0).sweep(angle=[0,.5]).run(),tuple[q.Result,...])
+
+decoded=q.decode_phase_estimation(q.phase_estimation(.25).run(),precision=3)
+assert_type(decoded['phase'], Any)

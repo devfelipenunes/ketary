@@ -148,3 +148,5 @@ Try the [developer notebook](examples/quantum_engineering.ipynb) for a complete 
 The optional `dynamic` extra enables bounded local native Aer shot execution (`Circuit.classical`, `run_shots`, and teleportation). It is not part of the pure-state core. No hardware or package publication is authorized.
 
 See [experimental verification engineering](docs/verification-roadmap.md) for bounded comparison, reproducible evidence, statistical contracts, and query plans. No universal guarantee from selected inputs.
+
+For experimental high-level syntax, see [progressive language guide](docs/language-guide.md). Existing gate-level Python remains available.

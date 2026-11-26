@@ -60,3 +60,7 @@ See [R01–R15 contracts and limits](verification-roadmap.md) for capabilities, 
 ## Pre-alpha behavior guide
 
 See [verification guide](verification-guide.md), [mathematical conventions](mathematical-guide.md) and [known limitations](known-limitations.md). Canonical examples use fluent gates; `.gates` and `.analyze()` remain compatibility surfaces. `analyze()` executes the default zero-input simulation explicitly. `copy()` and bound transforms return independent circuits. `capabilities` describes structural eligibility, not installed backend availability or resource sufficiency.
+
+## Progressive Python conveniences
+
+See [language guide](language-guide.md) for typed dictionary reports, ordered single-wire batches, named selections, apply, checkpoint labels, local Pauli mappings, named binding, bounded sweeps, decoders and reversible composition. No implicit simulation or new execution model.
