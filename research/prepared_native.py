@@ -8,6 +8,7 @@ from combined_native_benchmark import rust_pack
 
 MAX_ROWS=256
 MAX_OUTPUT=128*1024**2
+MAX_ANGLES=64*1024**2
 
 def frozen(array,dtype,shape):
     return np.frombuffer(np.asarray(array,dtype=dtype,order="C").tobytes(),dtype=dtype).reshape(shape)
@@ -25,7 +26,7 @@ class Prepared:
         return self.n,self.ops,self.angles,self.phase
 
     def angle_table(self,values):
-        if len(values)<1 or len(values)>MAX_ROWS or len(values)*(1<<self.n)*16>MAX_OUTPUT:
+        if len(values)<1 or len(values)>MAX_ROWS or len(values)*(1<<self.n)*16>MAX_OUTPUT or len(values)*len(self.angles)*8>MAX_ANGLES:
             raise ValueError("batch bounds exceeded")
         vals=np.asarray(values,dtype=np.float64)
         if vals.shape!=(len(values),len(self.parameters)) or not np.isfinite(vals).all():
