@@ -16,10 +16,9 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - name: Resolve research security upgrade and audit
+      - name: Audit pinned research dependencies
         run: |
           cd research/native_contract_engine/pyo3
-          cargo update -p pyo3 --precise 0.29.3
           cp Cargo.lock ../../../cargo-resolved.lock
           cd ../../..
           git rev-parse HEAD > commit.txt
