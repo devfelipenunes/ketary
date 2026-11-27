@@ -5,6 +5,7 @@ from facade17 import signed
 from engine import product_witness,valid_pauli
 from consolidated12 import Engine
 from native9 import bounds
+from sparse import BudgetExceeded
 
 @dataclass(frozen=True)
 class PauliNoise:
@@ -62,7 +63,8 @@ class NoiseTransition:
                 factor=sum(w*(-1 if ((x&p[1])^(z&p[0])).bit_count()%2 else 1) for (x,z,_),w in entries)
                 coef*=Fraction(factor,s.denominator)
             else:
-                r=s.session.propagate(p,max_work=remaining)
+                try:r=s.session.propagate(p,max_work=remaining)
+                except BudgetExceeded:return NoiseReport("INCONCLUSIVE",scope,None,None,None,max_work,"propagation budget")
                 assert r.denominator_power==0 and len(r.terms)==1
                 x,z,a,b=r.terms[0];assert b==0 and abs(a)==1
                 p=(x,z,0);coef*=a;remaining-=r.work

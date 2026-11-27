@@ -72,7 +72,15 @@ def noise():
         # Channel order: H then dephasing, E†(X)=(1-2p)Z.
         e=Engine.prepare(circuit(n,[(0,0,0)]));s=PauliNoise((((0,0,0),3),((0,1,0),1)),4)
         c=NoiseTransition((0,1,0),(1,0,0),Fraction(1,2));assert c.verify(n,(e,s)).status=="PASS";assert c.verify(n,(s,e)).status=="FAIL";checks+=2
-    output({"scope":"exact rational all-state Pauli transition for restricted noise and Clifford stages; no arbitrary CPTP claim","checks":checks,"rows":rows})
+    # Bounds and probability admission are part of the contract, not optional.
+    e=Engine.prepare(circuit(2,[(0,0,0)]*10));c=NoiseTransition((1,0,0),(1,0,0))
+    assert c.verify(2,(e,),max_work=31).status=="INCONCLUSIVE"
+    assert c.verify(2,(e,),max_work=40).status=="PASS"
+    for stages in ((PauliNoise((((0,0,0),1),),2),),(PauliNoise((((0,0,0),True),),1),),(Engine.prepare(circuit(2,[(6,0,0)])),)):
+        try:c.verify(2,stages)
+        except ValueError:pass
+        else:raise AssertionError("invalid noise admission")
+    output({"scope":"exact rational all-state Pauli transition for restricted noise and Clifford stages; no arbitrary CPTP claim","checks":checks,"budget_controls":2,"admission_rejections":3,"rows":rows})
 if __name__=="__main__":
     import sys
     {"forms":forms,"evidence":evidence,"noise":noise}[sys.argv[1]]()
