@@ -5,6 +5,7 @@ use pyo3::types::{PyBytes,PyInt,PyAny};
 use std::collections::BTreeMap;
 mod core;
 mod monomial;
+mod tableau22;
 type Signed=(u64,u64,u8);
 type Witness=(String,Vec<i8>,(i128,i128),u64);
 type Prop=(Vec<(u64,u64,i128,i128)>,u64,u64,u64);
@@ -221,9 +222,42 @@ impl PackedCircuit {
   Ok(py.detach(||monomial::verify(&self.gates,&b.gates,self.width,mask,max_work)))
  }
 }
+// Private experimental class; no changes to existing PackedCircuit semantics.
+#[pyclass(frozen)]
+struct CliffordTableau { table:tableau22::Tableau }
+#[pymethods]
+impl CliffordTableau {
+ #[new]
+ fn new(py:Python<'_>,circuit:PyRef<'_,PackedCircuit>,max_build_work:&Bound<'_,PyAny>)->PyResult<Self>{
+  let cap=exact_u64(max_build_work)?;
+  if cap==0||cap>2_000_000||circuit.gates.chunks_exact(3).any(|g|g[0]>=6){return Err(err(1))}
+  let n=circuit.width;let g=&circuit.gates;
+  // Logical bit-slice construction bound; not an allocator or time guarantee.
+  let cost=2*(g.len()/3) as u64+4*(n as u64)*(n as u64);
+  if cost>cap{return Err(err(3))}
+  let table=py.detach(||tableau22::Tableau::build(n,g));
+  Ok(Self{table})
+ }
+ #[getter]
+ fn width(&self)->u32{self.table.width()}
+ fn image(&self,post:Signed)->PyResult<Signed>{
+  if !valid(self.table.width(),post){return Err(err(1))}
+  Ok(self.table.image(post))
+ }
+ fn images(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,workers:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Signed>>{
+  let workers=exact_u64(workers)?;let cap=exact_u64(max_work)?;
+  if items.is_empty()||items.len()>4096||!(1..=8).contains(&workers)||cap==0||cap>2_000_000{return Err(err(1))}
+  let ps:Vec<Signed>=items.extract()?;
+  if ps.iter().any(|&p|!valid(self.table.width(),p)){return Err(err(1))}
+  let cost: u64=ps.iter().map(|p|1+p.0.count_ones() as u64+p.1.count_ones() as u64).sum();
+  if cost>cap{return Err(err(3))}
+  Ok(py.detach(||self.table.batch(&ps,workers as usize)))
+ }
+}
 #[pymodule]
 fn ketary_native_research(m:&Bound<'_,PyModule>)->PyResult<()>{
  m.add_class::<PackedCircuit>()?;
+ m.add_class::<CliffordTableau>()?;
  m.add("BudgetExceeded",m.py().get_type::<BudgetExceeded>())?;
  m.add("SCHEMA_VERSION",1)?;
  Ok(())
