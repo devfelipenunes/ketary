@@ -6,7 +6,7 @@ from ._core.independent20 import pauli as _validate_pauli
 from ._core.contract_forms11 import label_mask
 from ._core.candidate28 import Policy,Transition,StateEigen,replay_report,obligation,Report as CoreReport
 from ._core.qualified30 import CleanInput,RelativeAction,Equivalent,Separable,ZBranch,Report as DomainReport
-from ._core.qualified31 import Engine,SumTransition,NoiseAfter,Correctable
+from ._core.qualified31 import Engine,SumTransition,NoiseAfter,Correctable,validate as _validate_spec
 from ._core.unified24 import Compact
 
 __version__="0.1.0a3"
@@ -70,22 +70,34 @@ class Prepared:
     @property
     def snapshot_id(self):return self._engine.base.prepared.session.identity
     def _state_batch(self,contracts,max_work):
-        # Only the default zero-input state route; keep explicit DAG and
-        # non-Clifford policies unchanged. No pooled per-item quota.
+        # Apply the same state route in pure and mixed requests. Admit
+        # the entire request first and keep the original per-item quota.
+        # Low-budget items and explicit DAG policies retain legacy routing.
         core=self._engine.base.prepared
         table=core.router.previous.prepared.tableau
-        if table is None or core.state is not None or not core.policy.state_fallback or not all(type(x) is StateEigen for x in contracts):return None
-        keys=tuple(obligation(self.width,x) for x in contracts)
+        if table is None or core.state is not None or not core.policy.state_fallback:return None
+        states=tuple(i for i,x in enumerate(contracts) if type(x) is StateEigen)
         q=max_work//len(contracts)
-        posts=tuple(x.observable for x in contracts)
-        if any(3+x.bit_count()+z.bit_count()>q for x,z,s in posts):return None
-        images=table.images(posts,1,q*len(posts))
-        out=[]
-        for (domain,oid),(x,z,sign) in zip(keys,images):
+        if not states or not q:return None
+        if len(states)==len(contracts):
+            keys=tuple((domain,(self.snapshot_id,),oid) for domain,oid in
+                       (obligation(self.width,x) for x in contracts))
+        else:
+            keys=tuple(_validate_spec(core.session,x) for x in contracts)
+        eligible=tuple(i for i in states if 3+contracts[i].observable[0].bit_count()+contracts[i].observable[1].bit_count()<=q)
+        if not eligible:return None
+        images=table.images(tuple(contracts[i].observable for i in eligible),1,q*len(eligible))
+        out=[None]*len(contracts)
+        for i,(x,z,sign) in zip(eligible,images):
+            domain,ids,oid=keys[i]
             value=0 if x else (-1)**sign
             status="PASS" if value==1 else "FAIL"
             detail=CoreReport(status,domain,self.snapshot_id,oid,"tableau-state",expectation=((value,0),0))
-            out.append(DomainReport(status,domain,(self.snapshot_id,),oid,q,detail))
+            out[i]=DomainReport(status,domain,ids,oid,q,detail)
+        rest=tuple(i for i,r in enumerate(out) if r is None)
+        if rest:
+            raw=self._engine.verify(tuple(contracts[i] for i in rest),max_work=q*len(rest))
+            for i,r in zip(rest,raw):out[i]=r
         return tuple(out)
     def verify(self,*contracts:Specification,max_work:int=2_000_000)->tuple[Result,...]:
         bounds(4096,max_work)
