@@ -445,3 +445,42 @@ All R28 tests pending. No public API, merge or release. Outstanding:
 full resource and FFI audit, complex edge weights, remaining semantics
 integration, controlled-host and cross-platform candidate qualification,
 security/notice review, independent reviewer and usability study.
+
+
+## Round 29 — focused qualification, not feature expansion
+
+R28 exact head debeb5b3f45c92ace0dd39e0af850783be9139c3: 26/27
+workflows succeeded at inspection, SDK pending; 3/3 specialized jobs
+passed. Original commit and lab records inspected: integrated 81,
+admission 13, workloads 566 = 660 checks. On 36 brickwork fixtures
+(8 queries each), plain DAG decisive 264/288, phase-weighted 288/288.
+The three 12-wire depth-8 fixtures failed plain preparation but weighted
+succeeded (1456/3393/1140 live nodes). T-dressed graph at 64 wires:
+transition PASS and sign mutant FAIL; both state queries inconclusive
+because weighted preparation exhausted resources. Do not infer general
+coverage from the finite corpus.
+
+R29 submits three P0 suites:
+- ffi: strict builtin tuple/int/bool/bytes admission throughout the private
+  PyO3 surface; no implicit conversion callbacks. Bounded tuple lengths,
+  integer overflow checks, malformed input and hostile hook controls;
+  sparse core also rejects misaligned or oversized packed bytes. This
+  tightens private admission only; performance impact and all existing
+  call sites must be revalidated. Unsafe SIMD and allocator delegation
+  still require independent review.
+- fallback: opt-in exact zero-input Heisenberg expectation after state
+  preparation/query exhaustion, using bounded cone reduction and native
+  propagation. Sum only terms with no X support, normalize exact
+  coefficients. Disjoint logical reservations and independent spatial
+  replay. Test dense parity and the R28 64-wire graph failure case.
+- resources: isolated Linux fixed workloads with OS address-space and CPU
+  limits, parent wall timeout, process peak RSS including Python/native
+  dependencies, and explicit limit-triggering controls. Not a general
+  sandbox, per-call allocator cap, portable enforcement, or production
+  guarantee; existing logical ledgers remain distinct.
+
+No automatic backend adoption, public API change, merge or release.
+Remaining P0: inspect CI, full resource accounting incl bit operations
+and witness/serialization, independent security/FFI review. P1: broader
+typed contract integration, general complex edges if justified, candidate
+SBOM and platform reproducibility. M40/M46/M47 remain external.
