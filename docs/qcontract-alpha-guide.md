@@ -101,12 +101,21 @@ stub. IDE completion and type checking cover the ten specifications,
 prepared session and Result. Run the isolated qualification workflow
 to see positive and deliberately invalid mypy examples. Runtime
 admission remains authoritative: Python type hints are not guarantees.
-Canonical Qiskit gate concrete types are required; custom base_class
-spoofing, open controls and modified mutable definitions are rejected.
-This is an input boundary, not a sandbox for untrusted Python objects.
+Canonical Qiskit gate concrete types are required. Admission examines the
+operations actually stored in the circuit; unsupported custom types, open
+controls and modified mutable definitions that survive Qiskit insertion
+are rejected. Qiskit may canonicalize an operation before QContract sees
+it, so pre-insertion provenance cannot be recovered. Do not mutate a
+circuit concurrently with preparation. This is an input boundary, not a
+sandbox for untrusted Python objects.
 
 The installed benchmark compares signed Clifford identity verdicts with
 Qiskit PauliList vectorized evolution, measuring cold preparation,
 prepared verdicts and full reports separately. QContract also computes
 witnesses/metadata; Qiskit baseline returns Boolean verdicts only.
 The comparison uses shared CI hosts, not dedicated CPU performance.
+
+Linux candidate builds now request an audited manylinux_2_34_x86_64 tag,
+with an independent ELF requirements audit and installation on Ubuntu
+22.04. The portable build still needs CI qualification; other Linux
+architectures and CPython versions are not admitted by this matrix.
