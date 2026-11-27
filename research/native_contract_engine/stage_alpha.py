@@ -88,7 +88,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qcontract-alpha-local"
-version = "0.1.0a2"
+version = "0.1.0a3"
 description = "Local experimental QContract verification candidate (not published)"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"

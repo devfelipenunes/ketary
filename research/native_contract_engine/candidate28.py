@@ -185,6 +185,15 @@ def replay_report(session,spec,report,*,max_work=2_000_000):
         if report.route=="temporal-certificate":
             return report.status=="PASS" and report.witness is None and verify_bytes(n,g,spec.pre,spec.post,report.evidence,max_work=max_work)
         return None
+    if report.route=="tableau-state":
+        # Independent exact ordered-Pauli replay, not a second native call.
+        if report.witness is not None or report.evidence is not None:return False
+        reserve=8*n+16
+        if max_work<=reserve:return None
+        image=independent_image(n,g,spec.observable,max_work=max_work-reserve)
+        if image is None:return None
+        x,z,sign=image;value=0 if x else (-1)**sign
+        return report.status==("PASS" if value==1 else "FAIL") and report.expectation==((value,0),0)
     if report.route=="heisenberg-state":
         if len(g)>12288:return None
         from fractions import Fraction

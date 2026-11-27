@@ -54,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [clifford,state,near-clifford,state-batch,design,b3,b4,b5]
+        suite: [clifford,state,near-clifford,state-batch,design,b3,b4,b5,coverage-repair]
     runs-on: ubuntu-22.04
     timeout-minutes: 35
     steps:
@@ -88,6 +88,7 @@ jobs:
             design)
               b1/venv/bin/python -I benchmarks/qcontract/contract_language_lab.py > b1/result.json
               b1/venv/bin/python -I benchmarks/qcontract/ci_inventory.py > b1/ci-inventory.json ;;
+            coverage-repair) b1/venv/bin/python -I benchmarks/qcontract/repair_coverage_b3.py > b1/result.json ;;
             b3|b4|b5) b1/venv/bin/python -I benchmarks/qcontract/corpus_b3_b5.py "${{ matrix.suite }}" > b1/result.json ;;
             *) b1/venv/bin/python -I benchmarks/qcontract/compare_b1.py "${{ matrix.suite }}" > b1/result.json ;;
           esac
