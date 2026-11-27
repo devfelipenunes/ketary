@@ -145,3 +145,35 @@ until observations and remediation are recorded.
 
 R30 remains an unvalidated private candidate increment. No merge or
 release. Inventory is not a legal notice or a vulnerability-free claim.
+
+
+## Qualification update — R31
+
+R30 exact head 3dd303cf13cfbe7def441e63c43867c516de2a19: 29/30
+workflows succeeded; R30 matrix 5/6 jobs succeeded, macos-14 cancelled.
+A requested job retry also returned macos-14 cancelled. No macOS result
+or root cause inferred. Original R30 artifacts verified against commit:
+87 integrated, 1280 generated (512/512 decisive oracle queries,
+768/768 invalid snapshot rejections), 576 metered = 1943 checks.
+Linux and Windows platform smoke suites passed. Linux independent target
+directories yielded byte-identical wheels. Windows yielded unequal
+wheels: only the native .pyd and RECORD contents changed, 20 differing
+overlap bytes in equal-size PE binaries (428544 bytes); observed PE
+timestamps 1795806670 and 1795806684. Timestamp and other PE build
+metadata are suspected contributors, not yet a proven complete cause.
+
+| Requirement | R31 action | Remaining exit criteria |
+|---|---|---|
+| M09/M10/M19 | Typed rational sums and Clifford-then-Pauli-mixture contracts in shared adapter | General channels/feedback not admitted; CI and independent review |
+| M15/M16 | Finite-code correctability and syndrome recovery table with explicit code/error obligation identity | Physical fault-tolerance/noisy execution not claimed |
+| M32/M35 | Logical reservations and preflight tests for new domains | Admission and bigint/allocator accounting still incomplete |
+| M42/M43 | Windows /Brepro experiment, alternate macos-15 runner; compare raw wheel members and PE timestamp | Successful macOS test, confirm deterministic builds, independent hosts and portable wheels |
+| M44 | Collect actual local license/notice texts with SHA-256 and missing-file list | Review missing notices, exact linkage scope, vulnerability/notice/legal review |
+| M49/M50 | No public API changes; private exact adapter | Final candidate integration, explicit API approval and all mandatory gates |
+
+R31 code-set contracts use the circuit width only, not circuit identity;
+they do not certify the circuit or hardware. No arbitrary CPTP map,
+source-global-phase, numerical proof or fault-tolerance promotion.
+The local notices inventory is evidence for review, not a release notice
+or a security clearance. No external reviewer, dedicated host or usability
+participant has been engaged. All R31 results pending CI.
