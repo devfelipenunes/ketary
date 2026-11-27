@@ -69,3 +69,34 @@ https://mqt.readthedocs.io/projects/qcec/en/stable/.
 ## Round 3 research increment
 
 Prepared immutable ephemeral snapshot, gate classes validated once and wire indices mapped; no persistent cache or public API. Batch C++ bit-slicing up to 64 signed Paulis. Compare legacy export, preparation, scalar and batch, Qiskit Clifford prepared and full export with one tableau per batch. Exact sparse Clifford+T conjugation in Q(sqrt(2)), integer pairs over a shared power of two; no coefficient truncation. Caps: 64 wires, 100k gates, 32 T/Tdg, 4096 live terms and two million term visits; cap exhaustion is inconclusive, not failure or approximation. Numerical dense reference on small circuits. Leakage research: one arbitrary clean ancilla wire, 1–6 qubits, numeric unitary admission, SVD witness restricted to allowed inputs and direct reproduction, probability tolerance 1e-9 with diagnostic guard 1e-12; no certified roundoff. Generic effect residual squared agrees for exact unitary; timing routes differ in admission so no matched speedup claim. Includes analytic boundary case. No production changes or packaging.
+
+## Round 4: integrated research engine
+
+Immutable signed-Pauli transition obligations U^dagger post U=pre.
+Explicit scope ignores circuit global phase. Preparation is validated at
+the research boundary; identity hashes bind ordered admitted instructions
+and width, not authentication or complete circuit semantics. Planner selects
+Python, scalar/batch native, or sparse exact arithmetic with a declared
+work cap. Auto uses an explicit native instance and an initial batch
+threshold of eight, a heuristic derived from round 3, not a universal
+optimum. Unsupported method and budget exhaustion are separate verdicts;
+no weakening or hidden fallback. Sparse budget is shared conservatively
+across the request; abort consumes remaining budget. Work counts propagation
+visits, not witness generation or full process resources. Reports include
+method, scope, identities, reason, and product-state witness on exact FAIL.
+A nonzero Hermitian Pauli polynomial has a nonzero product-state
+expectation: fix local Pauli axes supporting one nonzero monomial and
+successively choose signs preserving a nonzero polynomial. The resulting
+expectation is exact in the same integer ring, not a maximum-residual
+witness. Dense independent replay validates small cases.
+
+Composition checks two local identities with matching intermediate Pauli;
+if both PASS, the combined identity follows by substitution. Otherwise
+perform a separate direct check within a reserved portion of the budget;
+local FAIL never implies global FAIL. Local reports accompany the derived
+report; no persistent certificate cache or formal verification claim.
+Three parallel correctness suites (mathematical, adversarial, native)
+and a separate full-report performance/RSS job. Compare Qiskit Clifford
+routes with identical report scope and witnesses. Linux high-water RSS
+is whole subprocess including setup, not allocation peak; no guarantee.
+Still no public API, runtime changes, new dependencies or merge.
