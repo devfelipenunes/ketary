@@ -210,3 +210,19 @@ reference, budget parity, GHZ fixtures and explicit thread tests.
 Cargo.lock generated and captured in artifact on first build; commit
 reviewed lock before release, audit licenses/SBOM and reproducibility.
 Wheel portability beyond runner OS is not claimed; no upload to registry.
+
+## Round 10 — qualification gates
+
+Exact joint clean subspace for Clifford+T: restrict U† Z_i U to the clean
+input subspace. X/Y on an ancilla has zero compression, Z on that ancilla
+is +1, and equality to identity for each generator is necessary and
+sufficient for zero leakage of a unitary. Native exact propagation and
+Python coefficient compression; reproduce failure witnesses in the clean
+domain. No approximate fallback. Shared propagation budget, not a full
+memory or witness bound. Algorithm corpus includes repetition encoding,
+Toffoli compute/action/uncompute with distinct coherent action checks,
+Grover snapshot and strict QFT numeric checks, with mutants. Match only
+equal scopes when timing. Fresh Linux worker memory comparisons and
+real SDK dense reference tests on installed Windows/macOS/Linux wheels.
+Independent human study and controlled host remain separate gates; see
+contract-engine-qualification.md. No production packaging or public API.
