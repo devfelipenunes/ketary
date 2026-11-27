@@ -63,5 +63,28 @@ def fuzz():
                 checks+=1
     return {"checks":checks,"decisive":decisive,"valid_queries":512,"invalid_rejections":invalid,"seed":3001,"scope":"deterministic generated cases, not coverage-guided fuzzer"}
 
+def metered():
+    rng=random.Random(3002);checks=0;rows=[]
+    for n in (2,4,8,16,32,64):
+        gs=[]
+        for _ in range(64):
+            a,b=rng.sample(range(n),2);op=rng.randrange(6);gs.append((op,a,b if op==5 else 0))
+        gs.extend((6,i%n,0) for i in range(4))
+        s=RustSession(n,pack(gs))
+        for _ in range(32):
+            a=(rng.getrandbits(n),rng.getrandbits(n),rng.randrange(2));b=(rng.getrandbits(n),rng.getrandbits(n),rng.randrange(2))
+            old=s.native.transition(a,b,128,2_000_000)
+            got=s.native.transition_metered(a,b,128,2_000_000)
+            assert got[:3]==old[:3] and got[4]==old[3]
+            assert got[3]==2*len(gs)+got[5]+got[4]<=2_000_000
+            assert got[6]<=65
+            assert s.native.transition_metered(a,b,128,got[3])==got
+            try:s.native.transition_metered(a,b,128,got[3]-1)
+            except rn.BudgetExceeded:pass
+            else:raise AssertionError("one-unit budget boundary")
+            checks+=3
+        rows.append({"n":n,"gate_count":len(gs),"reserved_diagnostics":got[5],"last_kernel_work":got[4],"last_final_coefficient_bits":got[6]})
+    return {"checks":checks,"rows":rows,"scope":"opt-in logical reservation for scan, sort/diagnostic visits and result construction; no allocation or bit-operation guarantee"}
+
 if __name__=="__main__":
-    print(json.dumps({"suite":sys.argv[1],**{"integrated":integrated,"fuzz":fuzz}[sys.argv[1]]()},indent=2,allow_nan=False))
+    print(json.dumps({"suite":sys.argv[1],**{"integrated":integrated,"fuzz":fuzz,"metered":metered}[sys.argv[1]]()},indent=2,allow_nan=False))
