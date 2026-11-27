@@ -1,4 +1,5 @@
 //! Isolated CPython research extension. No raw-pointer interface in our code.
+//! R25 opt-in SIMD contains a bounded architecture-specific unsafe block.
 use pyo3::prelude::*;
 use pyo3::exceptions::{PyValueError, PyRuntimeError};
 use pyo3::types::{PyBytes,PyInt,PyAny};
@@ -6,6 +7,7 @@ use std::collections::BTreeMap;
 mod core;
 mod monomial;
 mod tableau22;
+mod simd25;
 type Signed=(u64,u64,u8);
 type Witness=(String,Vec<i8>,(i128,i128),u64);
 type Prop=(Vec<(u64,u64,i128,i128)>,u64,u64,u64);
@@ -236,6 +238,17 @@ impl PackedCircuit {
    Ok((0,obs.len(),None,max_work-remaining))
   })
  }
+ // Experimental SIMD query; no default dispatch or public API change.
+ fn clifford_images_128(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,simd:bool,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Signed>>{
+  let cap=exact_u64(max_work)?;
+  if items.is_empty()||items.len()>128||cap==0||cap>2_000_000||self.gates.chunks_exact(3).any(|g|g[0]>=6){return Err(err(1))}
+  let ps:Vec<Signed>=items.extract()?;
+  if ps.iter().any(|&p|!valid(self.width,p)){return Err(err(1))}
+  let cost=ps.len() as u64*(1+2*self.width as u64+self.gates.len() as u64/3);
+  if cost>cap{return Err(err(3))}
+  Ok(py.detach(||if simd{simd25::images(&self.gates,self.width,&ps)}else{ps.chunks(64).flat_map(|p|bitslice(&self.gates,self.width,p)).collect()}))
+ }
+ fn simd_available(&self)->bool{simd25::available()}
  fn monomial_action(&self,py:Python<'_>,other:PyRef<'_,PackedCircuit>,mask:u64,max_work:u64)->PyResult<monomial::Outcome>{
   if self.width!=other.width||mask==0||(self.width<64&&mask>>self.width!=0)||self.gates.len()+other.gates.len()>300_000||max_work==0||max_work>2_000_000{return Err(err(1))}
   let b:&PackedCircuit=&other;
