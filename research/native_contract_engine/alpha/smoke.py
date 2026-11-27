@@ -40,15 +40,20 @@ def main():
     check(p.check(p.action_matches(ref,ancillas=(1,))).status=="PASS")
     # Bell measurement branch probability and unnormalized Z expectation.
     half=((1,0),1)
-    check(p.check(ZBranch(0,0,z,half,half)).status=="PASS")
+    branch=p.check(ZBranch(0,0,z,half,half))
+    check(branch.status=="PASS")
+    check(dict(branch.diagnostics)=={"probability":half,"unnormalized_expectation":half})
     one=QuantumCircuit(3);one.h(0);q=prepare(one);a=Pauli("IIX");b=Pauli("IIZ");i=Pauli("III")
     s=SumTransition(((b,Fraction(1,3)),),((a,Fraction(1,3)),))
     check(q.check(s).status=="PASS")
     n=NoiseAfter(b,a,((i,3),(b,1)),4,Fraction(1,2))
-    check(q.check(n).status=="PASS")
+    noise=q.check(n)
+    check(noise.status=="PASS")
+    check(dict(noise.diagnostics)["coefficient"]==(1,2))
     st=(Pauli("IZZ"),Pauli("ZZI"));es=(i,Pauli("IIX"),Pauli("IXI"),Pauli("XII"))
     code=q.check(Correctable(st,es))
     check(code.status=="PASS" and code.snapshots==())
+    check(len(dict(code.diagnostics)["table"])==4)
     check(q.check(Correctable(st,es+(Pauli("XXX"),))).status=="FAIL")
     # Real algorithm-shaped circuits in the admitted alphabet: GHZ and
     # Bernstein-Vazirani phase oracle. Independent expected outputs.
