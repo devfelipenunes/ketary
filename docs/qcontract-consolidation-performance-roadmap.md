@@ -180,3 +180,33 @@ A2 action:
 A2 pending exact-head CI. Review portable Linux tags, source admission
 hardening, stable public types, external review and dedicated benchmarks
 before Alpha release. No merge, public upload or deletion of historical PRs.
+
+
+## Alpha A3 — SDK usability and end-to-end performance
+
+A2 head 00b53ac6b92e921c7a100eda71af0ada64ee25c6: 32/33 workflows
+succeeded (historical R30 cancellation only); run 46067956376 all three
+platform jobs passed. Original artifact IDs 15232415337, 15232293625,
+15231628742 audited; 48 checks per platform (144 executions), 32 runtime
+modules, 40 wheel entries, native distribution and import renamed.
+All wheel hashes agree with qualification metadata. Linux and macOS
+pure Python wheel SHA-256 e2cafac689336238ea0eb69ed3e3ee6a27ae8b7f12d696c4ae1f3fdc698daf7b;
+Windows e2111f206c37e84fe26bbfe727b8481711c7cfea90133eb869c1cc587ca2320b.
+Only METADATA (CRLF vs LF) and its RECORD row differed; all executable
+source and other members matched. A3 normalizes that metadata only
+and regenerates RECORD, audits original and final RECORD, and asserts
+all other members are unchanged. Cross-platform equality pending A3.
+
+C05/C10: public typed stub, PEP 561 marker, runtime specification union,
+positive and negative installed mypy checks, guide and API version
+0.1.0a2. C08: canonical concrete gate admission; reject spoofed base_class
+and altered mutable gate definitions; negative controls for spoof/open
+control and positive canonical mutable control. Not a Python sandbox.
+C06/C07: installed API benchmark across 4/16/32/64 wires, 256/4096 gates,
+sparse/dense observables, batches 1/64 (32 scenarios; 1040 verdict
+comparisons per platform). Matched Boolean verdicts, separate full
+reports, preparation, end-to-end and P95/raw samples. QContract computes
+more diagnostic data; no speed claims before results.
+C09: A2 qualified installation, metadata reproduction correction
+pending. C11/C12: no external study, controlled benchmark, registry
+upload, public release, merge or historical PR deletion. A3 CI pending.
