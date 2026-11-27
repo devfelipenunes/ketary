@@ -81,5 +81,35 @@ def parallel():
             for workers in (2,4,8):assert t.images(ps,workers,2_000_000)==ref
             rows.append({"n":n,"queries":count,"timings":measure({str(w):lambda w=w:t.images(ps,w,2_000_000) for w in (1,2,4,8)},reps=21)})
     return {"rows":rows,"scope":"native scoped thread spawn included; serial fallback under 128; no persistent pool"}
+def dag():
+    from dag22 import simulate
+    from independent20 import column,admit
+    from structures21 import normalize
+    rng=random.Random(2204);rows=[];checks=0
+    for n in (2,3,4,5):
+        for j in range(24):
+            gs=[]
+            for _ in range(24):
+                a,b=rng.sample(range(n),2);op=rng.randrange(8);gs.append((op,a,b if op==5 else 0))
+            g=pack(gs);d=simulate(n,g)
+            assert d is not None
+            v,k=column(n,admit(n,g,2_000_000),0)
+            assert tuple(d.amplitude(i)[0] for i in range(1<<n))==v and d.k==k
+            checks+=1
+    for n in (8,12,16,20):
+        for name,gs in (("uniform",[(0,i,0) for i in range(n)]),("ghz",[(0,0,0)]+[(5,0,i) for i in range(1,n)]),("phase",[(0,i,0) for i in range(n)]+[(6,i,0) for i in range(n)])):
+            g=pack(gs);d=simulate(n,g);assert d is not None
+            a,k=d.amplitude(0);b,h=d.amplitude((1<<n)-1);assert k==h
+            if name=="uniform":assert a==b
+            elif name=="ghz":assert a==b and d.amplitude(1)[0]==(0,0,0,0)
+            else:
+                from independent20 import iphase
+                assert b==iphase(a,n//2)
+            rows.append({"n":n,"case":name,"live_nodes":d.live_nodes(),"arena_nodes":len(d.nodes),"dense_amplitudes":1<<n,"timings":measure({"dag":lambda:simulate(n,g)},reps=9)})
+            checks+=1
+    assert simulate(2,b"",cap=1) is None
+    reject(lambda:simulate(2,b"\x05\x00\x00"))
+    return {"checks":checks+2,"rows":rows,"scope":"direct unweighted exact DAG operations; bounded historical arena; no general scalable guarantee"}
+
 if __name__=="__main__":
-    print(json.dumps({"suite":sys.argv[1],**{"exact":exact,"external":external,"parallel":parallel}[sys.argv[1]]()},indent=2,allow_nan=False))
+    print(json.dumps({"suite":sys.argv[1],**{"exact":exact,"external":external,"parallel":parallel,"dag":dag}[sys.argv[1]]()},indent=2,allow_nan=False))
