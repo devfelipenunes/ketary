@@ -177,3 +177,26 @@ source-global-phase, numerical proof or fault-tolerance promotion.
 The local notices inventory is evidence for review, not a release notice
 or a security clearance. No external reviewer, dedicated host or usability
 participant has been engaged. All R31 results pending CI.
+
+
+## Qualification update — R32 / QContract provisional roadmap
+
+R31 exact head 790463a492b1245bd1eb8598a57a7144389b6575: all four R31 jobs
+passed, 192 domain checks. All three platform jobs reported same-host
+byte-identical wheels with zero differing members: Linux x86_64, Windows
+AMD64, macOS arm64. The Windows /Brepro experiment resolved the earlier
+same-host divergence. macos-15 succeeded; the R30 macos-14 historical
+cancellation persists. 29/30 returned workflows succeeded. Notices
+inventory missing only the editable project distribution on all three
+platforms; own source LICENSE exists, installed metadata still needs review.
+
+M27/M34/M38: optional four-bit lookup and packed batch IO; compare against
+vectorized Qiskit and Stim with matched signed outputs. M19/M30: coalesce
+safe Clifford requests while preserving isolated budget semantics.
+M35/M36/M37: independent exact parity, 48 Clifford scenarios, 10 state
+workloads and 16 equivalence pairs; report all inconclusives. M42/M43:
+R31 platform qualification evidence, latest R32 builds and cross-host
+reproduction remain separate. M44/M45: notice and packed FFI evidence,
+independent review remains open. New consolidation and performance
+roadmap in docs/qcontract-consolidation-performance-roadmap.md. R32 tests
+pending; no performance victory or release assertion.
