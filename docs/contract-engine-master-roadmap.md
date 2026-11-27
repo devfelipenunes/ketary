@@ -130,3 +130,42 @@ R18 #513 is still under CI; do not promote its partial gates yet. R19 stacks on 
 - Three matrix CI jobs: independent, planner, library. Status remains experimental until exact-head results are inspected.
 
 R19 does not implement M11 entanglement, M33/M34 native allocator/SIMD experiments, M38 external full comparison, M43/M44 distribution/security, or M49/M50 public integration. External M40/M46/M47 still blocked. No production change or publication.
+
+
+## Round 20 — independent exact oracle and mathematical contracts
+
+R18 17/17 workflows succeeded. R19 17/18 workflows succeeded (SDK general
+regression in progress at inspection); R19 specialist matrix 3/3 passed.
+Seven original R18/R19 lab.json reports and commit.txt files were inspected:
+2550 reported checks total. Planner median 0.011371/0.014837/0.570375 ms
+for 16/32/64 wires, respectively; only the 64-wire example required all three
+routes. These are shared-host, disconnected-component pilot results, not
+general speedups or resource qualification.
+
+R20 implements:
+- M24: second exact Clifford+T oracle using all computational basis columns
+  with integer coefficients in Z[1/sqrt(2),i]. Bounded to 5 wires, 512 gates.
+  Compares U A=B U, returns exact mismatch coordinates. Does not consume
+  serialized evidence, establish authenticity or verify strict source phase.
+- M11: exact Phi+ Bell pair target on zero input, using XX/ZZ stabilization.
+  Failure is not a separability witness; no arbitrary entanglement decision.
+- M16: Knill-Laflamme finite Pauli error set criterion for independent
+  commuting stabilizers. A pass proves existence of recovery, not an actual
+  recovery circuit, hardware threshold or fault tolerance.
+- M35/M37/M38/M39: held-out mixed Clifford+T and dense Qiskit cross-checks,
+  GHZ and Bell phase/bit mutants, 3/5/7-qubit code projector comparisons;
+  exact column oracle and native planner timing comparison. These are new
+  proposed tests, not results until CI passes.
+
+References: Knill and Laflamme, Phys. Rev. A 55, 900 (1997),
+https://doi.org/10.1103/PhysRevA.55.900 ; Giles and Selinger, Phys. Rev. A
+87, 032332 (2013), https://doi.org/10.1103/PhysRevA.87.032332 .
+For future M38, MQT QCEC documents DD, simulation and ZX methods:
+https://mqt.readthedocs.io/projects/qcec/en/stable/equivalence_checking.html .
+Compare only equivalent obligations (e.g. U A=B U) and explicit phase scope.
+
+Next unresolved research: scalable independent non-Clifford certificates;
+connected factorization/cut decomposition; planner preselection and
+allocation accounting; measured native profiling; reproducible wheels,
+security and FFI audit; matched external benchmarks and actual recovery
+circuits. External M40/M46/M47 remain blocked. No public API change.
