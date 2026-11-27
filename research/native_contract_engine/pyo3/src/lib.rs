@@ -374,7 +374,8 @@ impl CliffordLookup {
   if !(1..=2_000_000).contains(&cap){return Err(err(1))}
   let groups=2*base.table.width().div_ceil(4) as u64;
   if groups*80>cap{return Err(err(3))}
-  Ok(Self{table:py.detach(||tableau22::Lookup::build(&base.table))})
+  let table=&base.table;
+  Ok(Self{table:py.detach(||tableau22::Lookup::build(table))})
  }
  fn storage_bytes(&self)->usize{self.table.storage_bytes()}
  fn image(&self,post:&Bound<'_,PyAny>)->PyResult<Signed>{
