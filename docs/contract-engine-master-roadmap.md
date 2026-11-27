@@ -305,3 +305,43 @@ native allocator instrumentation, spatial cuts, physical syndrome
 extraction and arbitrary-rotation algorithm contracts remain pending.
 External hardware/review/user-study gates remain blocked. No release
 or merge.
+
+
+## Round 25 — breadth of qualification
+
+R24 exact head 91362067251ed6cacfc891ac4c75bddf72bf7a91 passed 24/24
+workflows, 4/4 specialty jobs. Four original lab.json reports and commit
+records checked: 3169 witness, 17 routing and 38 wide checks = 3224.
+64-wire/32-contract compact vs old median: 0% failures 0.048282 vs
+0.050405 ms; 50% 0.060400 vs 0.740653 ms; 100% 0.070234 vs 1.417250 ms.
+Expanding legacy witnesses costs additional time (100% failures
+0.372104 ms total expanded reports). Wide structured 64-wire DAG
+uniform/GHZ/phase active nodes 65/191/492; historical nodes 4290/2337/21701;
+simulation medians 10.448382/5.522601/53.430982 ms; observables
+0.274811/0.586289/1.605153 ms. Shared-runner pilot only. R24 certificate
+fallback verified connected 32/64-wire fixtures but their sign mutants
+remain inconclusive, not failures.
+
+R25 submits seven independent suites:
+- binary: width-dependent fixed-endian masks, shared boundaries, strict
+  canonical parsing and independent replay (M23/M24/M35).
+- weighted: exact quarter-turn phase-weighted DAG quotient and direct
+  contraction, compared against unweighted DAG; post-execution compression,
+  not arbitrary weighted gates (M29/M37).
+- simd: explicit SSE2 gate scan with 128 lanes, portable scalar fallback;
+  bounded opt-in, audited architecture-specific unsafe block, no automatic
+  adoption until performance and parity demonstrated (M27/M34/M45).
+- alloc: separate Rust executable tracks requested bytes/highwater and
+  allocation calls in sparse core, not allocator overhead/RSS nor whole
+  extension; unsafe GlobalAlloc delegation not linked into Python (M33/M45).
+- recovery: actual ideal controlled-Pauli syndrome extraction circuit and
+  measured classical recovery construction; test extraction and branch
+  correction independently, no noisy dynamic execution or hardware (M12/M16).
+- semantics: exact pure-state cut separability, strict packed gate-induced
+  phase, unnormalized Z measurement branch; scope limited (M11–M13).
+- algorithms: numerical Ketary circuit contracts for QFT/Grover/QPE/VQE/QAOA
+  bounded fixtures; not exact native arbitrary rotations (M36/M37).
+See contract-engine-qualification-ledger.md for all 50 requirements,
+open exit gates, proposed compatibility ADR, and executable examples.
+R25 CI pending. Spatial factorization, general weighted gate execution,
+resource accounting and external M40/M46/M47 remain open. No release or merge.
