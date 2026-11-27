@@ -30,7 +30,6 @@ jobs:
         run: |
           python -m pip install maturin==1.9.6
           cd research/native_contract_engine/pyo3
-          cargo generate-lockfile
           cargo tree --locked > ../../../cargo-tree.txt
           cargo metadata --locked --format-version 1 > ../../../cargo-metadata.json
           rustc --version > ../../../rust-version.txt
