@@ -38,3 +38,20 @@ clean-ancilla postcondition with domain and repair; compare usefulness
 against direct dense NumPy/Qiskit checks at matched guarantee strength;
 then decide whether a public interface earns its place. No merge until
 review, no release.
+
+## Composite application study
+
+Five-wire Grover search with a parity-and-conjunction oracle, two marked
+data states (13 and 14), one workspace wire, and a separate diffuser.
+Ten correct/defective variants distinguish workspace restoration,
+logical action on the clean-workspace subspace (up to common phase),
+and joint marked-state/clean-workspace probability. Two distinct oracle
+implementations and a global phase control are accepted. An independent
+truth-table diagonal oracle and analytic reflection supply reference
+matrices; exact expected probabilities and failure categories are fixed.
+A missing uncompute, wrong clause, identity oracle, wrong/identity diffuser
+and under/over-iteration must be distinguished. Effect residual and
+logical restriction residual are different numerical criteria; only
+classification of these well-separated examples is compared.
+No public API change. This is a small ideal simulation, not proof of
+scalable verification or actual user productivity.
