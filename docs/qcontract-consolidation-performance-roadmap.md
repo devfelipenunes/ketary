@@ -137,3 +137,46 @@ in ledger; independent reviewer, hardware and participants still needed.
 C12: one integration PR targeting main, exact-head build and regression
 required before review/merge. No merge, publication or branch deletion.
 Alpha A1 CI results pending.
+
+
+## Alpha A2 — packaging identity, replay and reproducibility
+
+A1 exact head 4c9f5523f9fb22843a50529cfbe29c9cb39f0aa5: 32/33
+workflows succeeded (historical R30 cancellation only). Qualification run
+46062634678: 3/3 platform jobs passed. Original artifacts
+15229094725 (Linux), 15229566740 (Windows), 15229009408 (macOS) audited:
+41 checks per platform, 123 executions of the installation checks;
+32 runtime modules, 40 wheel members; clean virtual environments without
+the legacy SDK. CPython 3.12 and Qiskit 2.6.2. All wheel SHA-256 values
+match the qualification metadata at source commit. Linux and macOS pure
+Python wheel digest 77e7d0b8d37a903766906b38d3651ed87494298f7fbb51ee612592af4e9c06d2;
+Windows digest fac2fe0d22b567f1ff16c008618f5a7624c68d50f2edb907991c92c554b147c7.
+Member comparison: Python sources, README metadata and license differ
+only by CRLF; manifest and RECORD hashes differ; ZIP host/permissions
+metadata differ. Native wheels have platform-specific tags and digests,
+not expected to match across architectures.
+
+A2 action:
+- C02/C09: isolated staged native crate substitutes only local distribution
+  and module namespace (qcontract-native-alpha-local / qcontract_native_alpha);
+  preserves the research crate and dependency versions. Record hashes of
+  original canonical source and staged native files. Local Python
+  distribution remains qcontract-alpha-local, version 0.1.0a1. No PyPI
+  registration or permanent namespace allocation.
+- C08/C09: normalize text to LF, pin setuptools 80.9.0 and wheel 0.45.1,
+  canonicalize pure-Python ZIP container metadata only (fixed timestamp,
+  order, permissions and stored entries); assert every member is unchanged
+  and verify RECORD. Compare cross-platform digests after CI; do not claim
+  equality before results. Native binaries never post-processed.
+- C04/C05/C08: independent Python ordered-Pauli replay for tableau reports.
+  Verify PASS equality and FAIL product-state witness value, masks, axes,
+  signs and snapshot/obligation binding. Replay returns None on insufficient
+  logical budget. Selected existing state/certificate routes unchanged.
+- C06: installed candidate tests include PASS/FAIL replay, tampering,
+  low budget and absence of legacy native distribution/module.
+- C07: preserve existing performance defaults and evidence; no new speed
+  claim. C10: update guide to reflect staged native name and replay scope.
+
+A2 pending exact-head CI. Review portable Linux tags, source admission
+hardening, stable public types, external review and dedicated benchmarks
+before Alpha release. No merge, public upload or deletion of historical PRs.
