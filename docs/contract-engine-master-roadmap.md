@@ -378,3 +378,34 @@ direct weighted gate operations, general spatial scaling, portable
 independent proof interoperability, full resource/FFI/SBOM audit,
 cross-platform candidate qualification and external M40/M46/M47.
 No merge or release.
+
+
+## Round 27 — direct weighted gates and spatial integration
+
+Corrected R25 head 803b14f1a3309b9ceb25631276750f4c54edb51f and R26
+head f3c72764a26787de1532e372b3702db64a367b54 each completed 25/25
+reported workflows. R26 raw lab artifacts at the exact head confirm
+172 spatial and 111 budget checks. Connected 16/32/64-wire fixtures
+with 94/190/382 gates give PASS and sign-mutant FAIL; previous planner
+is inconclusive for 32/64. Median independent replay 2.493678/3.483292/
+5.597131 ms, logical work 3876/4356/5316, peak terms 1 in these structured
+fixtures. No general complexity or controlled-host claim.
+
+R27 submits three suites:
+- weighted: execute all admitted Clifford+T gates directly on canonical
+  quarter-turn phase-weighted DAG edges, memoized linear operations and
+  addition, CX both wire orders, frozen reachable graph; exact amplitude
+  and expectation parity, structured 64-wire tests and work/node caps.
+  This is direct phase weighting, not general arbitrary complex weights.
+- evidence: portable canonical JSON spatial replay records binding snapshot,
+  obligations, partition, caps, verdict and exact coefficient digest.
+  Recompute the full independent spatial contraction; rejected malformed,
+  wrong request and rehashed false records. Not a succinct proof or signature.
+- routing: private opt-in spatial fallback after R24 planner, disjoint
+  per-obligation reservations, explicit shared batch budget for tableau;
+  definitive FAIL witness from spatial contraction; replay record attached.
+  Trace covers top-level routes, not every underlying internal attempt.
+  Serialization and bigint operations are not fully charged by logical ledger.
+No public API change, release or merge. Pending CI, general weighted edges,
+more demanding interacting workloads, complete resource and security audit,
+latest cross-platform qualification and external review/hardware gates.
