@@ -129,4 +129,45 @@ Snapshot: baseline A4 ee3699a5; comparative lab 3e4487b2; contract-first integra
 ## Totals
 121 deliveries: 14 evidenced, 83 partial/candidate, 21 pending, 3 externally blocked. Counts describe work packages, not test count or release percentage. Reconcile on each exact-head run.
 
-#528 merged at b8ba69f8f7eea5e76abc44b2f351f6659ed8e5e9; #529 retargeted to main, not yet merged. #528 tree identical to main at verification; post-merge run not confirmed. Preserve prior exact-head artifacts and historical workflows until CI coverage migration is verified.
+#528 merged at b8ba69f8f7eea5e76abc44b2f351f6659ed8e5e9; #529 merged at 49cff9d31590cb19369c66afabf8bd9d60b177ea; main tree matches the validated research head 3e4487b2. #530 retargeted to main. #528 tree identical to main at verification; post-merge run not confirmed. Preserve prior exact-head artifacts and historical workflows until CI coverage migration is verified.
+
+
+## Consolidation checkpoint — 530
+
+Validated #529 exact head 3e4487b2 (2/2 workflows, including shared
+build plus 8 consumers) merged with history into main at
+49cff9d31590cb19369c66afabf8bd9d60b177ea. Compare original head to main:
+0 missing commits, 0 changed files. #530 is now directly based on main.
+
+#530 initial head 005e2cb912e6e6a5f7098a165a529b98d279fba6:
+comparative run 46083586008 passed all 10 jobs. Artifact 15238107081
+contains 16 high-T cases, 64 properties per strategy: default 48
+decisive, plain 57, phase-weighted 57. 162 decisive replay successes
+across three strategies; 9 recovered obligations, 7 still unresolved
+by both DAGs (local-graph). Setup medians 0.19591/19.7095735/43.4182965
+ms; query medians 1.3084765/1.766577/1.862587 ms. Explicit DAG selection
+retained; no automatic retry or increase of logical budgets.
+Artifact 15237697798: default full state reports win 10/10 vs cached
+inverse values, median 4.6857x; 10/10 vs StabilizerState, 10.9106x.
+Artifact 15238385926: public full reports win 42/48 vs Qiskit inverse
+expectations, median 2.3558x. Outputs differ (full report vs numeric
+values); shared hosts, not a general speed claim.
+
+Isolated qualification run 46083586009 failed on all three platforms.
+Linux trace: dispatch_parity.py line 72, mixed-report equality with
+per-item check. The new state route was used only in all-state batches;
+mixed queries still went through the older state path. Fix 589091b:
+preflight the entire mixed batch with qualified31.validate, route
+eligible state obligations together, preserve original per-item quota,
+delegate remaining items at q * remaining_count, restore order.
+Pure and mixed eligible state obligations use same route; low budgets
+and explicit DAG policies retain prior behavior. New regression
+7c604af includes transition + two states with distinct costs + sum,
+budget boundaries and invalid input in mixed batch. The failing
+original regression remains unchanged. This is a candidate correction,
+not a confirmed fix. Do not merge #530 before new exact-head results.
+
+No status inflation: 14 evidenced, 83 partial/candidate, 21 pending,
+3 external blockers remain the conservative register classification.
+A3 post-merge qualification, all runtime API tests, broad CI cleanup,
+controlled hardware and external user studies are not closed.
