@@ -36,7 +36,7 @@ fn image(ops:&[Op],mut x:u64)->(u64,u8){
 }
 pub(crate) fn verify(a:&[u8],b:&[u8],n:u32,clean:u64,budget:u64)->Outcome{
  // Conservative charge for decode/partition/grouping plus evaluations.
- let scans=4*((a.len()+b.len())/3) as u64+u64::from(n)*64;
+ let scans=(2*u64::from(n)+4)*((a.len()+b.len())/3) as u64+3*u64::from(n)*u64::from(n);
  if scans>budget{return (2,"preprocessing budget".into(),None,budget);}
  let (aa,bb)=match(decode(a),decode(b)){(Some(a),Some(b))=>(a,b),_=>(return (3,"non-monomial gate pattern".into(),None,scans))};
  let mut groups:Vec<u64>=(0..n).map(|i|1u64<<i).collect();

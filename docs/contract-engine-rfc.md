@@ -311,3 +311,9 @@ fits but the full circuit exceeds its T cap. Sequential numerical effect
 contracts propagate adjoints backward and replay density forward without
 forming products of all Kraus branches; tolerance and diagnostic guard remain
 numerical. No new dependencies or public API; no release approval.
+
+Round 16 review: charge both union grouping and component filtering scans
+using width-dependent upper bound, not four scans alone. Add separate bit-
+and phase-flip repetition-code coherent recovery, all eight specified error
+patterns, with multi-error negative controls and independent dense checks.
+This is not a code correcting both X and Z errors simultaneously.

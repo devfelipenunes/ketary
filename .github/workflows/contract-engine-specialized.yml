@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [monomial,composition,channels]
+        suite: [monomial,composition,channels,recovery]
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:

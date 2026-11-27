@@ -81,6 +81,36 @@ def channels():
                 checks+=1
                 rows.append({"n":n,"layers":layers,"rate":rate,"status":r.status,"residual":r.residual,"timings":measure({"kraus_sequence":lambda:c.verify(p,p,stages),"qiskit_superop_sequence":lambda:c.verify(p,p,stages,method="superop")},reps=11)})
     output({"scope":"numerical same all-state effect inequality for sequential CPTP channels; analytic dephasing composition; no certified roundoff","checks":checks,"rows":rows})
+def recovery():
+    rows=[];checks=0
+    for blocks in (1,2,4,8,16):
+        n=3*blocks;w=tuple(range(blocks,n))
+        for basis in ("bit","phase"):
+            for errors in (0,1,2,4,3,5,6,7):
+                qc=QuantumCircuit(n);ref=QuantumCircuit(n)
+                for i in range(blocks):
+                    a,b,c=i,blocks+2*i,blocks+2*i+1
+                    qc.cx(a,b);qc.cx(a,c)
+                    if basis=="phase":qc.h([a,b,c])
+                    for j,wire in enumerate((a,b,c)):
+                        if errors&(1<<j):getattr(qc,"z" if basis=="phase" else "x")(wire)
+                    if basis=="phase":qc.h([a,b,c])
+                    qc.cx(a,b);qc.cx(a,c);ccx(qc,b,c,a)
+                    e0,e1,e2=(bool(errors&(1<<j)) for j in range(3))
+                    if e0^e1:ref.x(b)
+                    if e0^e2:ref.x(c)
+                a,b=Engine.prepare(q.from_qiskit(qc)),Engine.prepare(q.from_qiskit(ref))
+                r=Action(w).verify(a,b);expected="PASS" if errors.bit_count()<=1 else "FAIL"
+                assert r.status==expected,(blocks,basis,errors,r)
+                if n<=6:
+                    u,v=Operator(qc).data[:,:1<<blocks],Operator(ref).data[:,:1<<blocks]
+                    p=np.vdot(v,u)/(1<<blocks)
+                    assert (abs(abs(p)-1)<1e-10 and np.linalg.norm(u-p*v,2)<1e-10)==(expected=="PASS")
+                checks+=1
+                if errors in (1,3):
+                    rows.append({"n":n,"blocks":blocks,"basis":basis,"error_mask":errors,"status":r.status,"timings":measure({"projected":lambda:Action(w).verify(a,b)},reps=11)})
+    output({"scope":"separate bit- and phase-flip repetition codes; fixed Pauli error patterns and coherent logical domain, syndrome retained; double/triple errors fail; not arbitrary quantum noise correction","checks":checks,"rows":rows})
+
 if __name__=="__main__":
     import sys
-    {"monomial":monomial,"composition":composition,"channels":channels}[sys.argv[1]]()
+    {"monomial":monomial,"composition":composition,"channels":channels,"recovery":recovery}[sys.argv[1]]()
