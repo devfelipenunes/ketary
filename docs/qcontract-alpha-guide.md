@@ -12,16 +12,34 @@ by the alpha qualification workflow in a single pip command, allowing
 Qiskit and NumPy dependencies to resolve. Use the exact wheels for your platform, from the same commit. The Python wheel is
 `qcontract_alpha_local-0.1.0a3-py3-none-any.whl`; the native wheel is
 `qcontract_native_alpha_local-0.1.0-cp312-cp312-<platform>.whl`.
-Verify the artifact SHA-256 values before installation. Substitute the actual local
-file names for your platform:
+Download the matching qualification archive from [run 46084014830](https://github.com/devfelipenunes/ketary/actions/runs/46084014830) and extract it. The qualified source commit is `bc16ff0b74d7766d483a5bccd7258d998826c8b3`. Compare SHA-256 against the following values and `qualification.json` before installation.
 
+| Artifact | Native wheel filename | SHA-256 |
+|---|---|---|
+| Linux 15238562005 | qcontract_native_alpha_local-0.1.0-cp312-cp312-manylinux_2_34_x86_64.whl | 8a5a2cb18ca2caa4f24ee6f0376cf1351afb94fb99fb1977eae157217c0cd41f |
+| Windows 15238856035 | qcontract_native_alpha_local-0.1.0-cp312-cp312-win_amd64.whl | 4315b7615f1fc09db000b8c4293e2c2f171ce92d08791920fba7844dc330f125 |
+| macOS 15237893203 | qcontract_native_alpha_local-0.1.0-cp312-cp312-macosx_11_0_arm64.whl | 2fec74810ee36ae02e255f558089089b34ac0212ce42b7a8b1a7bfe9b76a0b8b |
+
+The pure Python wheel has SHA-256 `3118ff1ad3a8ab45c87ba321a34efd667628fdb86ec992e58ddc97485273bdf4` on all three targets. From the extracted archive directory, using CPython 3.12:
+
+Linux/macOS:
 ```sh
-python -m venv .venv
-# Activate the environment using the command for your OS.
-python -m pip install ./qcontract_alpha_local-0.1.0a3-py3-none-any.whl ./<native-wheel>.whl
+python3.12 -m venv .venv
+. .venv/bin/activate
+python -m pip install qiskit==2.6.2 python/*.whl native/*.whl
 python -m pip check
 python -c "import qcontract; print(qcontract.__version__)"
 ```
+
+Windows (PowerShell):
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\python.exe -m pip install qiskit==2.6.2 python\qcontract_alpha_local-0.1.0a3-py3-none-any.whl native\qcontract_native_alpha_local-0.1.0-cp312-cp312-win_amd64.whl
+.venv\Scripts\python.exe -m pip check
+.venv\Scripts\python.exe -c "import qcontract; print(qcontract.__version__)"
+```
+
+The printed version should be 0.1.0a3. For a strict replication of dependency versions, consult the matching environment.json; the install commands above are a quickstart, not a complete dependency lock.
 
 See [contract-first documentation](qcontract/README.md) for named plans,
 examples, reference and explanations. No production compatibility or public PyPI availability is
