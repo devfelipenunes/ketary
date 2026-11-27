@@ -4,7 +4,7 @@ Uses a fresh venv with no legacy distribution and no editable installs.
 Artifacts include the native and Python wheels, exact commit, wheel
 hashes, installed dependency inventory and smoke results. No publication.
 """
-import hashlib,json,os,pathlib,platform,subprocess,sys,venv,zipfile
+import base64,csv,hashlib,io,json,os,pathlib,platform,subprocess,sys,venv,zipfile
 
 ROOT=pathlib.Path(__file__).resolve().parents[3]
 LAB=ROOT/"research"/"native_contract_engine"
@@ -16,19 +16,36 @@ def sha(p):
 def source_sha(p):
     return hashlib.sha256(p.read_text(encoding="utf-8").encode("utf-8")).hexdigest()
 def canonical_python_zip(w):
-    # Pure Python wheel only: reproducible archive metadata, no changes
-    # to members or RECORD. Stored entries avoid compression differences.
+    # Pure Python wheel only: normalize the metadata line endings that
+    # setuptools writes in platform text mode. Recompute RECORD explicitly.
+    # No executable/source/manifest bytes or native wheel are changed.
     tmp=w.with_suffix(".tmp")
-    with zipfile.ZipFile(w) as src,zipfile.ZipFile(tmp,"w",compression=zipfile.ZIP_STORED) as dst:
+    with zipfile.ZipFile(w) as src:
         names=src.namelist()
         assert len(names)==len(set(names)) and not any(n.endswith((".jws",".p7s")) for n in names)
+        data={n:src.read(n) for n in names}
+    metadata,=tuple(n for n in names if n.endswith(".dist-info/METADATA"))
+    record,=tuple(n for n in names if n.endswith(".dist-info/RECORD"))
+    data[metadata]=data[metadata].replace(b"\r\n",b"\n")
+    rows=io.StringIO(newline="")
+    writer=csv.writer(rows,lineterminator="\n")
+    for n in sorted(set(names)-{record}):
+        value=data[n]
+        digest=base64.urlsafe_b64encode(hashlib.sha256(value).digest()).rstrip(b"=").decode("ascii")
+        writer.writerow((n,"sha256="+digest,len(value)))
+    writer.writerow((record,"",""))
+    data[record]=rows.getvalue().encode("utf-8")
+    with zipfile.ZipFile(tmp,"w",compression=zipfile.ZIP_STORED) as dst:
         for n in sorted(names,key=lambda n:(".dist-info/" in n,n.endswith("/RECORD"),n)):
             info=zipfile.ZipInfo(n,date_time=(2023,11,14,22,13,20))
             info.create_system=3;info.external_attr=0o100644<<16;info.compress_type=zipfile.ZIP_STORED
-            dst.writestr(info,src.read(n))
+            dst.writestr(info,data[n])
     with zipfile.ZipFile(w) as src,zipfile.ZipFile(tmp) as dst:
-        assert set(src.namelist())==set(dst.namelist()) and all(src.read(n)==dst.read(n) for n in src.namelist())
+        assert set(src.namelist())==set(dst.namelist())
+        assert all(src.read(n)==dst.read(n) for n in names if n not in (metadata,record))
+        assert src.read(metadata).replace(b"\r\n",b"\n")==dst.read(metadata)
     tmp.replace(w)
+
 def audit_python(w):
     with zipfile.ZipFile(w) as z:
         names=z.namelist()
@@ -63,6 +80,8 @@ def main():
     pywheel=OUT/"python";pywheel.mkdir()
     run([sys.executable,"-m","pip","wheel","--no-deps","--no-build-isolation","--wheel-dir",pywheel,staged],env=env)
     pw,=pywheel.glob("*.whl")
+    with (OUT/"python-original-record-audit.json").open("w",encoding="utf-8") as f:
+        run([sys.executable,LAB/"wheel_audit10.py",pywheel],stdout=f)
     canonical_python_zip(pw)
     audit=audit_python(pw)
     with (OUT/"python-record-audit.json").open("w",encoding="utf-8") as f:
