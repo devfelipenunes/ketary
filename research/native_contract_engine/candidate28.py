@@ -11,8 +11,8 @@ from independent20 import pauli
 from engine import digest
 from router27 import Router
 from weighted27 import simulate
-from weighted25 import expectation
-from dag22 import simulate as plain_simulate
+from weighted25 import expectation,Weighted
+from dag22 import simulate as plain_simulate,Limit
 from expectation23 import expectation as plain_expectation
 from certificate23 import verify_bytes
 from spatial_evidence27 import replay as replay_spatial
@@ -32,9 +32,11 @@ class Policy:
     state_build_work:int=2_000_000
     state_nodes:int=65536
     prepare_state:bool=False
+    state_backend:str="plain"
     def validate(self):
         bounds(4096,self.tableau_build_work);bounds(4096,self.state_build_work)
         if type(self.state_nodes) is not int or not 1<=self.state_nodes<=65536 or type(self.prepare_state) is not bool:raise ValueError("policy")
+        if type(self.state_backend) is not str or self.state_backend not in ("plain","phase-weighted"):raise ValueError("state backend")
 
 @dataclass(frozen=True)
 class Report:
@@ -68,6 +70,25 @@ def obligation(n,spec):
         return "zero-input-state-eigen",digest({"domain":"zero-input-state-eigen","post":spec.observable})
     raise TypeError("explicit exact contract domain")
 
+def freeze_plain(d):
+    """Freeze reachable unweighted nodes as zero-phase edges, charging
+    the existing preparation ledger. No mutable Arena escapes."""
+    if d is None:return None
+    try:
+        live=set();todo=[d.root]
+        while todo:
+            d.charge();i=todo.pop()
+            if i in live:continue
+            live.add(i)
+            if d.nodes[i][0]:todo.extend(d.children(i))
+        ids={i:j for j,i in enumerate(sorted(live))}
+        rows=[]
+        for i in sorted(live):
+            d.charge();l,*v=d.nodes[i]
+            rows.append((l,(ids[v[0]],0),(ids[v[1]],0)) if l else (0,v[0]))
+        return Weighted(d.n,d.k,(ids[d.root],0),tuple(rows))
+    except Limit:return None
+
 @dataclass(frozen=True)
 class Engine:
     session:RustSession
@@ -79,7 +100,12 @@ class Engine:
         self.policy.validate()
         p=self.policy;s=self.session
         object.__setattr__(self,"router",Router(s,p.tableau_build_work))
-        state=simulate(s.width,s.packed,max_nodes=p.state_nodes,max_work=p.state_build_work) if p.prepare_state and len(s.packed)<=1536 else None
+        state=None
+        if p.prepare_state and len(s.packed)<=1536:
+            if p.state_backend=="phase-weighted":
+                state=simulate(s.width,s.packed,max_nodes=p.state_nodes,max_work=p.state_build_work)
+            else:
+                state=freeze_plain(plain_simulate(s.width,s.packed,wide=True,cap=p.state_nodes,work=p.state_build_work))
         object.__setattr__(self,"state",state)
     @classmethod
     def prepare(cls,circuit,policy=Policy()):
@@ -108,14 +134,14 @@ class Engine:
                 reports[i]=report(i,"INCONCLUSIVE","state-unprepared-or-budget");continue
             r=expectation(self.state,specs[i].observable,max_work=q)
             if r.status=="INCONCLUSIVE":
-                reports[i]=report(i,r.status,"weighted-state-budget");continue
+                reports[i]=report(i,r.status,"state-query-budget");continue
             status="PASS" if r.numerator==(1<<r.denominator_power,0) else "FAIL"
-            reports[i]=report(i,status,"weighted-state",expectation=(r.numerator,r.denominator_power))
+            reports[i]=report(i,status,p.state_backend+"-state",expectation=(r.numerator,r.denominator_power))
         return Batch(tuple(reports),t+u,t,u,(p.tableau_build_work,p.state_build_work if p.prepare_state else 0))
 
 def replay_report(session,spec,report,*,max_work=2_000_000):
     """True/False for supported replay routes, None for unavailable/budget.
-    State replay independently uses unweighted DAG; spatial replay is the
+    State replay uses the alternative DAG backend; spatial replay is the
     same independent-of-Rust spatial algorithm, not a second spatial oracle.
     """
     if type(session) is not RustSession or type(report) is not Report:raise TypeError("request")
@@ -130,12 +156,17 @@ def replay_report(session,spec,report,*,max_work=2_000_000):
         if report.route=="temporal-certificate":
             return report.status=="PASS" and report.witness is None and verify_bytes(n,g,spec.pre,spec.post,report.evidence,max_work=max_work)
         return None
-    if report.route!="weighted-state" or len(g)>1536:return None
+    if report.route not in ("plain-state","phase-weighted-state") or len(g)>1536:return None
     a=max_work//2;b=max_work-a
     if not a:return None
-    d=plain_simulate(n,g,wide=True,work=a)
-    if d is None:return None
-    r=plain_expectation(d,spec.observable,max_work=b)
+    if report.route=="plain-state":
+        d=simulate(n,g,max_work=a)
+        if d is None:return None
+        r=expectation(d,spec.observable,max_work=b)
+    else:
+        d=plain_simulate(n,g,wide=True,work=a)
+        if d is None:return None
+        r=plain_expectation(d,spec.observable,max_work=b)
     if r.status=="INCONCLUSIVE":return None
     status="PASS" if r.numerator==(1<<r.denominator_power,0) else "FAIL"
     return status==report.status and report.expectation==(r.numerator,r.denominator_power)
