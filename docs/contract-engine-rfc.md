@@ -242,3 +242,22 @@ and remove the migration step after review. Add own project Apache license
 and verify wheel RECORD hashes in CI. Third-party notice, license obligations,
 scanner result and reproducibility are separate pending acceptance gates.
 No distribution, no public API changes.
+
+## Round 12 — consolidated research engine
+
+Native transition_batch accepts at most 64 obligations in one PyO3 call,
+validates all before propagation, uses shared term-work cap and conservative
+abort behavior; optional Rust exact inverse cancellation and backward cone.
+Same deterministic witness and status as Python dispatch. No implicit
+parallelism, no global cache; witness work and scan overhead are not a full
+wall-time or memory bound. Invariant sugar means identical pre/post Pauli.
+Engine.equivalent compares V†U on every X_i and Z_i (up to 32 wires, all 2n
+checks); centralizer of full Pauli algebra consists of scalars, so PASS
+implies equivalence up to global phase, never strict phase equivalence.
+Relative witnesses and both original identities retained. Invalid or
+unsupported input rejected explicitly; inconclusive is not success.
+Clean ancillas remain separate scope. Graph-state stabilizer transition
+contracts, Clifford+T QAOA-style ring symmetry (not MaxCut optimality),
+and coherent two-bit modular addition with independent permutation oracle.
+Compare only equal guarantees; strict dense adder result separate.
+Research-only; no change to SDK public runtime or distribution.

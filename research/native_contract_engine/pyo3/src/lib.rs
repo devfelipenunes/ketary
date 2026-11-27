@@ -64,6 +64,21 @@ fn witness(n:u32,terms:&[core::Term],k:u64,pre:Signed)->Option<Witness>{
  }
  Some((axes,signs,*poly.get(&0).expect("nonzero polynomial"),k))
 }
+// Exact cancellation and backward support cone. Charge three gate scans
+// conservatively; the existing term-work cap does not count witness cost.
+fn cone(g:&[u8],post:Signed)->Vec<u8>{
+ let inv=[0u8,2,1,3,4,5,7,6];let mut stack:Vec<[u8;3]>=Vec::with_capacity(g.len()/3);
+ for v in g.chunks_exact(3){
+  let row=[v[0],v[1],v[2]];
+  if stack.last()==Some(&[inv[row[0] as usize],row[1],row[2]]){stack.pop();}else{stack.push(row);}
+ }
+ let mut support=post.0|post.1;let mut kept=Vec::new();
+ for row in stack.into_iter().rev(){
+  let wires=(1u64<<row[1])|if row[0]==5{1u64<<row[2]}else{0};
+  if support&wires!=0{support|=wires;kept.push(row);}
+ }
+ kept.into_iter().rev().flatten().collect()
+}
 #[pyclass(frozen)]
 struct PackedCircuit{width:u32,gates:Vec<u8>}
 #[pymethods]
@@ -96,6 +111,30 @@ impl PackedCircuit {
    let w=witness(self.width,&terms,k,pre);
    Ok((w.is_none(),w,peak,work))
   }).map_err(err)
+ }
+ // One native call with shared conservative term-work budget.
+ fn transition_batch(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,max_terms:usize,max_work:u64,adaptive:bool)->PyResult<Vec<Option<Verdict>>>{
+  if items.len()==0||items.len()>64||max_terms==0||max_terms>4096||max_work==0||max_work>2_000_000{return Err(err(1))}
+  let obs:Vec<(Signed,Signed)>=items.extract()?;
+  if obs.iter().any(|(a,b)|!valid(self.width,*a)||!valid(self.width,*b)){return Err(err(1))}
+  py.detach(||{
+   let mut remaining=max_work;let mut out=Vec::with_capacity(obs.len());
+   for (pre,post) in obs{
+    if remaining==0{out.push(None);continue;}
+    let reduced;
+    let gates=if adaptive{
+     let cost=3*(self.gates.len()/3) as u64;
+     if cost>=remaining{remaining=0;out.push(None);continue;}
+     remaining-=cost;reduced=cone(&self.gates,post);reduced.as_slice()
+    }else{self.gates.as_slice()};
+    match core::run(gates,self.width,post.0,post.1,post.2,max_terms,remaining){
+     Ok((terms,k,peak,work))=>{remaining-=work;let w=witness(self.width,&terms,k,pre);out.push(Some((w.is_none(),w,peak,work)));}
+     Err(2|3|4)=>{remaining=0;out.push(None);}
+     Err(e)=>return Err(err(e)),
+    }
+   }
+   Ok(out)
+  })
  }
 }
 #[pymodule]
