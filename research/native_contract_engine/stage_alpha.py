@@ -5,7 +5,7 @@ or competing historical frontends. Select dependency closure explicitly.
 Keep originals in research for regression evidence. This is a provisional
 distribution, not an upload or permanent namespace allocation.
 """
-import ast,hashlib,json,pathlib,re,shutil,sys
+import ast,hashlib,json,pathlib,re,sys
 
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 LAB=ROOT/"research"/"native_contract_engine"
@@ -29,6 +29,10 @@ SELECT={
     "facade17":({"contract_forms11"},{"signed"}),
 }
 
+def canonical_text(path):
+    # Hash repository text in canonical LF form, independent of checkout OS.
+    return path.read_text(encoding="utf-8").encode("utf-8")
+
 def extract(src,module):
     if module not in SELECT:return src
     imports,names=SELECT[module];found=set();parts=[];lines=src.splitlines(keepends=True)
@@ -51,6 +55,7 @@ def rewrite(src,module):
     # All local imports become relative, including deferred imports.
     # No sys.path changes, no top-level research modules shipped.
     src=re.sub(r"(?m)^(\s*)from ([A-Za-z_]\w*) import ",lambda m:m[1]+"from "+("." if m[2] in MODULES else "")+m[2]+" import ",src)
+    src=src.replace("import ketary_native_research as rn","import qcontract_native_alpha as rn")
     tree=ast.parse(src)
     for node in ast.walk(tree):
         if isinstance(node,ast.ImportFrom):
@@ -64,30 +69,30 @@ def stage(dest):
     dest=pathlib.Path(dest).resolve()
     if dest.exists():raise ValueError("stage directory must not exist")
     pkg=dest/"src"/"qcontract";private=pkg/"_core";private.mkdir(parents=True)
-    (private/"__init__.py").write_text('"""Private generated runtime; not a supported import path."""\n',encoding="utf-8")
+    (private/"__init__.py").write_bytes(b'"""Private generated runtime; not a supported import path."""\n')
     manifest={}
     for name in MODULES:
-        p=LAB/(name+".py");raw=p.read_bytes();src=rewrite(extract(raw.decode("utf-8"),name),name)
+        p=LAB/(name+".py");raw=canonical_text(p);src=rewrite(extract(raw.decode("utf-8"),name),name)
         (private/(name+".py")).write_bytes(src.encode("utf-8"))
         manifest[name]={"source_sha256":hashlib.sha256(raw).hexdigest(),"runtime_sha256":hashlib.sha256(src.encode()).hexdigest()}
-    api=(LAB/"alpha"/"api.py").read_bytes();(pkg/"__init__.py").write_bytes(api)
+    api=canonical_text(LAB/"alpha"/"api.py");(pkg/"__init__.py").write_bytes(api)
     manifest["public_api"]={"source_sha256":hashlib.sha256(api).hexdigest()}
-    (pkg/"runtime-manifest.json").write_text(json.dumps(manifest,sort_keys=True,indent=2),encoding="utf-8")
-    shutil.copyfile(ROOT/"LICENSE",dest/"LICENSE")
-    shutil.copyfile(ROOT/"docs"/"qcontract-alpha-guide.md",dest/"README.md")
+    (pkg/"runtime-manifest.json").write_bytes(json.dumps(manifest,sort_keys=True,indent=2).encode("utf-8"))
+    (dest/"LICENSE").write_bytes(canonical_text(ROOT/"LICENSE"))
+    (dest/"README.md").write_bytes(canonical_text(ROOT/"docs"/"qcontract-alpha-guide.md"))
     (dest/"pyproject.toml").write_text("""[build-system]
-requires = ["setuptools>=77"]
+requires = ["setuptools==80.9.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "qcontract-alpha-local"
-version = "0.1.0a0"
+version = "0.1.0a1"
 description = "Local experimental QContract verification candidate (not published)"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-dependencies = ["qiskit==2.6.2", "numpy>=1.26,<3", "ketary-native-research==0.1.0"]
+dependencies = ["qiskit==2.6.2", "numpy>=1.26,<3", "qcontract-native-alpha-local==0.1.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -96,7 +101,7 @@ namespaces = false
 
 [tool.setuptools.package-data]
 qcontract = ["runtime-manifest.json"]
-""",encoding="utf-8")
+""",encoding="utf-8",newline="\n")
     return {"modules":len(MODULES),"manifest":manifest,"distribution":"qcontract-alpha-local","import":"qcontract","scope":"local candidate only"}
 
 if __name__=="__main__":print(json.dumps(stage(sys.argv[1]),indent=2))
