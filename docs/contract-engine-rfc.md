@@ -226,3 +226,19 @@ equal scopes when timing. Fresh Linux worker memory comparisons and
 real SDK dense reference tests on installed Windows/macOS/Linux wheels.
 Independent human study and controlled host remain separate gates; see
 contract-engine-qualification.md. No production packaging or public API.
+
+### Security and Windows follow-up
+
+Windows full SDK cross-test failed at import: native9 depended on benchmark
+modules importing Unix-only resource. Extract pure exact cancellation and
+cone into the research adapter, preserve the algorithm and test all platforms.
+RustSec RUSTSEC-2026-0176 and RUSTSEC-2026-0177 cover PyO3 0.27.2;
+these specific methods are not directly called by the research binding,
+but the pinned release must not become a distribution candidate. Test
+PyO3 0.29.3 (patched range >=0.29.0) in a new explicit resolution step,
+record resolved lock and audit output; the prior committed lock is a
+migration input, not the final updated lock. Pin the actual resolved lock
+and remove the migration step after review. Add own project Apache license
+and verify wheel RECORD hashes in CI. Third-party notice, license obligations,
+scanner result and reproducibility are separate pending acceptance gates.
+No distribution, no public API changes.

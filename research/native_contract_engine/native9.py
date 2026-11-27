@@ -6,9 +6,19 @@ import ketary_native_research as rn
 from round3 import CODES
 from engine import Obligation,Report,Witness,SCOPE,valid_pauli,digest
 from sparse import Propagation,BudgetExceeded
-from front_planner8 import cone
-from front_c6 import reduce_gates
-from round3 import Prepared
+# Keep verification independent of benchmark-only platform modules.
+def reduce_cone(packed,post):
+    inv=(0,2,1,3,4,5,7,6)
+    stack=[]
+    for i in range(0,len(packed),3):
+        op,a,b=packed[i:i+3]
+        if stack and stack[-1]==(inv[op],a,b):stack.pop()
+        else:stack.append((op,a,b))
+    support=post[0]|post[1];kept=[]
+    for op,a,b in reversed(stack):
+        wires=(1<<a)|((1<<b) if op==5 else 0)
+        if support&wires:kept.append((op,a,b));support|=wires
+    return bytes(v for row in reversed(kept) for v in row)
 
 ID=b"ketary-research/pauli-packed/v3\0"
 @dataclass(frozen=True)
@@ -57,10 +67,7 @@ class RustSession:
                 cost=3*(len(self.packed)//3)
                 if cost>=remaining:reports.append(report("INCONCLUSIVE","preprocess budget"));remaining=0;continue
                 remaining-=cost
-                gs=tuple(tuple(self.packed[i:i+3]) for i in range(0,len(self.packed),3))
-                prepared=Prepared(self.width,gs,self.packed)
-                reduced=cone(reduce_gates(prepared),ob.post)
-                backend=rn.PackedCircuit(self.width,bytes(v for row in reduced for v in row))
+                backend=rn.PackedCircuit(self.width,reduce_cone(self.packed,ob.post))
             try:ok,w,peak,work=backend.transition(ob.pre,ob.post,max_terms,remaining)
             except rn.BudgetExceeded:reports.append(report("INCONCLUSIVE","term/work budget"));remaining=0;continue
             remaining-=work
