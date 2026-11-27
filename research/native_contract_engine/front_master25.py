@@ -135,5 +135,34 @@ def semantics():
                 assert abs(val(b)-np.vdot(w,Pauli(label(n,p)).to_matrix()@w).real)<1e-9;checks+=2
     return {"checks":checks,"scope":"exact pure bipartite separability, packed strict phase, unnormalized single Z branch"}
 
+def algorithms():
+    import ketary as k
+    from numeric25 import unitary,probability,observable
+    from qiskit.circuit.library import QFTGate
+    checks=0;rows=[]
+    for n in (2,3,4,5):
+        d=1<<n;q=QuantumCircuit(n);q.append(QFTGate(n),range(n))
+        ref=np.exp(2j*np.pi*np.outer(np.arange(d),np.arange(d))/d)/np.sqrt(d)
+        assert unitary(k.from_qiskit(q),ref).status=="PASS"
+        q.x(0);assert unitary(k.from_qiskit(q),ref).status=="FAIL";checks+=2
+        # Grover: mark all-ones, then reflect about uniform state.
+        q=QuantumCircuit(n);q.h(range(n));q.h(n-1);q.mcx(list(range(n-1)),n-1);q.h(n-1)
+        q.h(range(n));q.x(range(n));q.h(n-1);q.mcx(list(range(n-1)),n-1);q.h(n-1);q.x(range(n));q.h(range(n))
+        target=float(np.sin(3*np.arcsin(1/np.sqrt(d)))**2)
+        assert probability(k.from_qiskit(q),d-1,target).status=="PASS";checks+=1
+        q=QuantumCircuit(n+1);q.x(n)
+        for i in range(n):q.h(i);q.cp(2*np.pi*(1<<i)/d,i,n)
+        q.append(QFTGate(n).inverse(),range(n))
+        assert probability(k.from_qiskit(q),d+1,1.0).status=="PASS";checks+=1
+        for theta in (.1,.7,1.9):
+            q=QuantumCircuit(1);q.ry(theta,0)
+            assert observable(k.from_qiskit(q),"Z",float(np.cos(theta))).status=="PASS";checks+=1
+        beta,gamma=.37,.83;q=QuantumCircuit(2);q.h([0,1]);q.rzz(gamma,0,1);q.rx(2*beta,[0,1])
+        zz=Pauli("ZZ").to_matrix();x=Pauli("X").to_matrix();rx=np.cos(beta)*np.eye(2)-1j*np.sin(beta)*x
+        v=np.kron(rx,rx)@np.diag(np.exp(-1j*gamma*np.diag(zz)/2))@np.ones(4)/2
+        assert observable(k.from_qiskit(q),"ZZ",float(np.vdot(v,zz@v).real)).status=="PASS";checks+=1
+        rows.append({"n":n,"families":["QFT","Grover","QPE","VQE one-parameter ansatz","QAOA single edge"]})
+    return {"checks":checks,"rows":rows,"scope":"bounded numerical contracts through Ketary circuit adapter, not exact native rotation support"}
+
 if __name__=="__main__":
-    print(json.dumps({"suite":sys.argv[1],**{"binary":binary,"weighted":weighted,"simd":simd,"recovery":recovery,"semantics":semantics}[sys.argv[1]]()},indent=2,allow_nan=False))
+    print(json.dumps({"suite":sys.argv[1],**{"binary":binary,"weighted":weighted,"simd":simd,"recovery":recovery,"semantics":semantics,"algorithms":algorithms}[sys.argv[1]]()},indent=2,allow_nan=False))
