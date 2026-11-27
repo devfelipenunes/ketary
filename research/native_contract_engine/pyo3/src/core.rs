@@ -22,7 +22,7 @@ fn add(v:&mut Vec<Option<Term>>,m:&mut HashMap<Key,usize>,k:Key,c:Co,cap:usize)-
  if m.len()>cap{Err(4)}else{Ok(())}
 }
 pub(crate) fn run(g:&[u8],n:u32,x:u64,z:u64,r:u8,cap:usize,max_work:u64)->Result<(Vec<Term>,u64,u64,u64),i32>{
- if n==0||n>64||r>1||(n<64&&(x|z)>>n!=0)||cap==0||cap>4096||max_work==0||max_work>2_000_000{return Err(1)}
+ if g.len()>300_000||g.len()%3!=0||n==0||n>64||r>1||(n<64&&(x|z)>>n!=0)||cap==0||cap>4096||max_work==0||max_work>2_000_000{return Err(1)}
  let mut tc=0u64;
  for v in g.chunks_exact(3){let(op,a,b)=(v[0],v[1] as u32,v[2] as u32);
   if op>7||a>=n||(op==5&&(b>=n||a==b))||(op!=5&&b!=0){return Err(1)}
