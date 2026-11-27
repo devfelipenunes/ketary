@@ -195,6 +195,22 @@ impl PackedCircuit {
    Ok((w.is_none(),w,peak,work))
   }).map_err(err)
  }
+ // R30 strict opt-in accounting: reserve gate validation, sort/diagnostic
+ // visits and output construction before invoking the existing core.
+ // These are logical element visits, not comparisons, CPU time or RSS.
+ fn transition_metered(&self,py:Python<'_>,pre:&Bound<'_,PyAny>,post:&Bound<'_,PyAny>,max_terms:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>)->PyResult<(bool,Option<Witness>,u64,u64,u64,u64,u64)>{
+  let pre=signed(pre)?;let post=signed(post)?;let (cap,budget)=limits(max_terms,max_work)?;
+  if !valid(self.width,pre)||!valid(self.width,post){return Err(err(1))}
+  let scan=2*(self.gates.len()/3) as u64;
+  let diagnostic=(2*self.width as u64+40)*(cap as u64+1)+8*self.width as u64+32;
+  if scan+diagnostic>=budget{return Err(err(3))}
+  py.detach(||{
+   let (terms,k,peak,work)=core::run(&self.gates,self.width,post.0,post.1,post.2,cap,budget-scan-diagnostic)?;
+   let bits=terms.iter().map(|(_, (a,b))|128-a.unsigned_abs().max(b.unsigned_abs()).leading_zeros() as u64).max().unwrap_or(0);
+   let w=witness(self.width,&terms,k,pre);
+   Ok((w.is_none(),w,peak,scan+diagnostic+work,work,diagnostic,bits))
+  }).map_err(err)
+ }
  // One native call with shared conservative term-work budget.
  fn transition_batch(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,max_terms:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>,adaptive:&Bound<'_,PyAny>)->PyResult<Vec<Option<Verdict>>>{
   let (max_terms,max_work)=limits(max_terms,max_work)?;let adaptive=exact_bool(adaptive)?;
