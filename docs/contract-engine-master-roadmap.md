@@ -345,3 +345,36 @@ See contract-engine-qualification-ledger.md for all 50 requirements,
 open exit gates, proposed compatibility ADR, and executable examples.
 R25 CI pending. Spatial factorization, general weighted gate execution,
 resource accounting and external M40/M46/M47 remain open. No release or merge.
+
+
+## Round 26 — resolve failure and independent spatial blocks
+
+R25 initial head a6119a3f6a00e42bed079fbb5ed41ae700cfeca3: 6/7 specialty
+jobs passed, algorithms failed importing the composite QFTGate outside
+Ketary's strict standard-gate allowlist. The full SDK regression was
+pending at inspection. Corrected R25 on its own branch at 803b14f1:
+explicit H/CP/SWAP QFT, inverse via composition, explicit CX/CCX for small
+Grover controls. This is a fixture repair, not a relaxation of admission.
+Corrected-head CI still required.
+
+R26 adds an independent spatial transfer verifier (M24/M31/M32/M35/M37).
+Partition is explicit, disjoint, complete, at most 3 wires per block.
+Between crossing CX gates, disjoint block-local gates are grouped in
+reverse epochs. Local transfer coefficients are obtained from exact
+basis columns and Pauli traces in Q(sqrt(2)); crossing CX is handled
+as its own exact two-wire transfer. Global sparse contraction preserves
+non-Pauli intermediate sums, with term, coefficient-size and abstract
+work caps and exact counterexample generation. Local transfer memoization
+is independent of Rust propagation. A request can be inconclusive;
+there is no general polynomial scaling or full allocator cap claim.
+Two suites submitted: dense exact oracle and independent witness parity,
+structured 16/32/64-wire connected positive and sign-negative cases;
+malformed partition/gate admission and budget controls. No automatic
+dispatch, portable spatial proof format or public API change yet.
+
+R25 positive suites require raw artifact review before adopting SIMD,
+weighted representation or allocation policy. Remaining major gates:
+direct weighted gate operations, general spatial scaling, portable
+independent proof interoperability, full resource/FFI/SBOM audit,
+cross-platform candidate qualification and external M40/M46/M47.
+No merge or release.
