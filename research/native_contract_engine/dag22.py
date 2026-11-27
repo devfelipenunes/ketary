@@ -10,8 +10,8 @@ from independent20 import ZERO,ONE,add,neg,twice,sqrt2,iphase
 class Limit(Exception):pass
 
 class Arena:
-    def __init__(self,n,cap=65536,work=2_000_000):
-        if type(n) is not int or not 1<=n<=20 or type(cap) is not int or not 1<=cap<=65536 or type(work) is not int or not 1<=work<=2_000_000:raise ValueError("limits")
+    def __init__(self,n,cap=65536,work=2_000_000,*,wide=False):
+        if type(wide) is not bool or type(n) is not int or not 1<=n<=(64 if wide else 20) or type(cap) is not int or not 1<=cap<=65536 or type(work) is not int or not 1<=work<=2_000_000:raise ValueError("limits")
         self.n=n;self.cap=cap;self.remaining=work;self.nodes=[];self.ids={};self.k=0
         self.memo={}
         zero=self.leaf(ZERO);root=self.leaf(ONE)
@@ -107,15 +107,15 @@ class Arena:
             if self.nodes[i][0]:todo.extend(self.children(i))
         return len(seen)
 
-def simulate(n,packed,*,cap=65536,work=2_000_000):
+def simulate(n,packed,*,cap=65536,work=2_000_000,wide=False):
     if type(packed) is not bytes or len(packed)%3 or len(packed)>1536:raise ValueError("snapshot")
     # Validate all gates before any cap-triggered inconclusive result.
     rows=tuple(zip(packed[::3],packed[1::3],packed[2::3]))
-    if type(n) is not int or not 1<=n<=20:raise ValueError("width")
+    if type(wide) is not bool or type(n) is not int or not 1<=n<=(64 if wide else 20):raise ValueError("width")
     for op,a,b in rows:
         if op>7 or a>=n or (op==5 and (b>=n or a==b)) or (op!=5 and b!=0):raise ValueError("gate")
     try:
-        arena=Arena(n,cap,work)
+        arena=Arena(n,cap,work,wide=wide)
         for op,a,b in rows:arena.gate(op,a,b)
         return arena
     except Limit:return None
