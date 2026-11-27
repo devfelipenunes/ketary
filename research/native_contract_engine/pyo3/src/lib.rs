@@ -362,10 +362,60 @@ impl CliffordTableau {
   Ok(py.detach(||self.table.batch(&ps,workers as usize)))
  }
 }
+// Private prepared lookup backend. Packed IO uses fixed 17-byte LE
+// (x,z,sign) records, no borrowed data escapes the call.
+#[pyclass(frozen)]
+struct CliffordLookup { table:tableau22::Lookup }
+#[pymethods]
+impl CliffordLookup {
+ #[new]
+ fn new(py:Python<'_>,base:PyRef<'_,CliffordTableau>,max_build_work:&Bound<'_,PyAny>)->PyResult<Self>{
+  let cap=exact_u64(max_build_work)?;
+  if !(1..=2_000_000).contains(&cap){return Err(err(1))}
+  let groups=2*base.table.width().div_ceil(4) as u64;
+  if groups*80>cap{return Err(err(3))}
+  Ok(Self{table:py.detach(||tableau22::Lookup::build(&base.table))})
+ }
+ fn storage_bytes(&self)->usize{self.table.storage_bytes()}
+ fn image(&self,post:&Bound<'_,PyAny>)->PyResult<Signed>{
+  let p=signed(post)?;if !valid(self.table.width(),p){return Err(err(1))}
+  Ok(self.table.image(p))
+ }
+ fn images(&self,py:Python<'_>,items:&Bound<'_,PyTuple>,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Signed>>{
+  let cap=exact_u64(max_work)?;let n=self.table.width();
+  if items.is_empty()||items.len()>4096||!(1..=2_000_000).contains(&cap){return Err(err(1))}
+  let ps=signed_items(items)?;
+  if ps.iter().any(|&p|!valid(n,p)){return Err(err(1))}
+  let cost=ps.len() as u64*(1+2*n.div_ceil(4) as u64);
+  if cost>cap{return Err(err(3))}
+  Ok(py.detach(||ps.iter().map(|&p|self.table.image(p)).collect()))
+ }
+ fn packed_images<'py>(&self,py:Python<'py>,items:&Bound<'_,PyBytes>,max_work:&Bound<'_,PyAny>)->PyResult<Bound<'py,PyBytes>>{
+  if !items.as_any().is_exact_instance_of::<PyBytes>(){return Err(err(1))}
+  let cap=exact_u64(max_work)?;let n=self.table.width();let b=items.as_bytes();
+  if b.is_empty()||b.len()%17!=0||b.len()>4096*17||!(1..=2_000_000).contains(&cap){return Err(err(1))}
+  let count=b.len()/17;
+  // Include record admission, output and bounded group scan.
+  let cost=count as u64*(35+2*n.div_ceil(4) as u64);
+  if cost>cap{return Err(err(3))}
+  let mut ps=Vec::with_capacity(count);
+  for row in b.chunks_exact(17){
+   let p=(u64::from_le_bytes(row[..8].try_into().unwrap()),u64::from_le_bytes(row[8..16].try_into().unwrap()),row[16]);
+   if !valid(n,p){return Err(err(1))}ps.push(p);
+  }
+  let out=py.detach(||{
+   let mut out=Vec::with_capacity(count*17);
+   for p in ps{let (x,z,s)=self.table.image(p);out.extend_from_slice(&x.to_le_bytes());out.extend_from_slice(&z.to_le_bytes());out.push(s);}
+   out
+  });
+  Ok(PyBytes::new(py,&out))
+ }
+}
 #[pymodule]
 fn ketary_native_research(m:&Bound<'_,PyModule>)->PyResult<()>{
  m.add_class::<PackedCircuit>()?;
  m.add_class::<CliffordTableau>()?;
+ m.add_class::<CliffordLookup>()?;
  m.add("BudgetExceeded",m.py().get_type::<BudgetExceeded>())?;
  m.add("SCHEMA_VERSION",1)?;
  Ok(())
