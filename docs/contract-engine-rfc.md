@@ -119,3 +119,17 @@ input/spec, not merely a checksum. No assumption that composition is
 faster; compare direct verification. No timing thresholds. Stim comparison
 checks same transformed Paulis rather than sampling or entire circuits.
 QFT/adder examples use research oracles, not new public contracts.
+
+## Round 6 research
+
+Separate exact zero-leakage from probabilistic tolerance in a typed subspace
+planner, no downgrade. Research-only owned FFI buffer attached to an explicit
+snapshot and batch session. Exact adjacent inverse cancellation before sparse
+propagation, independent strict dense controls; cap applies after rewrite only
+in this explicit experiment. Disjoint-wire tensor factorization can derive
+positive local Pauli invariants even when global term expansion exceeds the
+cap; local failure is inconclusive, not global failure. Version-bound evidence
+with source fingerprints and strict JSON replay, not authentication. Stronger
+Stim reference using text parser instead of per-gate append. Isolated live RSS
+with identical fixture and no eager tableau, repeated requests and three trials.
+All seven jobs independent, no new runtime dependency or public API.
