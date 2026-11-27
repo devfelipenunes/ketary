@@ -34,8 +34,8 @@ invalid axes, bools and out-of-range indices are rejected.
 
 prepare(circuit) captures packed source snapshot; do not concurrently
 mutate the source. Explicit preparation policies choose plain/weighted
-DAG or fallback. Default Clifford-only state batches can use tableau
-images if the per-item budget suffices. Other paths remain unchanged.
+DAG or fallback. Eligible Clifford state obligations in individual, homogeneous or mixed batches
+can use tableau images if the per-item budget suffices. Other paths remain unchanged.
 statuses() returns only exact status labels, no full report or witness.
 verify() returns immutable report objects; require() rejects unresolved
 as well as refuted results.
