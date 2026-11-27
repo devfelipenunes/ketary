@@ -160,3 +160,13 @@ at most 4 data wires and 256 gates. 16*2^(n+k) bytes column payload vs
 Stage profiling measures preparation, admission, propagation, hashes,
 example witness, warm report and cold full calls separately; medians are
 not additive. Five independent research jobs.
+
+Round 7 follow-up: component factoring's first dense control failed in CI.
+Keep the original assertion and add explicit Qiskit dense vs Clifford
+oracle, Pauli-label roundtrip and full sparse coefficient checks with
+fixture/phase diagnostics. Do not adopt this route until explained.
+Compact Clifford snapshot experiment validates packed bytes using bounded
+NumPy arrays and a domain-separated version-2 binary identity. It is not
+compatible with existing JSON circuit IDs. Compare semantic reports and
+witnesses, not equality of IDs across schemas; no migration or public
+change authorized. One bytes representation only, no mutable cache.

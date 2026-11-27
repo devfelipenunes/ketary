@@ -46,9 +46,19 @@ def main():
     for n in (2,3,4,5):
         for j in range(24):
             gs=gates(n,20,j);p=prepare(circuit(n,gs));post=(rng.getrandbits(n),rng.getrandbits(n),rng.randrange(2))
-            u=Operator(circuit(n,gs).to_qiskit()).data
+            qc=circuit(n,gs).to_qiskit()
+            u=Operator(qc).data
             from qiskit.quantum_info import Clifford
-            pre=bits(Pauli(label(n,post)).evolve(Clifford(circuit(n,gs).to_qiskit()),frame="h"))
+            evolved=Pauli(label(n,post)).evolve(Clifford(qc),frame="h")
+            pre=bits(evolved)
+            target=u.conj().T@Pauli(label(n,post)).to_matrix()@u
+            oracle_error=float(np.max(np.abs(target-evolved.to_matrix())))
+            roundtrip_error=float(np.max(np.abs(evolved.to_matrix()-Pauli(label(n,pre)).to_matrix())))
+            direct=propagate(n,p.gates,post)
+            info={"n":n,"seed":j,"gates":gs,"post":post,"pre":pre,"label":label(n,pre),"qiskit_label":evolved.to_label(),"phase":int(evolved.phase),"oracle_error":oracle_error,"roundtrip_error":roundtrip_error,"direct_terms":direct.terms}
+            assert oracle_error<1e-10,info
+            assert roundtrip_error<1e-10,info
+            assert direct.terms==((pre[0],pre[1],(-1)**pre[2],0),),info
             for flip in (0,1):
                 ob=Obligation((pre[0],pre[1],pre[2]^flip),post);r=factor(p,ob)
                 assert r.status==("FAIL" if flip else "PASS")
@@ -57,7 +67,7 @@ def main():
                     from test_engine import witness_state
                     v=witness_state(r.witness);a,b=r.witness.numerator
                     assert abs(np.vdot(v,expected@v).real-a)<1e-10 and b==0
-                else:assert np.max(np.abs(expected))<1e-10
+                else:assert np.max(np.abs(expected))<1e-10,{**info,"residual":float(np.max(np.abs(expected))),"report":asdict(r)}
                 checks+=1
     for blocks in (2,4,8,12,13,16,32):
         n=2*blocks;gs=fixture(blocks);p=prepare(circuit(n,gs),allow_t=True)
