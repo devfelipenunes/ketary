@@ -86,6 +86,19 @@ def main():
                     t=time.perf_counter_ns();routes[k]();samples[k].append((time.perf_counter_ns()-t)/1e6)
             rows.append({"width":n,"queries":count,"timings":{k:{"median_ms":statistics.median(v),"samples_ms":v} for k,v in samples.items()}})
         check(engine.statuses(transitions[0],specs[0])==tuple(r.status for r in engine.verify(transitions[0],specs[0])))
+        # A mixed request and its individual requests must produce the
+        # same full public results at exactly the same per-item quota.
+        # Include both eligible and insufficient-budget state observables.
+        mixed=(transitions[0],StateEigen((0,0,0)),StateEigen(((1<<n)-1,(1<<n)-1,0)),
+               SumTransition((((0,0,0),Fraction(1)),),(((0,0,0),Fraction(1)),)))
+        for quota in (0,1,2,3,4,2*n+2,2*n+3,6*n+7,10000):
+            budget=max(1,quota*len(mixed))
+            got=engine.verify(*mixed,max_work=budget)
+            if quota:
+                check(got==tuple(engine.check(x,max_work=quota) for x in mixed))
+            else:check(all(r.status=="INCONCLUSIVE" for r in got))
+        reject(lambda:engine.verify(StateEigen((0,0,0)),Contract(requires=(True,0,0),ensures=(0,0,0))))
+        reject(lambda:engine.verify(StateEigen((0,0,0)),StateEigen((True,0,0))))
         reject(lambda:engine.statuses(Contract(requires=(True,0,0),ensures=(0,0,0))))
         check(engine.verify(*specs,max_work=1)[0].status=="INCONCLUSIVE")
     print(json.dumps({"checks":checks,"rows":rows,"scope":"installed candidate named API, all ten families, state replay, budget/status parity and paired exploratory timings"},indent=2,allow_nan=False))
