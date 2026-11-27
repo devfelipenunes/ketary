@@ -68,7 +68,11 @@ def export(c):
         out.append((i,wires[0],wires[1] if i==5 else 0))
     return pack(out)
 def random_g(n,k):
-    return [(RNG.randrange(6),a,b) for a,b in (RNG.sample(range(n),2) for _ in range(k))]
+    out=[]
+    for _ in range(k):
+        a,b=RNG.sample(range(n),2);op=RNG.randrange(6)
+        out.append((op,a,b if op==5 else 0))
+    return out
 def main():
     subprocess.run(["g++","-std=c++17","-O3","-shared","-fPIC",str(ROOT/"pauli.cpp"),"-o",str(ROOT/"cpp.so")],check=True)
     subprocess.run(["rustc","--edition=2021","--crate-type=cdylib","-C","opt-level=3",str(ROOT/"pauli.rs"),"-o",str(ROOT/"rust.so")],check=True)
