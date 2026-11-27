@@ -19,6 +19,11 @@ impl Tableau {
   Self{n,x:bitslice(g,n,&xs).into_iter().map(Row::from_signed).collect(),z:bitslice(g,n,&zs).into_iter().map(Row::from_signed).collect()}
  }
  pub(crate) fn width(&self)->u32 {self.n}
+ // Exact size/capacity payload accounting for this object only; not RSS
+ // or allocator metadata, temporary construction or Python overhead.
+ pub(crate) fn storage_bytes(&self)->(usize,usize){
+  (std::mem::size_of::<Self>(),(self.x.capacity()+self.z.capacity())*std::mem::size_of::<Row>())
+ }
  pub(crate) fn image(&self,p:Signed)->Signed {
   let mut r=Row{x:0,z:0,k:(((p.0&p.1).count_ones()+2*p.2 as u32)&3) as u8};
   let (mut x,mut z)=(p.0,p.1);
