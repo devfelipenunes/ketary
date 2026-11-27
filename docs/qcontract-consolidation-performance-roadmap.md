@@ -281,3 +281,30 @@ not an installed-wheel test, and not performance evidence. The local
 environment is Python 3.13/glibc 2.41, lacks Qiskit and Rust tools;
 the A2 native wheel requires CPython 3.12 and was built on glibc 2.43.
 A3 and A4 native qualification remain required. No release or merge.
+
+
+### A4 distribution portability qualification
+
+Audited original Linux A2 wheel from artifact 15232293625 using readelf
+on its actual ELF x86-64 extension. The runner had glibc 2.43; the
+maximum required GLIBC symbol version is 2.34, not 2.43. DT_NEEDED:
+libgcc_s.so.1, libc.so.6, ld-linux-x86-64.so.2. Highest GCC symbol
+version is GCC_4.2.0. This is static binary evidence, not a guarantee
+of runtime or dependency compatibility. A2 still carries linux_x86_64
+rather than an audited manylinux tag.
+
+A4 changes only the candidate qualification: build Linux with Maturin
+--compatibility manylinux_2_34, assert the audited tag, inspect required
+ELF versions with readelf (reject unknown GLIBC versions and requirements
+above 2.34), and retain the original RECORD and isolated-install checks.
+Use the existing Linux job on ubuntu-22.04 rather than adding jobs.
+This exercises glibc 2.35, not the exact 2.34 floor. An older-host
+2.34 runtime test, ARM64 Linux, Intel macOS and additional Python versions
+remain outside the validated matrix. Shared-host benchmark medians
+cannot be directly compared between different runner images; A4 paired
+dispatch reference uses the same host.
+
+References: https://www.maturin.rs/distribution and
+https://docs.github.com/en/actions/reference/runners/github-hosted-runners.
+A3 head and workflows are unchanged. A4 remains auxiliary and unvalidated
+with the real native extension. No manual binary relabeling, no upload.
