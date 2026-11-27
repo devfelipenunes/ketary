@@ -9,6 +9,8 @@ from dataclasses import dataclass,field
 from native9 import RustSession,bounds
 from independent20 import pauli
 from engine import digest
+from planner19 import independent_image
+from unified24 import Compact
 from router27 import Router
 from weighted27 import simulate
 from weighted25 import expectation,Weighted
@@ -158,6 +160,25 @@ def replay_report(session,spec,report,*,max_work=2_000_000):
     if (report.snapshot,report.domain,report.obligation)!=(session.identity,domain,oid):return False
     if report.status not in ("PASS","FAIL"):return None
     if type(spec) is Transition:
+        if report.route=="tableau-native":
+            # Recompute using independent ordered-Pauli multiplication.
+            # Validate the supplied product-state counterexample itself,
+            # not merely the reported verdict.
+            if report.evidence is not None or report.expectation is not None:return False
+            reserve=8*n+16
+            if max_work<=reserve:return None
+            got=independent_image(n,g,spec.post,max_work=max_work-reserve)
+            if got is None:return None
+            if got==spec.pre:return report.status=="PASS" and report.witness is None
+            if report.status!="FAIL" or type(report.witness) is not Compact:return False
+            w=report.witness
+            mask=(1<<n)-1
+            if type(w.width) is not int or w.width!=n or any(type(v) is not int or not 0<=v<=mask for v in (w.ax,w.az,w.negative)) or w.ax|w.az!=mask or type(w.value) is not int or w.value not in (-2,-1,1,2):return False
+            def value(p):
+                x,z,sign=p
+                if ((x^w.ax)|(z^w.az))&(x|z):return 0
+                return (-1)**(sign+((x|z)&w.negative).bit_count())
+            return value(got)-value(spec.pre)==w.value
         if report.route=="spatial":
             r=replay_spatial(n,g,spec.pre,spec.post,report.evidence,max_work=max_work)
             return bool(r and r.status==report.status and r.witness==report.witness)
