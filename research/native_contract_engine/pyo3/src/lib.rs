@@ -10,6 +10,26 @@ type Signed=(u64,u64,u8);
 type Witness=(String,Vec<i8>,(i128,i128),u64);
 type Prop=(Vec<(u64,u64,i128,i128)>,u64,u64,u64);
 type Verdict=(bool,Option<Witness>,u64,u64);
+// Compact product-state witness: axis X/Z masks, negative eigenvalue mask,
+// integer expectation (denominator 1). Only two signed Paulis are involved.
+type CompactWitness=(u64,u64,u64,i8);
+fn compact_witness(n:u32,got:Signed,pre:Signed)->Option<CompactWitness>{
+ if got==pre{return None;}
+ let (x,z,r)=got;let (a,b,s)=pre;
+ let mask=if n==64{u64::MAX}else{(1u64<<n)-1};
+ let ax=x;let az=(z|(!x))&mask;
+ let c=if r==0{1i8}else{-1};let d=if s==0{-1i8}else{1};
+ let compatible=((a^ax)|(b^az))&(a|b)==0;
+ if !compatible{return Some((ax,az,0,c));}
+ if c+d!=0{return Some((ax,az,0,c+d));}
+ let diff=(x|z)^(a|b);
+ // Different compatible monomials: greedy all-plus until the last
+ // differing variable, where minus gives a nonzero expectation.
+ debug_assert_ne!(diff,0);
+ let bit=1u64<<(63-diff.leading_zeros());
+ let value=(if (x|z)&bit!=0{-c}else{c})+(if (a|b)&bit!=0{-d}else{d});
+ Some((ax,az,bit,value))
+}
 pyo3::create_exception!(ketary_native_research, BudgetExceeded, PyRuntimeError);
 fn err(code:i32)->PyErr {
  match code {
@@ -243,6 +263,26 @@ impl CliffordTableau {
  fn image(&self,post:Signed)->PyResult<Signed>{
   if !valid(self.table.width(),post){return Err(err(1))}
   Ok(self.table.image(post))
+ }
+ // Same conservative prefix budget as Prepared R23, but witness synthesis
+ // remains native and only compact masks cross FFI.
+ fn contracts(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Option<(bool,Option<CompactWitness>)>>>{
+  let cap=exact_u64(max_work)?;
+  if items.is_empty()||items.len()>64||cap==0||cap>2_000_000{return Err(err(1))}
+  let ps:Vec<(Signed,Signed)>=items.extract()?;
+  let n=self.table.width();
+  if ps.iter().any(|&(a,b)|!valid(n,a)||!valid(n,b)){return Err(err(1))}
+  Ok(py.detach(||{
+   let mut rem=cap;let mut out=Vec::with_capacity(ps.len());
+   for (a,b) in ps{
+    let cost=1+b.0.count_ones() as u64+b.1.count_ones() as u64+2*(2*n as u64+3);
+    if cost>rem{rem=0;out.push(None);continue;}
+    rem-=cost;
+    let w=compact_witness(n,self.table.image(b),a);
+    out.push(Some((w.is_none(),w)));
+   }
+   out
+  }))
  }
  fn images(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,workers:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Signed>>{
   let workers=exact_u64(workers)?;let cap=exact_u64(max_work)?;
