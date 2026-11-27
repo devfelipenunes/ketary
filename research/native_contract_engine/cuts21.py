@@ -51,6 +51,8 @@ def check_certificate(n,g,pre,post,cert,*,max_work=2_000_000):
     A missing certificate is inconclusive, not evidence of failure."""
     bounds(4096,max_work);valid_pauli(pre,n);valid_pauli(post,n)
     if type(g) is not bytes or len(g)%3 or len(g)>12288:raise ValueError("snapshot")
+    for op,a,b in zip(g[::3],g[1::3],g[2::3]):
+        if op>7 or a>=n or (op==5 and (b>=n or a==b)) or (op!=5 and b!=0):raise ValueError("gate")
     if type(cert) is not Certificate or (cert.width,cert.circuit_id,cert.pre,cert.post)!=(n,snapshot_id(n,g),pre,post):return False
     if type(cert.segments) is not tuple or len(cert.segments)>4096:return False
     rem=max_work-len(g);end=0;p=pre
@@ -83,12 +85,12 @@ def adaptive(session,pre,post,*,max_terms=4096,max_work=2_000_000):
     """Preselect cone for T-rich snapshots, then use bounded old planner.
     Return provenance; no timing-based semantic changes."""
     bounds(max_terms,max_work);valid_pauli(pre,session.width);valid_pauli(post,session.width)
-    g=session.packed;scan=len(g)
+    g=session.packed;scan=4*len(g)
     if scan<max_work//4 and sum(op>=6 for op in g[::3])>32:
         reduced=reduce_cone(g,post)
         if len(reduced)<len(g)//2:
             r=plan_transition(RustSession(session.width,reduced),pre,post,max_terms=max_terms,max_work=max_work-scan)
             if r.status!="INCONCLUSIVE":return ("preselected-cone",r.status,session.identity,r)
             return ("preselected-cone","INCONCLUSIVE",session.identity,r)
-    r=plan_transition(session,pre,post,max_terms=max_terms,max_work=max_work)
+    r=plan_transition(session,pre,post,max_terms=max_terms,max_work=max_work-scan if scan<max_work//4 else max_work)
     return ("baseline",r.status,session.identity,r)
