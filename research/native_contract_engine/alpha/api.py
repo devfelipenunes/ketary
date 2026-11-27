@@ -12,7 +12,7 @@ __version__="0.1.0a0"
 Status=Literal["PASS","FAIL","INCONCLUSIVE","UNSUPPORTED"]
 
 def Pauli(label:str)->tuple[int,int,int]:
-    """Full label, highest wire first, optional leading minus; no padding."""
+    """Signed mask from a label, highest wire first, optional leading minus."""
     if type(label) is not str:raise TypeError("Pauli label")
     n=len(label)-int(label.startswith("-"))
     if not 1<=n<=64:raise ValueError("Pauli width")
@@ -70,7 +70,7 @@ class Prepared:
         """Replay supported transition/state routes. None means unavailable."""
         if type(result) is not Result or type(contract) not in (Transition,StateEigen):return None
         raw=result._raw
-        if (result.status,result.domain,result.snapshots,result.obligation)!=(raw.status,raw.domain,raw.snapshots,raw.obligation):return False
+        if result!=_result(raw):return False
         if raw.detail is None:return None
         return replay_report(self._engine.base.prepared.session,contract,raw.detail,max_work=max_work)
 
