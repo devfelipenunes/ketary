@@ -175,6 +175,45 @@ impl PackedCircuit {
    Ok(out)
   })
  }
+ // First failing projected generator, or budget-inconclusive. The
+ // compression and witness stay native; only a single witness crosses FFI.
+ fn projected(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,mask:u64,max_terms:usize,max_work:u64,adaptive:bool)->PyResult<(u8,usize,Option<Witness>,u64)>{
+  if items.len()==0||items.len()>128||mask==0||(self.width<64&&mask>>self.width!=0)||max_terms==0||max_terms>4096||max_work==0||max_work>2_000_000{return Err(err(1))}
+  let obs:Vec<(Signed,Signed)>=items.extract()?;
+  if obs.iter().any(|(a,b)|!valid(self.width,*a)||!valid(self.width,*b)||a.0&mask!=0){return Err(err(1))}
+  py.detach(||{
+   let mut remaining=max_work;
+   for (i,(pre,post)) in obs.iter().copied().enumerate(){
+    if remaining==0{return Ok((2,i,None,max_work));}
+    let reduced;
+    let gates=if adaptive{
+     let cost=3*(self.gates.len()/3) as u64;
+     if cost>=remaining{return Ok((2,i,None,max_work));}
+     remaining-=cost;reduced=cone(&self.gates,post);reduced.as_slice()
+    }else{self.gates.as_slice()};
+    match core::run(gates,self.width,post.0,post.1,post.2,max_terms,remaining){
+     Ok((terms,k,_,work))=>{
+      remaining-=work;
+      let mut compressed:BTreeMap<(u64,u64),(i128,i128)>=BTreeMap::new();
+      for ((x,z),(a,b)) in terms{
+       if x&mask==0{
+        let key=(x,z&!mask);
+        let old=compressed.get(&key).copied().unwrap_or((0,0));
+        let co=(old.0+a,old.1+b);
+        if co==(0,0){compressed.remove(&key);}else{compressed.insert(key,co);}
+       }
+      }
+      let terms:Vec<core::Term>=compressed.into_iter().collect();
+      let w=witness(self.width,&terms,k,(pre.0,pre.1&!mask,pre.2));
+      if w.is_some(){return Ok((1,i,w,max_work-remaining));}
+     }
+     Err(2|3|4)=>return Ok((2,i,None,max_work)),
+     Err(e)=>return Err(err(e)),
+    }
+   }
+   Ok((0,obs.len(),None,max_work-remaining))
+  })
+ }
 }
 #[pymodule]
 fn ketary_native_research(m:&Bound<'_,PyModule>)->PyResult<()>{

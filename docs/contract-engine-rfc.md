@@ -276,3 +276,21 @@ relative compressed generator and lies within the input domain. Does not
 require V to preserve the clean input at output, or certify strict phase.
 Use independent modular increment permutation, mutants and clean-domain
 phase controls. Large widths embed three logical data bits. Research only.
+
+## Round 15 — reusable contract roadmap
+
+C01 native projected generators with exact integer compression, native
+witness, original caps and conservative shared scan/term accounting. The
+canonical compressed term ordering can change the witness; replay it on
+the actual relative operator, retaining the exact failed generator. Clean
+and Action have separate scopes. C02 ordered local signed Pauli transition
+composition, with equal intermediate predicates and bounded direct fallback;
+local failure never implies global failure. C03 bounded numerical CPTP
+effect contracts, explicit tolerance, spectral residual, forward replay and
+separate Kraus/SuperOp methods; no exact rounding certificate. C04 coherent
+increment workloads with 3–5 active bits per register, independent blocks
+up to 64 wires; independent small permutation oracle; preserve inconclusive
+on cap. C05 coherent bit-flip repetition-code recovery with syndrome and
+specified X errors, not arbitrary noise or fault tolerance. C06 five jobs,
+matched timings only within scopes; C07 retain public API and release gates.
+No new dependency, public API, simulator, publication or merge.
