@@ -12,7 +12,7 @@ canonical architecture or compatibility rules. Q01–Q10 are mapped below.
 Statuses: V = experiment validated in CI; E = experiment being validated;
 P = pending qualification; B = external blocker. V is not release approval.
 
-| ID | Epic / deliverable | Status at round 16 baseline | Exit gate |
+| ID | Epic / deliverable | Status at round 18 baseline | Exit gate |
 |---|---|---|---|
 | M01 | Semantic taxonomy and algebra | V | Exact/numeric/empirical separation; independent review |
 | M02 | Signed Pauli transition and invariant | V | Dense oracle and exact replay |
@@ -22,7 +22,7 @@ P = pending qualification; B = external blocker. V is not release approval.
 | M06 | Monomial action and relative phase | V | Exact CCX recognition, union partition, cap and witness |
 | M07 | Sequential transition composition | V | Matching intermediate predicates; no invalid failure inference |
 | M08 | Effect inequality and sequential CPTP | V | Numeric guard, forward replay and scope |
-| M09 | Exact rational Pauli channel transitions | E | Exact coefficients and independent dense/analytic controls |
+| M09 | Exact rational Pauli channel transitions | V | Exact coefficients and independent dense/analytic controls |
 | M10 | General Hermitian predicates / sums | P | Exact supported coefficient algebra, explicit unsupported |
 | M11 | Entanglement and separability contracts | P | Typed sufficient vs necessary witness scopes |
 | M12 | Measurement, reset, classical branches | P | CP-TNI / total vs partial correctness, explicit approved scope |
@@ -31,12 +31,12 @@ P = pending qualification; B = external blocker. V is not release approval.
 | M15 | Recovery and syndrome contracts | V | Fixed X/Z patterns; arbitrary logical input, no fault tolerance claim |
 | M16 | General error-correcting codes | P | Stabilizer logical generators, independent syndrome and logical oracle |
 | M17 | Channel composition error bounds | P | Analytic additive bounds, numeric vs exact separated |
-| M18 | Observable-native research syntax | E | Use existing q.X/Y/Z and @, ± single Pauli only |
-| M19 | Unified experimental contract facade | E | Explicit route/domain, immutable spec, compatible report semantics |
+| M18 | Observable-native research syntax | V | Use existing q.X/Y/Z and @, ± single Pauli only |
+| M19 | Unified experimental contract facade | V | Explicit route/domain, immutable spec, compatible report semantics |
 | M20 | Reusable component registry design | P | Explicit IDs, domain and composition, no global mutable registry |
 | M21 | Contract implication/reuse | P | Verified rule set; counterexamples and invalid substitution |
 | M22 | Diagnostics and explanations | P | Failed generator, basis/phase evidence, bounded replay |
-| M23 | Versioned evidence records | E | Strict serialization, request/engine fingerprint and replay/tamper controls |
+| M23 | Versioned evidence records | V | Strict serialization, request/engine fingerprint and replay/tamper controls |
 | M24 | Independent evidence verification | P | Separate implementation; no claim of authenticity |
 | M25 | Native immutable admission | V | Canonical bytes and explicit versioned identity |
 | M26 | Sparse exact arithmetic and witness | V | Coefficient bounds, cap and dense oracle |
@@ -81,3 +81,38 @@ Revalidate exact head, inspect raw artifacts and scope, record failures and
 inconclusive separately; do not promote an optimization from noisy timings.
 Do not close external issues merely because a protocol or CI suite exists.
 No new public surface without approved RFC, compatibility and type review.
+
+
+## Round 18 — parallel work queues (all 50 IDs)
+
+Baseline PR #512 head 2e514539ca437462193124610246ad6c2999e25a:
+17/17 PR-triggered workflows succeeded; master W1 forms, evidence and noise
+jobs all succeeded. M09/M18/M19/M23 experimental status promoted to V only.
+This baseline has 23 V, 24 nonblocked pending/partial and 3 external blockers.
+R18 changes need their own exact-head CI. No publication or public API changes.
+
+| Lane | IDs (each assigned once) | Immediate acceptance target |
+|---|---|---|
+| A1 semantics | M01–M10 | exact Hermitian sums, prior invariant regressions, dense oracle |
+| A2 advanced | M11–M13, M16–M17 | entanglement certificate scope; measurement/reset and phase; general recovery and error bounds |
+| B1 library | M14–M15, M20–M22 | component identity/domain; sound implication, constructive witness |
+| B2 API/evidence | M18–M19, M23–M24 | facade regression, independent verification and tamper checks |
+| C1 native | M25–M32 | immutable admission, exact arithmetic, route parity, factoring and bounded accounting |
+| C2 native safety | M33–M35, M45 | isolated allocator, SIMD/thread experiments, held-out fuzz and FFI rejection |
+| D1 comparisons | M36–M40 | matched guarantees on held-out workloads, external oracles, dedicated host when available |
+| D2 distribution | M41–M44, M48 | lab records, repeatable wheels, SBOM/notice audit, runnable docs |
+| D3 external | M46–M47 | frozen protocol, real independent reviewer and consenting participants |
+| E integration | M49–M50 | compatibility ADR and candidate qualification, no release until approved |
+
+These lanes are a scheduling plan, not a claim of ten live workers.
+R18 implementations submitted in contracts18.py and front_master18.py:
+- M10: rational Hermitian Pauli sums using the native exact propagator; no arbitrary Hermitian algebra.
+- M12: exact adjoint rules for nonselective Z measurement and reset, not conditional branches.
+- M13: independent bounded numerical strict unitary/controlled phase oracle; not exact strict proof.
+- M16: independent commuting stabilizer generator admission and syndrome only; not general recovery.
+- M17: exact composition of supplied CPTP diamond norm upper bounds, not certification of the input bounds.
+- M24/M32/M35/M37: partial numerical oracle, accounting, negative controls and held-out small interacting cases; do not mark the full gates as complete.
+M11 Bell-state entanglement certification, M20–M22, M30–M31 and remaining gates
+are not implemented by this patch. M40/M46/M47 remain blocked.
+Any result with a budget/cap exhaustion is inconclusive. The phase-insensitive
+Rust circuit identity must not be used as a strict-phase evidence identity.
