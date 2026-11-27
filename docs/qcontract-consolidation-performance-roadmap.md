@@ -250,3 +250,34 @@ must be read separately. No speedup claim before measured results.
 A4 validation hook is implemented but not invoked by A3. Hold branch
 integration until A3 exact-head CI results are inspected. No merge,
 release, branch deletion or public package/version change.
+
+
+### A3/A4 offline verification while CI queued
+
+Revalidated original A2 artifact ZIPs (IDs 15232415337, 15232293625,
+15231628742), both wheel digests against their qualification metadata
+and every pure-Python RECORD row. Applied the A3 metadata normalization
+and deterministic ZIP algorithm locally to the original wheels without
+modifying them. Windows METADATA had 107 CRLF endings; Linux/macOS zero.
+All three normalized wheels (40 members) have SHA-256
+d6d33ea8e222fc3547d993db71bd3a114c427c09440d6d17942661689c757fa2.
+Second normalization produced byte-identical output for each archive.
+This is a regression check on existing A2 artifacts, not evidence of
+new A3 compilation or portable native binaries. Added a reusable
+verify_wheel_normalization.py offline tool that checks RECORD,
+normalization, idempotence and equality without mutating inputs.
+
+For A4, reconstructed the actual modified qualified30/31 sources
+from the A2 installed Python modules plus the exact A4 changes;
+verified Git blob SHA-1s 514f198a917c416d5e01994ea8c7ed3727b7ebd4 and
+dc01fa771dbfe03a994f5825de25b8725cec7b98 before executing them.
+Compared complete old/new Python report fields via dataclasses.asdict,
+with a mock native tableau using independent_image and the exact
+compact-witness arithmetic. 7,918 report comparisons in 428 scenarios
+passed (12 widths, four batch sizes, varied per-item budget boundaries,
+24-gate seeded Clifford inputs, positive and negative obligations).
+This is a local dispatch regression, not real FFI or Qiskit parity,
+not an installed-wheel test, and not performance evidence. The local
+environment is Python 3.13/glibc 2.41, lacks Qiskit and Rust tools;
+the A2 native wheel requires CPython 3.12 and was built on glibc 2.43.
+A3 and A4 native qualification remain required. No release or merge.
