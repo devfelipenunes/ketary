@@ -89,8 +89,10 @@ def b4():
                 assert r.status in (("PASS" if want else "FAIL"),"INCONCLUSIVE")
                 ext=qcec.verify(c,d);verdict=str(ext.equivalence).split(".")[-1]
                 if verdict in ("equivalent","equivalent_up_to_global_phase","not_equivalent"):assert (verdict!="not_equivalent")==want
+                def native_end_to_end():
+                    a=prepare(c);b=prepare(d);return a.check(a.equivalent_to(b))
                 rows.append({"width":n,"family":family,"mode":mode,"status":r.status,"qcec":verdict,
-                             "timings":{"qcontract_prepared":measured(lambda:p.check(spec)),"qcontract_end_to_end":measured(lambda:prepare(c).check(prepare(c).equivalent_to(prepare(d)))),
+                             "timings":{"qcontract_prepared":measured(lambda:p.check(spec)),"qcontract_end_to_end":measured(native_end_to_end),
                                         "qiskit_operator":measured(lambda:Operator(c).equiv(Operator(d))),"qcec_end_to_end":measured(lambda:qcec.verify(c,d))}})
                 checks+=1
     return {"checks":checks,"rows":rows,"scope":"initial small complete circuit corpus, known rewrites/mutants; held-out real circuits and complex arithmetic still pending"}
