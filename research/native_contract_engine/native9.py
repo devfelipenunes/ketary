@@ -1,7 +1,6 @@
 """Private research adapter. Real Ketary Circuit, exact transition scope only."""
 from dataclasses import dataclass,field,asdict
 import hashlib,struct
-import ketary as q
 import ketary_native_research as rn
 from round3 import CODES
 from engine import Obligation,Report,Witness,SCOPE,valid_pauli,digest
@@ -33,8 +32,16 @@ class RustSession:
         object.__setattr__(self,"identity",hashlib.sha256(ID+struct.pack(">BI",self.width,len(self.packed)//3)+self.packed).hexdigest())
     @classmethod
     def from_circuit(cls,c):
-        if not isinstance(c,q.Circuit):raise TypeError("Ketary Circuit")
-        qc=c.to_qiskit()
+        import ketary as q
+        if not isinstance(c,q.Circuit):raise TypeError("legacy SDK Circuit")
+        return cls.from_qiskit(c.to_qiskit())
+    @classmethod
+    def from_qiskit(cls,qc):
+        from qiskit import QuantumCircuit
+        if type(qc) is not QuantumCircuit:raise TypeError("Qiskit QuantumCircuit")
+        # Snapshot immediately, never retain or mutate the caller's circuit.
+        # Packed conjugation semantics intentionally ignore global phase.
+        qc=qc.copy()
         if not 1<=qc.num_qubits<=64 or qc.num_clbits or qc.num_parameters or len(qc.data)>100_000:raise ValueError("circuit")
         w={b:i for i,b in enumerate(qc.qubits)};buf=bytearray()
         for inst in qc.data:
