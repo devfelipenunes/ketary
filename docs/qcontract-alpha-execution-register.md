@@ -196,3 +196,21 @@ comparison against qualified A4 confirms no pyo3, native staging or audit
 workflow source changes, and current SDK dependency-review passed.
 Do not imply a new native dependency audit executed at this head.
 No public tag, publication or general formal verification claim.
+
+
+## Integrated local Alpha — scope frozen
+
+PR #530 was merged at `b931d5ffae5da0799362fc107c56ca5c3e522c4e`.
+The exact candidate `bc16ff0b74d7766d483a5bccd7258d998826c8b3`
+passed 32/33 workflows; R30 macOS-14 cancelled (not a pass). The
+legacy SDK completed all six jobs, including benchmark and packaging.
+GitHub comparison confirms zero missing commits and zero changed files
+between qualified candidate and integrated main. The available workflow
+lookup does not return a post-merge run for the merge commit; do not
+treat candidate checks or identical tree as a confirmed push CI.
+All runtime and mathematical scope remains frozen. This register is
+historical evidence, not an obligation to implement the deferred research
+before local Alpha use. #258 integration and #35 acceptance retain the
+remaining gates; #507/#510/#460 deferred; #100/#165/#462 external.
+No release tag or registry publication. Documentation correction does
+not change any tested runtime blob.
