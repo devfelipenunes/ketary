@@ -16,6 +16,8 @@ from dag22 import simulate as plain_simulate,Limit
 from expectation23 import expectation as plain_expectation
 from certificate23 import verify_bytes
 from spatial_evidence27 import replay as replay_spatial
+from state29 import verify as heisenberg
+from spatial26 import verify as spatial_verify
 
 @dataclass(frozen=True)
 class Transition:
@@ -33,9 +35,10 @@ class Policy:
     state_nodes:int=65536
     prepare_state:bool=False
     state_backend:str="plain"
+    state_fallback:bool=False
     def validate(self):
         bounds(4096,self.tableau_build_work);bounds(4096,self.state_build_work)
-        if type(self.state_nodes) is not int or not 1<=self.state_nodes<=65536 or type(self.prepare_state) is not bool:raise ValueError("policy")
+        if type(self.state_nodes) is not int or not 1<=self.state_nodes<=65536 or type(self.prepare_state) is not bool or type(self.state_fallback) is not bool:raise ValueError("policy")
         if type(self.state_backend) is not str or self.state_backend not in ("plain","phase-weighted"):raise ValueError("state backend")
 
 @dataclass(frozen=True)
@@ -130,13 +133,18 @@ class Engine:
         else:
             for i in trans:reports[i]=report(i,"INCONCLUSIVE","query-budget")
         for i in states:
-            if self.state is None or not q:
-                reports[i]=report(i,"INCONCLUSIVE","state-unprepared-or-budget");continue
-            r=expectation(self.state,specs[i].observable,max_work=q)
-            if r.status=="INCONCLUSIVE":
-                reports[i]=report(i,r.status,"state-query-budget");continue
-            status="PASS" if r.numerator==(1<<r.denominator_power,0) else "FAIL"
-            reports[i]=report(i,status,p.state_backend+"-state",expectation=(r.numerator,r.denominator_power))
+            if not q:
+                reports[i]=report(i,"INCONCLUSIVE","state-query-budget");continue
+            primary=(q//2 if p.state_fallback else q) if self.state is not None else 0
+            if primary:
+                r=expectation(self.state,specs[i].observable,max_work=primary)
+                if r.status!="INCONCLUSIVE":
+                    status="PASS" if r.numerator==(1<<r.denominator_power,0) else "FAIL"
+                    reports[i]=report(i,status,p.state_backend+"-state",expectation=(r.numerator,r.denominator_power));continue
+            if p.state_fallback and q-primary:
+                r=heisenberg(s,specs[i].observable,max_work=q-primary)
+                reports[i]=report(i,r.status,"heisenberg-state",expectation=r.expectation);continue
+            reports[i]=report(i,"INCONCLUSIVE","state-unprepared-or-budget")
         return Batch(tuple(reports),t+u,t,u,(p.tableau_build_work,p.state_build_work if p.prepare_state else 0))
 
 def replay_report(session,spec,report,*,max_work=2_000_000):
@@ -156,6 +164,17 @@ def replay_report(session,spec,report,*,max_work=2_000_000):
         if report.route=="temporal-certificate":
             return report.status=="PASS" and report.witness is None and verify_bytes(n,g,spec.pre,spec.post,report.evidence,max_work=max_work)
         return None
+    if report.route=="heisenberg-state":
+        if len(g)>12288:return None
+        from fractions import Fraction
+        r=spatial_verify(n,g,(0,0,0),spec.observable,tuple((i,) for i in range(n)),max_work=max_work)
+        if r.status=="INCONCLUSIVE":return None
+        a=sum((c[0] for (x,z),c in r.terms if not x),Fraction(0))
+        b=sum((c[1] for (x,z),c in r.terms if not x),Fraction(0))
+        k=max(a.denominator.bit_length()-1,b.denominator.bit_length()-1)
+        v=(int(a*(1<<k)),int(b*(1<<k)))
+        status="PASS" if v==(1<<k,0) else "FAIL"
+        return status==report.status and report.expectation==(v,k)
     if report.route not in ("plain-state","phase-weighted-state") or len(g)>1536:return None
     a=max_work//2;b=max_work-a
     if not a:return None
