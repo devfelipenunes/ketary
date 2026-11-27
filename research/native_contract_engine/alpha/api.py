@@ -34,6 +34,7 @@ class Result:
     witness:object
     evidence:bytes|None
     expectation:tuple|None
+    diagnostics:tuple
     _raw:object=field(repr=False,compare=False)
     @property
     def passed(self):return self.status=="PASS"
@@ -47,7 +48,15 @@ def _result(r):
     if type(w) is Compact:w=w.expand()
     evidence=getattr(d,"evidence",None)
     expectation=getattr(d,"expectation",None)
-    return Result(r.status,r.domain,r.snapshots,r.obligation,r.reserved,getattr(d,"route",None),w,evidence,expectation,r)
+    # Stable immutable named pairs for the candidate, not raw research classes.
+    extra=[]
+    for name in ("coefficient","image","residual","table","reason","detail"):
+        if hasattr(d,name):
+            value=getattr(d,name)
+            if value is not None:extra.append((name,value))
+    if r.domain=="zero-input-unnormalized-z-branch" and type(d) is tuple:
+        extra.extend((("probability",d[0]),("unnormalized_expectation",d[1])))
+    return Result(r.status,r.domain,r.snapshots,r.obligation,r.reserved,getattr(d,"route",None),w,evidence,expectation,tuple(extra),r)
 
 @dataclass(frozen=True)
 class Prepared:
