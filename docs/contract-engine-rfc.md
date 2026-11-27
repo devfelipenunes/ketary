@@ -133,3 +133,19 @@ with source fingerprints and strict JSON replay, not authentication. Stronger
 Stim reference using text parser instead of per-gate append. Isolated live RSS
 with identical fixture and no eager tableau, repeated requests and three trials.
 All seven jobs independent, no new runtime dependency or public API.
+
+## Round 7 — matched optimization experiments
+
+Sparse: Clifford permutations are injective on unsigned Pauli labels, so
+the accumulation dictionary can be replaced by direct assignment; commuting
+T gates need not rescale all coefficients until canonical export. Preserve
+exact Propagation output, term-work, cap and rejection semantics.
+Session reports: group repeated post observables, share immutable identical
+reports only within one request, retain original conservative work bound;
+early terminate product-witness conditioning when polynomial is constant.
+Compare unique and duplicate obligations separately, no global cache.
+Composition: connected components of the CX interaction graph factor the
+unitary into tensor products; each local Pauli image may equal plus or minus
+its target, accumulate signs, produce global signed witness when opposite.
+Non-Pauli local image or exhausted component budget remains INCONCLUSIVE.
+No general arbitrary-gate equivalence. Three independent research CI jobs.
