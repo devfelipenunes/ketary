@@ -210,3 +210,43 @@ more diagnostic data; no speed claims before results.
 C09: A2 qualified installation, metadata reproduction correction
 pending. C11/C12: no external study, controlled benchmark, registry
 upload, public release, merge or historical PR deletion. A3 CI pending.
+
+
+## Alpha A4 — isolated dispatch optimization candidate
+
+A3 head a44c82647331d2ad6f85c7f3597eb6ec99db2c4b remains unchanged
+on integration/qcontract-alpha and PR #528. At the start of A4 all
+33 A3 workflows were queued (run 46077884300 for isolated wheels).
+Do not invalidate the pending A3 evidence by pushing this experiment
+into its branch prematurely. A4 branch integration/qcontract-alpha-a4
+is based on that exact head and is not yet a release candidate.
+
+Code inspection identified repeated validation, obligation hashing,
+legacy object creation and nested report allocation in pure base
+requests. These are hypotheses, not measured bottleneck shares.
+R31 adapter delegates base-only requests once. R30 adapter has a
+specialized path only for validated all-transition batches with an
+available prepared Clifford tableau. Native compact witness/verdict
+results become the same typed reports and attempt metadata directly.
+The exact native logical charge per item is
+1 + popcount(post.x) + popcount(post.z) + 2*(2*width+3).
+Preflight all items, admit only those whose individual equal quota
+covers this charge, batch only admitted entries, and preserve original
+order, snapshot, obligation IDs, witness, route and reservations.
+No shared-budget borrowing, no mathematical kernel change, no cached
+verdict, no new public API. Mixed, non-Clifford or unprepared requests
+retain existing routing.
+
+Installed dispatch_parity.py compares complete raw reports against
+reconstructed A3 pure-transition dispatch, plus independent Qiskit
+signed Clifford results. Twelve widths (including partial mask widths
+and 64), batch sizes 1/2/7/64, exact cost thresholds, sparse/dense
+inputs, PASS/FAIL, low budget, invalid input, mixed domains and
+fallback controls. Twenty-four paired dispatch timing scenarios.
+This reference is for regression parity, not independent proof.
+A3 actual public API benchmarks and A4 same-host dispatch experiment
+must be read separately. No speedup claim before measured results.
+
+A4 validation hook is implemented but not invoked by A3. Hold branch
+integration until A3 exact-head CI results are inspected. No merge,
+release, branch deletion or public package/version change.
