@@ -76,7 +76,9 @@ def stage(dest):
         (private/(name+".py")).write_bytes(src.encode("utf-8"))
         manifest[name]={"source_sha256":hashlib.sha256(raw).hexdigest(),"runtime_sha256":hashlib.sha256(src.encode()).hexdigest()}
     api=canonical_text(LAB/"alpha"/"api.py");(pkg/"__init__.py").write_bytes(api)
-    manifest["public_api"]={"source_sha256":hashlib.sha256(api).hexdigest()}
+    stub=canonical_text(LAB/"alpha"/"api.pyi");(pkg/"__init__.pyi").write_bytes(stub)
+    (pkg/"py.typed").write_bytes(b"")
+    manifest["public_api"]={"source_sha256":hashlib.sha256(api).hexdigest(),"stub_sha256":hashlib.sha256(stub).hexdigest()}
     (pkg/"runtime-manifest.json").write_bytes(json.dumps(manifest,sort_keys=True,indent=2).encode("utf-8"))
     (dest/"LICENSE").write_bytes(canonical_text(ROOT/"LICENSE"))
     (dest/"README.md").write_bytes(canonical_text(ROOT/"docs"/"qcontract-alpha-guide.md"))
@@ -86,7 +88,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qcontract-alpha-local"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Local experimental QContract verification candidate (not published)"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
@@ -100,7 +102,7 @@ include = ["qcontract*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-qcontract = ["runtime-manifest.json"]
+qcontract = ["runtime-manifest.json", "*.pyi", "py.typed"]
 """,encoding="utf-8",newline="\n")
     return {"modules":len(MODULES),"manifest":manifest,"distribution":"qcontract-alpha-local","import":"qcontract","scope":"local candidate only"}
 
