@@ -2,7 +2,7 @@
 //! R25 opt-in SIMD contains a bounded architecture-specific unsafe block.
 use pyo3::prelude::*;
 use pyo3::exceptions::{PyValueError, PyRuntimeError};
-use pyo3::types::{PyBytes,PyInt,PyAny};
+use pyo3::types::{PyBytes,PyInt,PyAny,PyTuple,PyBool};
 use std::collections::BTreeMap;
 mod core;
 mod monomial;
@@ -44,6 +44,36 @@ fn err(code:i32)->PyErr {
 fn exact_u64(v:&Bound<'_,PyAny>)->PyResult<u64>{
  if !v.is_exact_instance_of::<PyInt>(){return Err(PyValueError::new_err("expected exact int"))}
  v.extract()
+}
+// No Python __index__, iterable or tuple-subclass conversion hooks.
+fn exact_tuple<'a>(v:&Bound<'a,PyAny>,len:usize)->PyResult<Bound<'a,PyTuple>>{
+ if !v.is_exact_instance_of::<PyTuple>(){return Err(err(1))}
+ let t=v.cast::<PyTuple>()?;
+ if t.len()!=len{return Err(err(1))}
+ Ok(t.clone())
+}
+fn exact_bool(v:&Bound<'_,PyAny>)->PyResult<bool>{
+ if !v.is_exact_instance_of::<PyBool>(){return Err(err(1))}
+ v.extract()
+}
+fn signed(v:&Bound<'_,PyAny>)->PyResult<Signed>{
+ let t=exact_tuple(v,3)?;
+ let x=exact_u64(&t.get_item(0)?)?;let z=exact_u64(&t.get_item(1)?)?;let r=exact_u64(&t.get_item(2)?)?;
+ if r>1{return Err(err(1))}
+ Ok((x,z,r as u8))
+}
+fn signed_items(items:&Bound<'_,PyTuple>)->PyResult<Vec<Signed>>{
+ if !items.as_any().is_exact_instance_of::<PyTuple>(){return Err(err(1))}
+ items.iter().map(|v|signed(&v)).collect()
+}
+fn paired_items(items:&Bound<'_,PyTuple>)->PyResult<Vec<(Signed,Signed)>>{
+ if !items.as_any().is_exact_instance_of::<PyTuple>(){return Err(err(1))}
+ items.iter().map(|v|{let t=exact_tuple(&v,2)?;Ok((signed(&t.get_item(0)?)?,signed(&t.get_item(1)?)?))}).collect()
+}
+fn limits(terms:&Bound<'_,PyAny>,work:&Bound<'_,PyAny>)->PyResult<(usize,u64)>{
+ let t=exact_u64(terms)?;let w=exact_u64(work)?;
+ if !(1..=4096).contains(&t)||!(1..=2_000_000).contains(&w){return Err(err(1))}
+ Ok((t as usize,w))
 }
 fn valid(n:u32,p:Signed)->bool {p.2<=1&&(n==64||(p.0|p.1)>>n==0)}
 fn add(m:&mut BTreeMap<u64,(i128,i128)>,key:u64,c:(i128,i128)){
@@ -136,6 +166,7 @@ impl PackedCircuit {
  #[new]
  fn new(width:&Bound<'_,PyAny>,gates:&Bound<'_,PyBytes>)->PyResult<Self>{
   let n=exact_u64(width)?;
+  if !gates.as_any().is_exact_instance_of::<PyBytes>(){return Err(err(1))}
   let g=gates.as_bytes();
   if !(1..=64).contains(&n)||g.len()>300_000||g.len()%3!=0{return Err(err(1))}
   let n=n as u32;
@@ -149,12 +180,14 @@ impl PackedCircuit {
  fn width(&self)->u32{self.width}
  #[getter]
  fn gate_count(&self)->usize{self.gates.len()/3}
- fn propagate(&self,py:Python<'_>,post:Signed,max_terms:usize,max_work:u64)->PyResult<Prop>{
+ fn propagate(&self,py:Python<'_>,post:&Bound<'_,PyAny>,max_terms:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>)->PyResult<Prop>{
+  let post=signed(post)?;let (max_terms,max_work)=limits(max_terms,max_work)?;
   if !valid(self.width,post){return Err(err(1))}
   let (terms,k,peak,work)=py.detach(||core::run(&self.gates,self.width,post.0,post.1,post.2,max_terms,max_work)).map_err(err)?;
   Ok((terms.into_iter().map(|((x,z),(a,b))|(x,z,a,b)).collect(),k,peak,work))
  }
- fn transition(&self,py:Python<'_>,pre:Signed,post:Signed,max_terms:usize,max_work:u64)->PyResult<Verdict>{
+ fn transition(&self,py:Python<'_>,pre:&Bound<'_,PyAny>,post:&Bound<'_,PyAny>,max_terms:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>)->PyResult<Verdict>{
+  let pre=signed(pre)?;let post=signed(post)?;let (max_terms,max_work)=limits(max_terms,max_work)?;
   if !valid(self.width,pre)||!valid(self.width,post){return Err(err(1))}
   py.detach(||{
    let (terms,k,peak,work)=core::run(&self.gates,self.width,post.0,post.1,post.2,max_terms,max_work)?;
@@ -163,9 +196,10 @@ impl PackedCircuit {
   }).map_err(err)
  }
  // One native call with shared conservative term-work budget.
- fn transition_batch(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,max_terms:usize,max_work:u64,adaptive:bool)->PyResult<Vec<Option<Verdict>>>{
+ fn transition_batch(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,max_terms:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>,adaptive:&Bound<'_,PyAny>)->PyResult<Vec<Option<Verdict>>>{
+  let (max_terms,max_work)=limits(max_terms,max_work)?;let adaptive=exact_bool(adaptive)?;
   if items.len()==0||items.len()>64||max_terms==0||max_terms>4096||max_work==0||max_work>2_000_000{return Err(err(1))}
-  let obs:Vec<(Signed,Signed)>=items.extract()?;
+  let obs=paired_items(items)?;
   if obs.iter().any(|(a,b)|!valid(self.width,*a)||!valid(self.width,*b)){return Err(err(1))}
   py.detach(||{
    // Keep old sequential abort semantics, including the exact budget boundary.
@@ -201,9 +235,10 @@ impl PackedCircuit {
  }
  // First failing projected generator, or budget-inconclusive. The
  // compression and witness stay native; only a single witness crosses FFI.
- fn projected(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,mask:u64,max_terms:usize,max_work:u64,adaptive:bool)->PyResult<(u8,usize,Option<Witness>,u64)>{
+ fn projected(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,mask:&Bound<'_,PyAny>,max_terms:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>,adaptive:&Bound<'_,PyAny>)->PyResult<(u8,usize,Option<Witness>,u64)>{
+  let mask=exact_u64(mask)?;let (max_terms,max_work)=limits(max_terms,max_work)?;let adaptive=exact_bool(adaptive)?;
   if items.len()==0||items.len()>128||mask==0||(self.width<64&&mask>>self.width!=0)||max_terms==0||max_terms>4096||max_work==0||max_work>2_000_000{return Err(err(1))}
-  let obs:Vec<(Signed,Signed)>=items.extract()?;
+  let obs=paired_items(items)?;
   if obs.iter().any(|(a,b)|!valid(self.width,*a)||!valid(self.width,*b)||a.0&mask!=0){return Err(err(1))}
   py.detach(||{
    let mut remaining=max_work;
@@ -239,17 +274,19 @@ impl PackedCircuit {
   })
  }
  // Experimental SIMD query; no default dispatch or public API change.
- fn clifford_images_128(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,simd:bool,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Signed>>{
+ fn clifford_images_128(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,simd:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Signed>>{
+  let simd=exact_bool(simd)?;
   let cap=exact_u64(max_work)?;
   if items.is_empty()||items.len()>128||cap==0||cap>2_000_000||self.gates.chunks_exact(3).any(|g|g[0]>=6){return Err(err(1))}
-  let ps:Vec<Signed>=items.extract()?;
+  let ps=signed_items(items)?;
   if ps.iter().any(|&p|!valid(self.width,p)){return Err(err(1))}
   let cost=ps.len() as u64*(1+2*self.width as u64+self.gates.len() as u64/3);
   if cost>cap{return Err(err(3))}
   Ok(py.detach(||if simd{simd25::images(&self.gates,self.width,&ps)}else{ps.chunks(64).flat_map(|p|bitslice(&self.gates,self.width,p)).collect()}))
  }
  fn simd_available(&self)->bool{simd25::available()}
- fn monomial_action(&self,py:Python<'_>,other:PyRef<'_,PackedCircuit>,mask:u64,max_work:u64)->PyResult<monomial::Outcome>{
+ fn monomial_action(&self,py:Python<'_>,other:PyRef<'_,PackedCircuit>,mask:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>)->PyResult<monomial::Outcome>{
+  let mask=exact_u64(mask)?;let max_work=exact_u64(max_work)?;
   if self.width!=other.width||mask==0||(self.width<64&&mask>>self.width!=0)||self.gates.len()+other.gates.len()>300_000||max_work==0||max_work>2_000_000{return Err(err(1))}
   let b:&PackedCircuit=&other;
   Ok(py.detach(||monomial::verify(&self.gates,&b.gates,self.width,mask,max_work)))
@@ -274,7 +311,8 @@ impl CliffordTableau {
  #[getter]
  fn width(&self)->u32{self.table.width()}
  fn storage_bytes(&self)->(usize,usize){self.table.storage_bytes()}
- fn image(&self,post:Signed)->PyResult<Signed>{
+ fn image(&self,post:&Bound<'_,PyAny>)->PyResult<Signed>{
+  let post=signed(post)?;
   if !valid(self.table.width(),post){return Err(err(1))}
   Ok(self.table.image(post))
  }
@@ -283,7 +321,7 @@ impl CliffordTableau {
  fn contracts(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Option<(bool,Option<CompactWitness>)>>>{
   let cap=exact_u64(max_work)?;
   if items.is_empty()||items.len()>64||cap==0||cap>2_000_000{return Err(err(1))}
-  let ps:Vec<(Signed,Signed)>=items.extract()?;
+  let ps=paired_items(items)?;
   let n=self.table.width();
   if ps.iter().any(|&(a,b)|!valid(n,a)||!valid(n,b)){return Err(err(1))}
   Ok(py.detach(||{
@@ -301,7 +339,7 @@ impl CliffordTableau {
  fn images(&self,py:Python<'_>,items:&Bound<'_,pyo3::types::PyTuple>,workers:&Bound<'_,PyAny>,max_work:&Bound<'_,PyAny>)->PyResult<Vec<Signed>>{
   let workers=exact_u64(workers)?;let cap=exact_u64(max_work)?;
   if items.is_empty()||items.len()>4096||!(1..=8).contains(&workers)||cap==0||cap>2_000_000{return Err(err(1))}
-  let ps:Vec<Signed>=items.extract()?;
+  let ps=signed_items(items)?;
   if ps.iter().any(|&p|!valid(self.table.width(),p)){return Err(err(1))}
   let cost: u64=ps.iter().map(|p|1+p.0.count_ones() as u64+p.1.count_ones() as u64).sum();
   if cost>cap{return Err(err(3))}
