@@ -92,3 +92,21 @@ bind each generated module to its original source. Native backend is a
 locally staged QContract wheel, not independently security-audited. No hardware
 execution, arbitrary noisy circuits, general formal verification, external
 usability validation, or production readiness is claimed.
+
+
+## Typed API and benchmark evidence (A3)
+
+The local candidate 0.1.0a2 includes a PEP 561 marker and public type
+stub. IDE completion and type checking cover the ten specifications,
+prepared session and Result. Run the isolated qualification workflow
+to see positive and deliberately invalid mypy examples. Runtime
+admission remains authoritative: Python type hints are not guarantees.
+Canonical Qiskit gate concrete types are required; custom base_class
+spoofing, open controls and modified mutable definitions are rejected.
+This is an input boundary, not a sandbox for untrusted Python objects.
+
+The installed benchmark compares signed Clifford identity verdicts with
+Qiskit PauliList vectorized evolution, measuring cold preparation,
+prepared verdicts and full reports separately. QContract also computes
+witnesses/metadata; Qiskit baseline returns Boolean verdicts only.
+The comparison uses shared CI hosts, not dedicated CPU performance.
