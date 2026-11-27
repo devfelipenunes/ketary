@@ -87,3 +87,53 @@ editable project distribution ketary 0.1.0.dev0 (own project LICENSE
 exists in source; installed distribution metadata issue still open).
 No cross-host reproduction or legal clearance. R30 historical cancelled
 workflow remains, so 29/30 returned exact-head workflows passed.
+
+
+## Integration candidate — Alpha A1
+
+R32 exact head dd3c40ff9f0d7588e92e199409003c62244f468f completed
+31/32 workflows; historical R30 cancellation only. Four R32 jobs passed:
+5384 exact, 17424 Clifford, 80 state, 16 equivalence checks = 22904.
+Original artifact IDs 15227508026, 15227960621, 15227253246, 15226789582
+were inspected. Lookup tuple beat baseline tableau tuple in 11/48 cases
+(median ratio baseline/lookup 0.854); keep conventional default.
+Packed lookup beat Qiskit vectorized normalized output in 48/48 cases
+and Stim loop in 48/48, with median scenario ratios 385.26 and 22.94.
+These compare prepared representations on shared CI, not generic SDK
+execution. At 64 wires/4096 gates/dense/1024: packed lookup 0.111274 ms,
+tableau tuple 0.281375, Stim loop 2.582382, Qiskit normalized 23.753357.
+Snapshot export from SDK median 5.454844 ms in this case.
+Batched full typed reports beat per-item reports in 16/16 scenarios
+(median speedup 1.4682). Retain safe batching. Do not auto-select lookup.
+All 80 exact state expectations agreed with dense reference; some small
+prepared dense queries were faster. All 16 equivalence pairs agreed with
+QCEC; simple appended-inverse and mutant fixtures only, unequal setup
+boundaries, not a general verification advantage.
+
+C01 inventory: exact R32 is 131 commits ahead of main 084418d6 and zero
+behind, 155 changed files; 16 stacked open PRs #512–527. Candidate
+integration branch preserves them, without merging/closing them.
+C02/C03: explicit 32-module runtime dependency closure with generated
+relative imports; extract selected declarations from benchmark-heavy
+modules, preserve original research. Runtime manifest binds source and
+generated hashes. No benchmark ctypes loaders or executable suites in
+wheel. This is a transitional packaging boundary, not final module
+refactoring or independent source review.
+C04/C05: provisional qcontract API, direct canonical Qiskit snapshot,
+explicit contracts/statuses, domain/snapshot binding, selected replay,
+immutable diagnostics. Existing legacy package unchanged in repository.
+C06: isolated tests of all ten families, GHZ up to 64 wires,
+Bernstein-Vazirani, mutation and exact negative controls.
+C07: R32 comparative evidence above. Dedicated controlled benchmarks
+and matched Pauli-prop comparison remain open.
+C08/C09: candidate wheel manifest/contents audit, native RECORD audit,
+fresh venv and pip check; CI on Linux/Windows/macOS. Private native wheel
+still uses historical distribution/import name; local Python distribution
+qcontract-alpha-local and import qcontract are provisional. No registry
+upload, final package namespace, portable platform tags or legal clearance.
+C10: docs/qcontract-alpha-guide.md describes local installation and
+exact domain boundaries. C11: related work and external protocols remain
+in ledger; independent reviewer, hardware and participants still needed.
+C12: one integration PR targeting main, exact-head build and regression
+required before review/merge. No merge, publication or branch deletion.
+Alpha A1 CI results pending.
