@@ -169,3 +169,34 @@ connected factorization/cut decomposition; planner preselection and
 allocation accounting; measured native profiling; reproducible wheels,
 security and FFI audit; matched external benchmarks and actual recovery
 circuits. External M40/M46/M47 remain blocked. No public API change.
+
+
+## Round 21 — integrated research pilots
+
+R18 and R19 CI complete (17/17 and 18/18). R20 specialized jobs 3/3
+completed; overall 18/19 at inspection. R21 is stacked on R20 exact head.
+Seven fail-fast-disabled suites submitted, not validated yet.
+
+| Research lane | Executable deliverable | Remaining gate |
+|---|---|---|
+| Connected factorization M31 | Temporal Pauli cuts on connected chains, local exact replay | Arbitrary spatial cuts and non-Pauli boundary contractions |
+| Adaptive planner M30/M32 | Cone preselection and baseline comparison | Learned/cost-driven route ordering, complete resource accounting |
+| Native tableau M27/M34 | Compare existing native bit slicing and scalar, concurrent threads | New SIMD implementation, persistent native tableau |
+| Decision diagrams M29/M31 | Exact hash-consed amplitude DAG roundtrip and node counts | Weighted DD operations, direct gate evaluation, scalable admission |
+| Exact arithmetic M10/M26 | Common power-of-two normalization, exact reconstruction | Native coefficient normalization and bit-complexity budget |
+| Certificates M23/M24 | Request-bound segmented independent exact replay; tamper controls | Portable serialized certificates, independent large non-Clifford checker |
+| Hierarchy M20/M21 | Local Pauli transition composition on connected circuits | General contract algebra and nested non-Pauli domains |
+| Algorithms M36/M37 | QFT/Grover/QPE/QAOA/VQE analytic numerical reference fixtures | Ketary-native contract lowering for arbitrary rotations |
+| Native profiling M33/M34 | Scalar/bitslice/threaded timings, Python peak and process RSS | Isolated native allocations, SIMD, dedicated host |
+| Recovery M16 | Syndrome-to-Pauli table and all-logical-state dense validation | Physical extraction and fault-tolerant recovery |
+| Security M35/M44/M45 | FFI malformed-input probes, dependency inventory | Full fuzz, SBOM format and vulnerability audit |
+| External M38 | Stim/Qiskit signed Clifford image and QCEC modulo-phase pilot | Full matched benchmarks including setup and controlled host |
+| Distribution M43/M44 | Two clean target builds, SHA256 comparison and cargo/pip inventory | Cross-host reproducibility, signed SBOM, vulnerability review |
+
+R21 is an experimental implementation increment, not completion of these
+lanes. The adaptive route has separate reduced-snapshot provenance; its
+budget is abstract logical work, not memory/time. The DAG only compresses
+an already constructed bounded vector. External comparisons isolate
+pinned stim 1.16.0 and mqt.qcec 3.8.0 in one job, not SDK dependencies.
+QCEC probable equivalence/timeout is not a proof. No publication/merge.
+M40/M46/M47 remain external blockers.
