@@ -35,13 +35,14 @@ def apply_pauli(q,p,n):
 def recovery_circuit(n,stabilizers,errors):
     t=recovery_table(n,stabilizers,errors)
     if t.status!="PASS" or n+len(stabilizers)>14:return None
-    # Coherent ideal correction selected by the syndrome register.
-    # Measuring those qubits instead and using the same lookup is equivalent
-    # on the admitted error subspaces. This is not a fault-tolerant gadget.
-    q=extraction(n,stabilizers);anc=list(range(n,n+len(stabilizers)))
+    # Explicit measurement and classical correction. No Aer dependency is
+    # required to construct the circuit. The exact syndrome and conditional
+    # data action are tested separately on ideal state vectors.
+    m=len(stabilizers);q=QuantumCircuit(n+m,m)
+    q.compose(extraction(n,stabilizers),inplace=True)
+    q.measure(range(n,n+m),range(m))
     for key,p in t.table:
         if p[:2]==(0,0):continue
-        u=QuantumCircuit(n);apply_pauli(u,(p[0],p[1],0),n)
-        gate=u.to_gate().control(len(anc),ctrl_state=sum(b<<i for i,b in enumerate(key)))
-        q.append(gate,anc+list(range(n)))
+        with q.if_test((q.cregs[0],sum(b<<i for i,b in enumerate(key)))):
+            apply_pauli(q,(p[0],p[1],0),n)
     return q
