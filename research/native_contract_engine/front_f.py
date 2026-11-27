@@ -33,13 +33,13 @@ def main():
                 ss=[stim.PauliString(("-" if v[2] else "+")+label(n,(v[0],v[1],0))[::-1]) for v in ps]
                 def native_pre():return backend.run(p,ps,"batch" if m>=8 else "scalar")
                 def qs_pre():return [bits(x) for x in qs.evolve(cl,frame="h")]
-                def stim_pre():return [stim_bits(x.before(tab)) for x in ss]
+                def stim_pre():return [stim_bits(x.before(tab, targets=range(n))) for x in ss]
                 def native_full():
                     pp=prepare(c);return backend.run(pp,ps,"batch" if m>=8 else "scalar")
                 def qs_full():return [bits(x) for x in qs.evolve(Clifford(c.to_qiskit()),frame="h")]
                 def stim_full():
                     pp=prepare(c);tt=stim.Tableau.from_circuit(stim_circuit(pp))
-                    return [stim_bits(x.before(tt)) for x in ss]
+                    return [stim_bits(x.before(tt, targets=range(n))) for x in ss]
                 fs={"native_prepared":native_pre,"qiskit_list_prepared":qs_pre,"stim_tableau_prepared":stim_pre,
                     "native_full":native_full,"qiskit_list_full":qs_full,"stim_full":stim_full}
                 expected=qs_pre()
