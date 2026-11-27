@@ -9,7 +9,7 @@ from ._core.qualified30 import CleanInput,RelativeAction,Equivalent,Separable,ZB
 from ._core.qualified31 import Engine,SumTransition,NoiseAfter,Correctable
 from ._core.unified24 import Compact
 
-__version__="0.1.0a2"
+__version__="0.1.0a3"
 Status=Literal["PASS","FAIL","INCONCLUSIVE","UNSUPPORTED"]
 Signed=tuple[int,int,int]
 Dyadic=tuple[tuple[int,int],int]
@@ -189,6 +189,9 @@ def clean_ancillas(name:str,*,wires:tuple[int,...])->Named:
 @dataclass(frozen=True)
 class Outcome:
     results:tuple[tuple[str,Result],...]
+    def __post_init__(self):
+        if type(self.results) is not tuple or not 1<=len(self.results)<=64 or any(type(x) is not tuple or len(x)!=2 or type(x[0]) is not str or type(x[1]) is not Result for x in self.results):raise ValueError("nonempty named results")
+        if len({x[0] for x in self.results})!=len(self.results):raise ValueError("duplicate result name")
     @property
     def passed(self)->bool:return all(r.passed for _,r in self.results)
     def require(self):
