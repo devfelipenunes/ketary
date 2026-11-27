@@ -261,3 +261,18 @@ contracts, Clifford+T QAOA-style ring symmetry (not MaxCut optimality),
 and coherent two-bit modular addition with independent permutation oracle.
 Compare only equal guarantees; strict dense adder result separate.
 Research-only; no change to SDK public runtime or distribution.
+
+## Round 14 — bit-sliced Clifford and logical action
+
+Native nonadaptive Clifford batches of >=8 obligations use 64-bit lanes,
+with identical signed conjugation and witness, retaining the previous
+scalar term-work accounting and affordable prefix/abort semantics. T or
+adaptive requests retain their existing routes. No new resource guarantee.
+LogicalAction compares actual U and reference V on the declared clean input
+subspace P, up to one common global phase. Test compressed Z_i on ancillas
+and X_i/Z_i on data for W=V†U; the Z checks imply W preserves P, and the
+remaining checks imply the restricted W is scalar. Witness is for the
+relative compressed generator and lies within the input domain. Does not
+require V to preserve the clean input at output, or certify strict phase.
+Use independent modular increment permutation, mutants and clean-domain
+phase controls. Large widths embed three logical data bits. Research only.

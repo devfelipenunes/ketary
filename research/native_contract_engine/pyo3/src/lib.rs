@@ -79,6 +79,32 @@ fn cone(g:&[u8],post:Signed)->Vec<u8>{
  }
  kept.into_iter().rev().flatten().collect()
 }
+// Clifford bit slicing: each lane is one independent signed Pauli.
+// The caller admits only a prefix affordable under the old scalar budget.
+fn bitslice(g:&[u8],n:u32,ps:&[Signed])->Vec<Signed>{
+ let mut x=[0u64;64];let mut z=[0u64;64];let mut r=0u64;
+ for (j,&(a,b,s)) in ps.iter().enumerate(){
+  let lane=1u64<<j;
+  if s!=0{r|=lane;}
+  for i in 0..n as usize{if (a>>i)&1!=0{x[i]|=lane;}if (b>>i)&1!=0{z[i]|=lane;}}
+ }
+ for v in g.chunks_exact(3).rev(){
+  let a=v[1] as usize;let b=v[2] as usize;let xa=x[a];let za=z[a];
+  match v[0]{
+   0=>{r^=xa&za;x[a]=za;z[a]=xa;},
+   1=>{r^=xa&!za;z[a]^=xa;},
+   2=>{r^=xa&za;z[a]^=xa;},
+   3=>r^=za,4=>r^=xa,
+   5=>{let xb=x[b];let zb=z[b];r^=xa&zb&!(xb^za);x[b]^=xa;z[a]^=zb;},
+   _=>unreachable!("Clifford-only path")
+  }
+ }
+ ps.iter().enumerate().map(|(j,_)|{
+  let mut a=0u64;let mut b=0u64;
+  for i in 0..n as usize{a|=((x[i]>>j)&1)<<i;b|=((z[i]>>j)&1)<<i;}
+  (a,b,((r>>j)&1) as u8)
+ }).collect()
+}
 #[pyclass(frozen)]
 struct PackedCircuit{width:u32,gates:Vec<u8>}
 #[pymethods]
@@ -118,6 +144,19 @@ impl PackedCircuit {
   let obs:Vec<(Signed,Signed)>=items.extract()?;
   if obs.iter().any(|(a,b)|!valid(self.width,*a)||!valid(self.width,*b)){return Err(err(1))}
   py.detach(||{
+   // Keep old sequential abort semantics, including the exact budget boundary.
+   let count=(self.gates.len()/3) as u64;
+   if !adaptive&&obs.len()>=8&&self.gates.chunks_exact(3).all(|v|v[0]<6){
+    let m=if count==0{obs.len()}else{obs.len().min((max_work/count) as usize)};
+    let posts:Vec<Signed>=obs[..m].iter().map(|(_,p)|*p).collect();
+    let images=bitslice(&self.gates,self.width,&posts);
+    let mut out=Vec::with_capacity(obs.len());
+    for ((pre,_),(x,z,r)) in obs[..m].iter().zip(images){
+     let terms=[((x,z),(if r==0{1}else{-1},0))];
+     let w=witness(self.width,&terms,0,*pre);out.push(Some((w.is_none(),w,1,count)));
+    }
+    out.resize(obs.len(),None);return Ok(out);
+   }
    let mut remaining=max_work;let mut out=Vec::with_capacity(obs.len());
    for (pre,post) in obs{
     if remaining==0{out.push(None);continue;}
