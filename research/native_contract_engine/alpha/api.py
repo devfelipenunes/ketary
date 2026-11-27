@@ -8,7 +8,7 @@ from ._core.qualified30 import CleanInput,RelativeAction,Equivalent,Separable,ZB
 from ._core.qualified31 import Engine,SumTransition,NoiseAfter,Correctable
 from ._core.unified24 import Compact
 
-__version__="0.1.0a0"
+__version__="0.1.0a1"
 Status=Literal["PASS","FAIL","INCONCLUSIVE","UNSUPPORTED"]
 
 def Pauli(label:str)->tuple[int,int,int]:
