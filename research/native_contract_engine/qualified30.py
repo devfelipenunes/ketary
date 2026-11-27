@@ -100,11 +100,19 @@ class Engine:
         s=self.prepared.session;n=s.width;legacy=Legacy(s)
         keys=tuple(validate(s,x) for x in items)
         q=max_work//len(items);out=[]
-        for x,(domain,ids,oid) in zip(items,keys):
+        # Batch only when each reserved slice covers even the worst-case
+        # tableau query + compact witness. Otherwise preserve independent
+        # per-obligation exhaustion semantics (no pooled budget borrowing).
+        indices=tuple(i for i,x in enumerate(items) if type(x) is Transition)
+        fast={}
+        if len(indices)>1 and self.prepared.router.previous.prepared.tableau is not None and q>=6*n+7:
+            batch=self.prepared.verify(tuple(items[i] for i in indices),max_work=q*len(indices))
+            fast=dict(zip(indices,batch.reports))
+        for idx,(x,(domain,ids,oid)) in enumerate(zip(items,keys)):
             def report(status,detail=None):return Report(status,domain,ids,oid,q,detail)
             if not q:out.append(report("INCONCLUSIVE"));continue
             if type(x) in (Transition,StateEigen):
-                r=self.prepared.verify((x,),max_work=q).reports[0];out.append(report(r.status,r));continue
+                r=fast[idx] if idx in fast else self.prepared.verify((x,),max_work=q).reports[0];out.append(report(r.status,r));continue
             if type(x) is CleanInput:r=Clean(x.ancillas).verify(legacy,max_work=q)
             elif type(x) is RelativeAction:
                 if len(s.packed)+len(x.reference.packed)>300000:out.append(report("UNSUPPORTED"));continue
