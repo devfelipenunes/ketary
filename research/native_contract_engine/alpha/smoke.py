@@ -79,6 +79,22 @@ def main():
     for bad_c in (QuantumCircuit(1,1),QuantumCircuit(1,global_phase=.125)):
         reject(lambda:prepare(bad_c))
     rot=QuantumCircuit(1);rot.rx(.2,0);reject(lambda:prepare(rot))
+    from qiskit.circuit import Gate
+    from qiskit.circuit.library import HGate
+    class Spoof(Gate):
+        @property
+        def base_class(self):return HGate
+    spoof=QuantumCircuit(1);spoof.append(Spoof("spoof_h",1,[]),[0])
+    reject(lambda:prepare(spoof))
+    opened=QuantumCircuit(2);opened.cx(0,1,ctrl_state=0)
+    reject(lambda:prepare(opened))
+    # Standard singleton and canonical mutable gates remain admissible.
+    mutable=QuantumCircuit(1);mutable.append(HGate().to_mutable(),[0])
+    check(prepare(mutable).check(Contract(requires=Pauli("Z"),ensures=Pauli("X"))).passed)
+    check(p.check(good).require().passed)
+    try:p.check(bad).require()
+    except AssertionError:checks+=1
+    else:raise AssertionError("failed contract require accepted")
     reject(lambda:p.verify());reject(lambda:p.check(Contract(requires=(True,0,0),ensures=x)))
     reject(lambda:p.check(good,max_work=True))
     try:md.version("ketary-native-research")
