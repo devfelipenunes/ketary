@@ -41,8 +41,8 @@ class RustSession:
         if type(qc) is not QuantumCircuit:raise TypeError("Qiskit QuantumCircuit")
         # Snapshot immediately, never retain or mutate the caller's circuit.
         # Packed conjugation semantics intentionally ignore global phase.
-        qc=qc.copy()
         if not 1<=qc.num_qubits<=64 or qc.num_clbits or qc.num_parameters or len(qc.data)>100_000:raise ValueError("circuit")
+        qc=qc.copy()
         w={b:i for i,b in enumerate(qc.qubits)};buf=bytearray()
         for inst in qc.data:
             op=inst.operation;i=CODES.get(op.base_class)
