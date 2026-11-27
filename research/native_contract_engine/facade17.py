@@ -1,6 +1,5 @@
 """One private research facade, preserving existing Observable and Contract APIs."""
 from dataclasses import dataclass
-import ketary as q
 from contract_forms11 import spec,label_mask,Transition
 from consolidated12 import Engine,Invariant
 from contracts15 import Clean,Action,mask_for
@@ -8,6 +7,10 @@ from monomial16 import MonomialAction
 from native9 import bounds
 
 def signed(p,n):
+    # Packed specs need no dependency on the legacy SDK.
+    if type(p) in (tuple,str):return spec(p,n)
+    try:import ketary as q
+    except ModuleNotFoundError:return spec(p,n)
     if type(p) is q.Observable:
         # Public Observable supports width <=62; do not silently increase it.
         d=p.to_dict()
