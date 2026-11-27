@@ -260,6 +260,7 @@ impl CliffordTableau {
  }
  #[getter]
  fn width(&self)->u32{self.table.width()}
+ fn storage_bytes(&self)->(usize,usize){self.table.storage_bytes()}
  fn image(&self,post:Signed)->PyResult<Signed>{
   if !valid(self.table.width(),post){return Err(err(1))}
   Ok(self.table.image(post))
