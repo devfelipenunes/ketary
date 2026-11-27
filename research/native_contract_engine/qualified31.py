@@ -84,7 +84,11 @@ class Engine:
         s=self.base.prepared.session;n=s.width;legacy=Legacy(s)
         keys=tuple(validate(s,x) for x in items)
         q=max_work//len(items);out=[]
-        for x,(domain,ids,oid) in zip(items,keys):
+        indices=tuple(i for i,x in enumerate(items) if type(x) not in (SumTransition,NoiseAfter,Correctable))
+        base_reports={}
+        if q and indices:
+            base_reports=dict(zip(indices,self.base.verify(tuple(items[i] for i in indices),max_work=q*len(indices))))
+        for idx,(x,(domain,ids,oid)) in enumerate(zip(items,keys)):
             def report(status,detail=None):return Report(status,domain,ids,oid,q,detail)
             if not q:out.append(report("INCONCLUSIVE"));continue
             if type(x) is SumTransition:
@@ -105,6 +109,6 @@ class Engine:
                 if not cap:out.append(report("INCONCLUSIVE"));continue
                 r=recovery_table(n,x.stabilizers,x.errors,max_pairs=cap)
             else:
-                out.append(self.base.verify((x,),max_work=q)[0]);continue
+                out.append(base_reports[idx]);continue
             out.append(report(r.status,r))
         return tuple(out)
