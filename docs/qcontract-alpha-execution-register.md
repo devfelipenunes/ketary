@@ -5,9 +5,9 @@ Snapshot: baseline A4 ee3699a5; comparative lab 3e4487b2; contract-first integra
 | ID | Status | Task | Evidence / next action |
 |---|---|---|---|
 | A01 | E | exact A4 artifact and namespace audit. | A4 exact-head three-platform qualification 46078771325; original artifact audit |
-| A02 | I | complete #528 required checks and dependency audit, inspect failures. | 31 successful runs; legacy SDK still in progress, R30 macOS cancelled |
-| A03 | P | merge preserving ancestry; verify main tree and post-merge gates. | Not completed; follow master roadmap acceptance criterion |
-| A04 | P | close only #512–527 confirmed ancestors; no branch deletion until review. | Not completed; follow master roadmap acceptance criterion |
+| A02 | E | complete #528 required checks and dependency audit, inspect failures. | 32 exact-head successes including dependency/SDK; R30 macOS-14 cancellation documented, R31/macOS-15 and A4 all platforms passed; repository accepted merge |
+| A03 | I | merge preserving ancestry; verify main tree and post-merge gates. | #528 merged b8ba69f8; A4 ancestor, main identical tree, post-merge execution not confirmed |
+| A04 | E | close only #512–527 confirmed ancestors; no branch deletion until review. | #512 auto-merged, #513–527 closed after verified ancestry and explanatory comments; no branch deletion |
 | A05 | I | separate runtime, independent checker, adapter and lab boundaries; inventory imports. | A4 wheel AST audit; runtime audit candidate |
 | A06 | P | canonical package source layout, avoid generated AST extraction long term; parity with A4. | Not completed; follow master roadmap acceptance criterion |
 | A07 | P | move legacy SDK adapters out of runtime; stable internal packed representation. | Not completed; follow master roadmap acceptance criterion |
@@ -127,6 +127,6 @@ Snapshot: baseline A4 ee3699a5; comparative lab 3e4487b2; contract-first integra
 | M14 | P | signed/tagged local Alpha candidate only after owner approval; no public registry reservation. | Not completed; follow master roadmap acceptance criterion |
 
 ## Totals
-121 deliveries: 12 evidenced, 83 partial/candidate, 23 pending, 3 externally blocked. Counts describe work packages, not test count or release percentage. Reconcile on each exact-head run.
+121 deliveries: 14 evidenced, 83 partial/candidate, 21 pending, 3 externally blocked. Counts describe work packages, not test count or release percentage. Reconcile on each exact-head run.
 
-No #528 or #529 merge is implied. Preserve prior exact-head artifacts and historical workflows until CI coverage migration is verified.
+#528 merged at b8ba69f8f7eea5e76abc44b2f351f6659ed8e5e9; #529 retargeted to main, not yet merged. #528 tree identical to main at verification; post-merge run not confirmed. Preserve prior exact-head artifacts and historical workflows until CI coverage migration is verified.
