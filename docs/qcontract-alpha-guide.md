@@ -2,7 +2,7 @@
 
 Provisional name and API. The local distribution is qcontract-alpha-local;
 the Python import is qcontract. Nothing is uploaded to a package registry.
-This candidate depends on the private native wheel and Qiskit, not on the
+This candidate depends on the local `qcontract-native-alpha-local` native wheel and Qiskit, not on the
 previous SDK package. CPython 3.12 is the admitted interpreter.
 
 ## Install from validated local build artifacts
@@ -79,7 +79,7 @@ Prepared snapshots are immutable and isolated from later source circuit
 edits. A Result includes status, domain, snapshot and obligation IDs,
 reserved work, route when supplied, and optional witness/evidence/exact
 expectation. Diagnostic shapes are provisional, not a stable wire schema.
-Prepared.replay supports selected transition/state routes only; None means
+Prepared.replay independently checks native Clifford transition verdicts and their exact product-state witnesses, as well as selected other transition/state routes. None means
 unavailable. Evidence is not authenticated or a succinct proof of work.
 Other families do not yet offer portable replay.
 
@@ -89,6 +89,6 @@ The historical research remains in the repository; the staging script
 selects the needed runtime declarations and uses package-relative imports.
 It does not execute benchmark-only ctypes loaders. Runtime manifest hashes
 bind each generated module to its original source. Native backend is a
-private research wheel, not independently security-audited. No hardware
+locally staged QContract wheel, not independently security-audited. No hardware
 execution, arbitrary noisy circuits, general formal verification, external
 usability validation, or production readiness is claimed.
