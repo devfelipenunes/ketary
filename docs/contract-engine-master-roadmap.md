@@ -409,3 +409,39 @@ R27 submits three suites:
 No public API change, release or merge. Pending CI, general weighted edges,
 more demanding interacting workloads, complete resource and security audit,
 latest cross-platform qualification and external review/hardware gates.
+
+
+## Round 28 — consolidation and adversarial workloads
+
+R27 head 2d7be59e463606cd5aa60cdf7cbde915cdf9ab5a: 25/26 workflows
+successful at inspection, SDK regression pending. All three specialist
+jobs passed. Original artifacts and commit files inspected: weighted
+2630, evidence 72, routing 14 = 2716 checks. At 64 wires, phase-weighted
+T-state live nodes 129 vs 492 unweighted, but simulation 35.103 vs
+32.496 ms. Uniform and GHZ live nodes unchanged; weighted preparation
+slower in all nine structured scenarios. Retain plain default; weighted
+backend explicit. Spatial records at 64 wires 726 bytes, PASS/FAIL
+replay medians 5.925/5.933 ms. Integrated two-obligation spatial route
+median 13.274 ms. Shared CI timings, no controlled host or speed guarantee.
+
+R28 candidate28.py consolidates two exact domains in one private engine:
+all-input signed Pauli transition and zero-input state eigencontract.
+Explicit typed specs, immutable packed snapshot, frozen reachable state
+graph, separate preparation budgets, disjoint query reservations,
+domain-bound obligation identity, route evidence and alternate DAG
+replay. Existing public Contract semantics unchanged. State preparation
+is opt-in and plain is default; phase-weighted explicit. No arbitrary
+rotation or numerical proof promotion. Replay may be unavailable or
+budget-exhausted; no authentication claim. Other existing contract
+families retain their private facades pending a broader typed design.
+
+Three qualification jobs: integrated mixed requests and GHZ through
+64 wires, held-out interacting brickwork (6/8/10/12 wires, 2/4/8 layers,
+3 seeds) against Qiskit state-vector references, T-dressed connected graph
+stabilizers and mutants through 64 wires, malformed requests and
+domain/report tampering. Record decisive and inconclusive coverage
+separately; do not infer scalability from successful structured cases.
+All R28 tests pending. No public API, merge or release. Outstanding:
+full resource and FFI audit, complex edge weights, remaining semantics
+integration, controlled-host and cross-platform candidate qualification,
+security/notice review, independent reviewer and usability study.
