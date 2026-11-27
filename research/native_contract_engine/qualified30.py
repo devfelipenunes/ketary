@@ -5,7 +5,9 @@ Projected, relative and bounded exact column semantics reuse their
 qualified implementations. No numerical results promoted to exact.
 """
 from dataclasses import dataclass
-from candidate28 import Engine as Prepared,Transition,StateEigen,Policy,obligation
+from candidate28 import Engine as Prepared,Transition,StateEigen,Policy,obligation,Report as CoreReport
+from router27 import Attempt
+from unified24 import Compact
 from consolidated12 import Engine as Legacy
 from contracts15 import Clean,Action,mask_for
 from monomial16 import action
@@ -97,9 +99,34 @@ class Engine:
     def verify(self,items,*,max_work=2_000_000):
         bounds(4096,max_work)
         if type(items) is not tuple or not 1<=len(items)<=64:raise ValueError("bounded tuple")
-        s=self.prepared.session;n=s.width;legacy=Legacy(s)
+        s=self.prepared.session;n=s.width
         keys=tuple(validate(s,x) for x in items)
         q=max_work//len(items);out=[]
+        # The fully validated all-transition Clifford path can emit the same
+        # report directly from native compact verdicts. No duplicate digest,
+        # router, or intermediate report allocations. Per-item admission
+        # uses exactly the native cost formula, including witness reservation.
+        # A budget-exhausted item does not consume its neighbors' quota.
+        tableau=self.prepared.router.previous.prepared.tableau
+        if tableau is not None and all(type(x) is Transition for x in items):
+            if not q:
+                return tuple(Report("INCONCLUSIVE",d,ids,oid,0) for d,ids,oid in keys)
+            accepted=tuple(i for i,x in enumerate(items)
+                           if 1+x.post[0].bit_count()+x.post[1].bit_count()+2*(2*n+3)<=q)
+            raw=tableau.contracts(tuple((items[i].pre,items[i].post) for i in accepted),q*len(accepted)) if accepted else ()
+            answers=dict(zip(accepted,raw))
+            for i,(domain,ids,oid) in enumerate(keys):
+                v=answers.get(i)
+                if v is None:
+                    status="INCONCLUSIVE";route="tableau-budget";w=None
+                else:
+                    status="PASS" if v[0] else "FAIL";route="tableau-native"
+                    w=Compact(n,*v[1]) if v[1] is not None else None
+                detail=CoreReport(status,domain,s.identity,oid,route,witness=w,
+                                  attempts=(Attempt(route,status,0),))
+                out.append(Report(status,domain,ids,oid,q,detail))
+            return tuple(out)
+        legacy=Legacy(s)
         # Batch only when each reserved slice covers even the worst-case
         # tableau query + compact witness. Otherwise preserve independent
         # per-obligation exhaustion semantics (no pooled budget borrowing).
