@@ -308,3 +308,30 @@ References: https://www.maturin.rs/distribution and
 https://docs.github.com/en/actions/reference/runners/github-hosted-runners.
 A3 head and workflows are unchanged. A4 remains auxiliary and unvalidated
 with the real native extension. No manual binary relabeling, no upload.
+
+
+### A3 native qualification failure and correction
+
+A3 macOS job 140769795080 failed at the spoofed-gate negative control
+(line 88 of smoke.py), not compilation, installation or dependency
+checking. Artifact 15235423415 contains the built A3 wheel and stage
+manifest; installed native9.py confirms the concrete-type check exists.
+Qiskit may canonicalize a claimed standard base class in its own
+internal representation; the exact point of conversion (append or
+copy) is not yet established. Correct the adapter to inspect the
+stored instructions before copying/normalizing the circuit and capture
+immutable packed bytes. No concurrent mutation support. The revised
+negative control checks stored type/standard representation; if the
+operation was already canonicalized, independently verify its H matrix
+with Qiskit Operator and check its transition, rather than demand
+rejection of lost provenance. A genuinely custom gate named h must
+remain nonstandard and be rejected. Open control and canonical mutable
+controls remain. This correction has not passed native CI yet.
+
+The A3 head remains recorded for the failed run. Its Linux/Windows jobs
+were still queued at the time of inspection. Since A3 failed a gate,
+A4 can advance the existing integration candidate by fast-forward after
+checking ancestry; no new integration PR, no merge into main, no release.
+All A4 native, SDK benchmark, type and portable Linux gates still need
+exact-head qualification. The earlier offline dispatch regression is
+not a substitute for the native CI.
