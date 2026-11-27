@@ -106,11 +106,13 @@ def main():
         run([python,"-I",LAB/"alpha"/"benchmark_api.py"],cwd=OUT,stdout=f,env=env)
     with (OUT/"dispatch-parity.json").open("w",encoding="utf-8") as f:
         run([python,"-I",LAB/"alpha"/"dispatch_parity.py"],cwd=OUT,stdout=f,env=env)
+    with (OUT/"contract-first.json").open("w",encoding="utf-8") as f:
+        run([python,"-I",LAB/"alpha"/"contract_first_tests.py"],cwd=OUT,stdout=f,env=env)
     # Static checking in same isolated environment after runtime measurements.
     run([python,"-m","pip","install","mypy==1.15.0"],env=env)
     positive=OUT/"typing_positive.py"
     negative=OUT/"typing_negative.py"
-    positive.write_text("from qiskit import QuantumCircuit\nfrom qcontract import Contract, Pauli, prepare, Status\np=prepare(QuantumCircuit(2))\nr=p.check(Contract(requires=Pauli('IZ'), ensures=Pauli('IZ')))\nstatus: Status=r.status\np.verify(p.equivalent_to(p), p.action_matches(p,ancillas=(1,)))\n",encoding="utf-8")
+    positive.write_text("from qiskit import QuantumCircuit\nfrom qcontract import Contract, Pauli, prepare, Status\np=prepare(QuantumCircuit(2))\nr=p.check(Contract(requires=Pauli('IZ'), ensures=Pauli('IZ')))\nstatus: Status=r.status\np.verify(p.equivalent_to(p), p.action_matches(p,ancillas=(1,)))\nfrom qcontract import Plan, transition, pauli_on\nplan=Plan((transition('H property', before='IZ', after='IZ'),))\nplan.verify(p).require()\np.statuses(Contract(requires=pauli_on(2, ((0, 'Z'),)), ensures=Pauli('IZ')))\n",encoding="utf-8")
     negative.write_text("from qiskit import QuantumCircuit\nfrom qcontract import prepare\np=prepare(QuantumCircuit(2))\np.check('not a contract')\n",encoding="utf-8")
     args=[python,"-m","mypy","--strict","--follow-imports=silent","--disable-error-code=import-untyped","--no-incremental"]
     good=run([*args,positive],cwd=OUT,env=env,capture_output=True,text=True)
