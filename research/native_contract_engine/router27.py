@@ -17,6 +17,7 @@ class Decision:
     report:Report
     attempts:tuple
     reserved:int
+    shared_batch_budget:int|None=None
 
 @dataclass(frozen=True)
 class Router:
@@ -34,7 +35,7 @@ class Router:
             pauli(n,item[0]);pauli(n,item[1])
         # Preserve the existing batched tableau path and its prefix budget.
         if self.previous.prepared.tableau is not None or not spatial:
-            return tuple(Decision(r,(Attempt(r.route,r.status,max_work),),max_work)
+            return tuple(Decision(r,(Attempt(r.route,r.status,0),),0,max_work)
                          for r in self.previous.transitions(items,max_work=max_work))
         q=max_work//len(items);out=[]
         part=tuple((i,) for i in range(n))
