@@ -200,3 +200,38 @@ an already constructed bounded vector. External comparisons isolate
 pinned stim 1.16.0 and mqt.qcec 3.8.0 in one job, not SDK dependencies.
 QCEC probable equivalence/timeout is not a proof. No publication/merge.
 M40/M46/M47 remain external blockers.
+
+
+## Round 22 — persistent Rust tableau and direct decision DAG
+
+R21 exact head d752fec290f99eebe2eb405f49c210455cdc2524: 20/20
+workflows, 7/7 specialized suites. Reopened original lab.json reports:
+Stim prepared queries 1.342–3.534 us vs Rust gate scans 5.880–7.355 us
+(256 gates, 4–64 wires). Native bit-slicing 3.9–10.0x faster than scalar
+for 64 transitions; Python thread overhead worsened latency. Temporal cuts
+verified structured connected 64-wire / 384-gate case; same-host wheels
+byte-identical. These observations do not establish general superiority.
+
+R22 prototypes (pending CI):
+- M27/M30/M34: immutable Rust inverse Clifford tableau built from 2n generator
+  images using existing bit-slicing; exact signed Pauli multiplication with
+  popcount, sparse set-bit traversal, query independent of gate count.
+  Separate build and query logical budgets. No implicit public dispatch.
+- M34: bounded native scoped threads for up to 4096 queries, 1–8 workers.
+  Thread creation included in timing; no claim of speedup or SIMD.
+- M38/M39: match prebuilt query scope with Stim and Qiskit at 4/16/32/64 wires,
+  256/4096 gates; report setup separately, single and 64-query latency;
+  library output representations differ. Shared runner, not controlled host.
+- M29/M31: direct exact unweighted amplitude DAG gates H/S/Sdg/X/Z/CX/T/Tdg,
+  hash-consed nodes and memoized subgraph operations, no dense expansion
+  inside backend. Bounded 20 wires/512 gates, historical arena cap and logical
+  work; not a weighted DD, arbitrary rotation engine, native allocation cap
+  or general efficient simulator. Compare exact columns at 2–5 wires;
+  structured uniform, GHZ and T-phase fixtures at 8–20 wires.
+- M35/M45: malformed/budget admission and bit 63 controls; exact parity
+  against separate algebra, previous kernel, Stim and Qiskit.
+
+Four matrix suites exact/external/parallel/dag. No merge or production
+promotion. Explicit SIMD, native allocation accounting, persistent worker
+pool, weighted DD, cut decomposition and physical syndrome extraction
+remain open, as do M40/M46/M47 and public integration gates.
