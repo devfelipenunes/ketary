@@ -2,7 +2,10 @@
 from dataclasses import dataclass,field,asdict
 import hashlib,struct
 import ketary_native_research as rn
-from round3 import CODES
+from round3 import CODES,CLASSES
+# Qiskit canonical gates may be singleton subclasses of their public class.
+# Do not trust a user-defined base_class property as an admission credential.
+CANONICAL_TYPES={t:i for i,cls in enumerate(CLASSES) for t in (cls,type(cls()))}
 from engine import Obligation,Report,Witness,SCOPE,valid_pauli,digest
 from sparse import Propagation,BudgetExceeded
 # Keep verification independent of benchmark-only platform modules.
@@ -45,8 +48,9 @@ class RustSession:
         qc=qc.copy()
         w={b:i for i,b in enumerate(qc.qubits)};buf=bytearray()
         for inst in qc.data:
-            op=inst.operation;i=CODES.get(op.base_class)
-            if i is None or inst.clbits or op.params or getattr(op,"condition",None) is not None:raise ValueError("gate")
+            op=inst.operation;i=CANONICAL_TYPES.get(type(op))
+            if i is None or op.base_class is not CLASSES[i] or inst.clbits or op.params or getattr(op,"condition",None) is not None:raise ValueError("gate")
+            if op.mutable and op.definition!=CLASSES[i]().definition:raise ValueError("modified standard gate definition")
             if len(inst.qubits)!=(2 if i==5 else 1) or (i==5 and op.ctrl_state!=1):raise ValueError("arity/control")
             a=w[inst.qubits[0]];b=w[inst.qubits[1]] if i==5 else 0
             buf.extend((i,a,b))
