@@ -511,3 +511,23 @@ repeatability is diagnostic; cross-host reproducibility remains pending.
 All six R30 jobs pending CI. External qualification handoff protocols and
 remaining requirements in qualification ledger; no external study performed.
 No merge or release.
+
+
+## Round 31 — close qualification gaps
+
+R30 exact head 3dd303cf13cfbe7def441e63c43867c516de2a19:
+29/30 workflows succeeded, three specialist suites (1943 explicit checks)
+and Linux/Windows platform jobs passed. macos-14 cancelled twice, including
+requested retry; cause not established. Windows two wheels differed in
+native PE (20 bytes, including timestamps) and RECORD, Linux matched.
+R31 tests /Brepro on MSVC and alternate macos-15 runner; raw wheel member
+difference diagnostics and actual local license/notice text hashes are
+captured. No binary post-processing or assertion of determinism.
+R31 qualified31.py integrates rational Hermitian sums, exact Clifford
+followed by finite Pauli mixture, and finite Pauli-set code correctability
+with recovery tables. Explicit code-only identity and disjoint logical
+reservations; preflight, negative controls and independent dense channel
+oracle. Four specialist/platform jobs pending CI. See qualification ledger
+for exit requirements. No merge, public API change, release or external
+study. General channels, physical QEC, full bit-cost/allocator accounting,
+platform reproducibility, legal/security review and external gates remain.
