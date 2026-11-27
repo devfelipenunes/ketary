@@ -149,3 +149,14 @@ unitary into tensor products; each local Pauli image may equal plus or minus
 its target, accumulate signs, produce global signed witness when opposite.
 Non-Pauli local image or exhausted component budget remains INCONCLUSIVE.
 No general arbitrary-gate equivalence. Three independent research CI jobs.
+
+Additional independent jobs: restricted-column leakage computes the map on
+every clean basis input (therefore also all coherent superpositions), not
+only their individual probabilities. Uses native Statevector evolution for
+columns, shared SVD and independently replayed witness. Compare with full
+Operator for up to 8 wires; restricted research path admits up to 12 wires,
+at most 4 data wires and 256 gates. 16*2^(n+k) bytes column payload vs
+16*4^n dense operator payload, not actual peak RSS. No new public bounds.
+Stage profiling measures preparation, admission, propagation, hashes,
+example witness, warm report and cold full calls separately; medians are
+not additive. Five independent research jobs.

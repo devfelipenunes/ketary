@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        front: [a,b,c]
+        front: [a,b,c,d,e]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
