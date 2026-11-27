@@ -42,19 +42,24 @@ class RustSession:
     def from_qiskit(cls,qc):
         from qiskit import QuantumCircuit
         if type(qc) is not QuantumCircuit:raise TypeError("Qiskit QuantumCircuit")
-        # Snapshot immediately, never retain or mutate the caller's circuit.
+        # Admit the instructions actually stored in the input circuit,
+        # before any copy that could normalize a custom Python operation.
+        # Qiskit can already canonicalize a gate during append: provenance
+        # before insertion is not available. No concurrent mutation support.
         # Packed conjugation semantics intentionally ignore global phase.
-        if not 1<=qc.num_qubits<=64 or qc.num_clbits or qc.num_parameters or len(qc.data)>100_000:raise ValueError("circuit")
-        qc=qc.copy()
+        width=qc.num_qubits
+        if not 1<=width<=64 or qc.num_clbits or qc.num_parameters or len(qc.data)>100_000:raise ValueError("circuit")
+        instructions=tuple(qc.data)
+        if len(instructions)>100_000:raise ValueError("circuit")
         w={b:i for i,b in enumerate(qc.qubits)};buf=bytearray()
-        for inst in qc.data:
+        for inst in instructions:
             op=inst.operation;i=CANONICAL_TYPES.get(type(op))
             if i is None or op.base_class is not CLASSES[i] or inst.clbits or op.params or getattr(op,"condition",None) is not None:raise ValueError("gate")
             if op.mutable and op.definition!=CLASSES[i]().definition:raise ValueError("modified standard gate definition")
             if len(inst.qubits)!=(2 if i==5 else 1) or (i==5 and op.ctrl_state!=1):raise ValueError("arity/control")
             a=w[inst.qubits[0]];b=w[inst.qubits[1]] if i==5 else 0
             buf.extend((i,a,b))
-        return cls(qc.num_qubits,bytes(buf))
+        return cls(width,bytes(buf))
     def propagate(self,post,*,max_terms=4096,max_work=2_000_000):
         valid_pauli(post,self.width);bounds(max_terms,max_work)
         try:terms,k,peak,work=self.native.propagate(post,max_terms,max_work)
