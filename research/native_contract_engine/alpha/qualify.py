@@ -61,6 +61,8 @@ def audit_python(w):
             assert source_sha(source)==row["source_sha256"]
             want=row.get("runtime_sha256",row["source_sha256"])
             assert hashlib.sha256(z.read(path)).hexdigest()==want
+        assert "qcontract/py.typed" in names
+        assert hashlib.sha256(z.read("qcontract/__init__.pyi")).hexdigest()==manifest["public_api"]["stub_sha256"]==source_sha(LAB/"alpha"/"api.pyi")
         return {"entries":len(names),"runtime_modules":len(manifest)-1,"sha256":sha(w)}
 def main():
     OUT.mkdir(exist_ok=False)
@@ -93,6 +95,19 @@ def main():
     with (OUT/"environment.json").open("w",encoding="utf-8") as f:run([python,"-m","pip","list","--format=json"],stdout=f,env=env)
     with (OUT/"smoke.json").open("w",encoding="utf-8") as f:
         run([python,"-I",LAB/"alpha"/"smoke.py"],cwd=OUT,stdout=f,env=env)
+    with (OUT/"benchmark-api.json").open("w",encoding="utf-8") as f:
+        run([python,"-I",LAB/"alpha"/"benchmark_api.py"],cwd=OUT,stdout=f,env=env)
+    # Static checking in same isolated environment after runtime measurements.
+    run([python,"-m","pip","install","mypy==1.15.0"],env=env)
+    positive=OUT/"typing_positive.py"
+    negative=OUT/"typing_negative.py"
+    positive.write_text("from qiskit import QuantumCircuit\nfrom qcontract import Contract, Pauli, prepare, Status\np=prepare(QuantumCircuit(2))\nr=p.check(Contract(requires=Pauli('IZ'), ensures=Pauli('IZ')))\nstatus: Status=r.status\np.verify(p.equivalent_to(p), p.action_matches(p,ancillas=(1,)))\n",encoding="utf-8")
+    negative.write_text("from qiskit import QuantumCircuit\nfrom qcontract import prepare\np=prepare(QuantumCircuit(2))\np.check('not a contract')\n",encoding="utf-8")
+    args=[python,"-m","mypy","--strict","--follow-imports=silent","--disable-error-code=import-untyped","--no-incremental"]
+    good=run([*args,positive],cwd=OUT,env=env,capture_output=True,text=True)
+    bad=subprocess.run([str(x) for x in [*args,negative]],cwd=OUT,env=env,capture_output=True,text=True)
+    assert bad.returncode==1 and "[arg-type]" in bad.stdout
+    (OUT/"typing.json").write_text(json.dumps({"positive":good.stdout,"negative":bad.stdout,"mypy":"1.15.0"},indent=2),encoding="utf-8")
     commit=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip()
     result={"commit":commit,"platform":platform.platform(),"machine":platform.machine(),"python":sys.version,
             "native":{"file":nw.name,"sha256":sha(nw)},"alpha":{"file":pw.name,**audit},
