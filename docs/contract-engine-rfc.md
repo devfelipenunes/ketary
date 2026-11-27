@@ -65,3 +65,7 @@ https://www.maturin.rs/project_layout.html,
 https://quantum.cloud.ibm.com/docs/en/api/qiskit/qiskit.quantum_info.Pauli,
 https://quantum-journal.org/papers/q-2026-07-23-2172/,
 https://mqt.readthedocs.io/projects/qcec/en/stable/.
+
+## Round 3 research increment
+
+Prepared immutable ephemeral snapshot, gate classes validated once and wire indices mapped; no persistent cache or public API. Batch C++ bit-slicing up to 64 signed Paulis. Compare legacy export, preparation, scalar and batch, Qiskit Clifford prepared and full export with one tableau per batch. Exact sparse Clifford+T conjugation in Q(sqrt(2)), integer pairs over a shared power of two; no coefficient truncation. Caps: 64 wires, 100k gates, 32 T/Tdg, 4096 live terms and two million term visits; cap exhaustion is inconclusive, not failure or approximation. Numerical dense reference on small circuits. Leakage research: one arbitrary clean ancilla wire, 1–6 qubits, numeric unitary admission, SVD witness restricted to allowed inputs and direct reproduction, probability tolerance 1e-9 with diagnostic guard 1e-12; no certified roundoff. Generic effect residual squared agrees for exact unitary; timing routes differ in admission so no matched speedup claim. Includes analytic boundary case. No production changes or packaging.

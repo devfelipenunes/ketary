@@ -33,13 +33,16 @@ jobs:
           python -m pip freeze > environment.txt
           lscpu > host.txt
       - name: Validate and measure native kernels
-        run: python research/native_contract_engine/benchmark.py > native-contract-benchmark.json
+        run: |
+          python research/native_contract_engine/benchmark.py > native-contract-benchmark.json
+          python research/native_contract_engine/round3.py > native-contract-round3.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: native-contract-evidence
           path: |
             native-contract-benchmark.json
+            native-contract-round3.json
             commit.txt
             environment.txt
             host.txt
