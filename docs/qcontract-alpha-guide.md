@@ -1,4 +1,4 @@
-# QContract Alpha — local candidate guide
+# QContract Alpha 0.1.0a3 — local candidate guide
 
 Provisional name and API. The local distribution is qcontract-alpha-local;
 the Python import is qcontract. Nothing is uploaded to a package registry.
@@ -9,8 +9,22 @@ previous SDK package. CPython 3.12 is the admitted interpreter.
 
 From a clean Python 3.12 virtual environment, install both wheels produced
 by the alpha qualification workflow in a single pip command, allowing
-Qiskit and NumPy dependencies to resolve. Use the exact wheels for your
-platform. No production compatibility or public PyPI availability is
+Qiskit and NumPy dependencies to resolve. Use the exact wheels for your platform, from the same commit. The Python wheel is
+`qcontract_alpha_local-0.1.0a3-py3-none-any.whl`; the native wheel is
+`qcontract_native_alpha_local-0.1.0-cp312-cp312-<platform>.whl`.
+Verify the artifact SHA-256 values before installation. Substitute the actual local
+file names for your platform:
+
+```sh
+python -m venv .venv
+# Activate the environment using the command for your OS.
+python -m pip install ./qcontract_alpha_local-0.1.0a3-py3-none-any.whl ./<native-wheel>.whl
+python -m pip check
+python -c "import qcontract; print(qcontract.__version__)"
+```
+
+See [contract-first documentation](qcontract/README.md) for named plans,
+examples, reference and explanations. No production compatibility or public PyPI availability is
 implied.
 
 ## First exact contract
@@ -94,9 +108,9 @@ execution, arbitrary noisy circuits, general formal verification, external
 usability validation, or production readiness is claimed.
 
 
-## Typed API and benchmark evidence (A3)
+## Typed API and benchmark evidence
 
-The local candidate 0.1.0a2 includes a PEP 561 marker and public type
+The local candidate 0.1.0a3 includes a PEP 561 marker and public type
 stub. IDE completion and type checking cover the ten specifications,
 prepared session and Result. Run the isolated qualification workflow
 to see positive and deliberately invalid mypy examples. Runtime
@@ -117,5 +131,14 @@ The comparison uses shared CI hosts, not dedicated CPU performance.
 
 Linux candidate builds now request an audited manylinux_2_34_x86_64 tag,
 with an independent ELF requirements audit and installation on Ubuntu
-22.04. The portable build still needs CI qualification; other Linux
-architectures and CPython versions are not admitted by this matrix.
+22.04. The exact 0.1.0a3 candidate passed isolated installation on Ubuntu 22.04 x86_64
+(glibc 2.35), Windows AMD64 and macOS 15 ARM64 with CPython 3.12.
+The manylinux tag is not evidence of testing every compatible host, and the
+macOS wheel tag is not evidence of testing older macOS releases. Other
+architectures and CPython versions are outside the qualified matrix.
+
+`Plan`, `Named`, `Outcome`, and convenience constructors attach readable names
+to existing exact obligations; they do not expand the mathematical domains.
+`statuses()` omits full reports and evidence. Use `verify()` when diagnostics
+or replay matter. Eligible Clifford state obligations use the same tableau route
+in individual and mixed requests, with equal per-item logical budgets.
