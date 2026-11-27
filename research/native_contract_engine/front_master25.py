@@ -138,21 +138,28 @@ def semantics():
 def algorithms():
     import ketary as k
     from numeric25 import unitary,probability,observable
-    from qiskit.circuit.library import QFTGate
+    # Explicit decomposition into admitted logical gates; preserve strict phase.
+    def qft(n):
+        q=QuantumCircuit(n)
+        for j in reversed(range(n)):
+            q.h(j)
+            for i in reversed(range(j)):q.cp(np.pi/(1<<(j-i)),i,j)
+        for i in range(n//2):q.swap(i,n-1-i)
+        return q
     checks=0;rows=[]
     for n in (2,3,4,5):
-        d=1<<n;q=QuantumCircuit(n);q.append(QFTGate(n),range(n))
+        d=1<<n;q=qft(n)
         ref=np.exp(2j*np.pi*np.outer(np.arange(d),np.arange(d))/d)/np.sqrt(d)
         assert unitary(k.from_qiskit(q),ref).status=="PASS"
         q.x(0);assert unitary(k.from_qiskit(q),ref).status=="FAIL";checks+=2
         # Grover: mark all-ones, then reflect about uniform state.
-        q=QuantumCircuit(n);q.h(range(n));q.h(n-1);q.mcx(list(range(n-1)),n-1);q.h(n-1)
+        q=QuantumCircuit(n);q.h(range(n));q.h(n-1);q.cx(0,1) if n==2 else q.ccx(0,1,2) if n==3 else q.mcx(list(range(n-1)),n-1);q.h(n-1)
         q.h(range(n));q.x(range(n));q.h(n-1);q.mcx(list(range(n-1)),n-1);q.h(n-1);q.x(range(n));q.h(range(n))
         target=float(np.sin(3*np.arcsin(1/np.sqrt(d)))**2)
         assert probability(k.from_qiskit(q),d-1,target).status=="PASS";checks+=1
         q=QuantumCircuit(n+1);q.x(n)
         for i in range(n):q.h(i);q.cp(2*np.pi*(1<<i)/d,i,n)
-        q.append(QFTGate(n).inverse(),range(n))
+        q.compose(qft(n).inverse(),qubits=list(range(n)),inplace=True)
         assert probability(k.from_qiskit(q),d+1,1.0).status=="PASS";checks+=1
         for theta in (.1,.7,1.9):
             q=QuantumCircuit(1);q.ry(theta,0)
