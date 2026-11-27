@@ -80,7 +80,7 @@ def sparse_image(n,post,blocks):
     op=SparsePauliOp.from_list([(label(n,post),1.)])
     for kind,arg in blocks:
         if kind=="c":
-            op=op.evolve(arg,frame="h")
+            op=SparsePauliOp(op.paulis.evolve(arg,frame="h"),coeffs=op.coeffs)
         else:
             # T=exp(-i pi Z/8) up to phase. Commuting strings unchanged;
             # anticommuting P -> (P+iZP)/sqrt(2) for T, opposite for Tdg.
