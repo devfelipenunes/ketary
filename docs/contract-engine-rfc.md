@@ -170,3 +170,22 @@ NumPy arrays and a domain-separated version-2 binary identity. It is not
 compatible with existing JSON circuit IDs. Compare semantic reports and
 witnesses, not equality of IDs across schemas; no migration or public
 change authorized. One bytes representation only, no mutable cache.
+
+## Round 8: optimization roadmap experiments
+
+Fix the round 7 dense residual expression: it omitted the right-hand U in
+U^dagger P U - Q. Keep all oracle assertions and the independent target
+comparison. Native sparse Rust uses bounded i128 integer coefficients
+(32 T cap implies max coefficient <=4^32), insertion order and identical
+work/term cap checks; C ABI is a research experiment, not a PyO3 decision.
+Adaptive Pauli planner: exact inverse cancellation, backward conservative
+support cone and optional factor route under a split work budget. Disjoint
+gates commute with current Pauli support; no coefficient pruning. Report
+identity refers to original circuit. Group duplicate Clifford obligations
+only when reuse is substantial; threshold is heuristic. Scale to 100k
+gates within existing research caps and compare explicit thread pools
+without changing runtime threading. Channels use bounded numeric
+CPTP adjoints and independently replayed forward witnesses; separate
+from unitary contracts. Algorithm components and QCEC up-to-phase full
+equivalence use distinct scopes. Dedicated host protocol remains
+docs/release-validation.md / #100: shared CI is not controlled evidence.

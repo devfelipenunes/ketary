@@ -62,7 +62,8 @@ def main():
             for flip in (0,1):
                 ob=Obligation((pre[0],pre[1],pre[2]^flip),post);r=factor(p,ob)
                 assert r.status==("FAIL" if flip else "PASS")
-                expected=u.conj().T@Pauli(label(n,post)).to_matrix()-Pauli(label(n,ob.pre)).to_matrix()
+                expected=u.conj().T@Pauli(label(n,post)).to_matrix()@u-Pauli(label(n,ob.pre)).to_matrix()
+                np.testing.assert_allclose(expected,target-Pauli(label(n,ob.pre)).to_matrix(),atol=1e-10)
                 if flip:
                     from test_engine import witness_state
                     v=witness_state(r.witness);a,b=r.witness.numerator
