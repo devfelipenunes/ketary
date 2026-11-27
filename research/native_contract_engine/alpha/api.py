@@ -8,8 +8,11 @@ from ._core.qualified30 import CleanInput,RelativeAction,Equivalent,Separable,ZB
 from ._core.qualified31 import Engine,SumTransition,NoiseAfter,Correctable
 from ._core.unified24 import Compact
 
-__version__="0.1.0a1"
+__version__="0.1.0a2"
 Status=Literal["PASS","FAIL","INCONCLUSIVE","UNSUPPORTED"]
+Signed=tuple[int,int,int]
+Dyadic=tuple[tuple[int,int],int]
+Specification=Transition|StateEigen|CleanInput|Separable|ZBranch|SumTransition|NoiseAfter|Correctable|Equivalent|RelativeAction
 
 def Pauli(label:str)->tuple[int,int,int]:
     """Signed mask from a label, highest wire first, optional leading minus."""
@@ -20,7 +23,7 @@ def Pauli(label:str)->tuple[int,int,int]:
 
 # A label is a mask, so leading identities are not carried into the spec.
 # The prepared circuit validates the mask against its actual width.
-def Contract(*,requires:tuple,ensures:tuple)->Transition:
+def Contract(*,requires:Signed,ensures:Signed)->Transition:
     return Transition(requires,ensures)
 
 @dataclass(frozen=True)
@@ -65,9 +68,9 @@ class Prepared:
     def width(self):return self._engine.base.prepared.session.width
     @property
     def snapshot_id(self):return self._engine.base.prepared.session.identity
-    def verify(self,*contracts,max_work=2_000_000)->tuple[Result,...]:
+    def verify(self,*contracts:Specification,max_work:int=2_000_000)->tuple[Result,...]:
         return tuple(_result(r) for r in self._engine.verify(contracts,max_work=max_work))
-    def check(self,contract,*,max_work=2_000_000)->Result:
+    def check(self,contract:Specification,*,max_work:int=2_000_000)->Result:
         return self.verify(contract,max_work=max_work)[0]
     def equivalent_to(self,reference,*,strict=False):
         if type(reference) is not Prepared:raise TypeError("prepared reference")
@@ -100,4 +103,4 @@ def prepare(circuit,*,prepare_state=False,state_backend="plain",state_fallback=T
     return Prepared(Engine.prepare(RustSession.from_qiskit(circuit),policy))
 
 __all__=["Pauli","Contract","Transition","StateEigen","CleanInput","Separable","ZBranch",
-         "SumTransition","NoiseAfter","Correctable","Prepared","Result","Status","prepare","__version__"]
+         "SumTransition","NoiseAfter","Correctable","Prepared","Result","Status","Signed","Dyadic","Specification","prepare","__version__"]
