@@ -94,3 +94,54 @@ rustc --edition 2021 -C opt-level=3 -C overflow-checks=yes research/native_contr
 These commands are executable lab entrypoints, not documentation for a
 released API. CI stores raw JSON, commit, environment and host metadata.
 Do not treat unvalidated R25 results as completed gates.
+
+
+## Qualification update — R30
+
+R28 debeb5b3: 27/27 workflows. R29 9c1966c2: 29/29 workflows.
+R29 raw exact-head artifacts: 131 FFI, 396 fallback and 7 process limit
+checks (534 total). The two 64-wire T-dressed graph state obligations
+were resolved PASS/FAIL by Heisenberg fallback (0.500258 ms median for
+both queries, excluding preparation). Four isolated Linux workload peaks
+111328–112936 KiB RSS; address-space, wall and CPU controls triggered.
+These are shared-runner and fixed-workload results, not general guarantees.
+
+| Gate | R30 action | Remaining exit requirement |
+|---|---|---|
+| M03–M05/M11–M13/M19 | Seven typed exact contract families, explicit domain and snapshot bindings | Validate CI, integrate channels/noise/QEC separately; source strict phase still unsupported |
+| M26/M32/M33 | Opt-in native metered transition with diagnostic reserve and final coefficient bits; R29 process limits | Full bit-operation, serialization and allocator accounting; independent audit |
+| M35/M37/M45 | Deterministic generated valid/invalid circuit campaign; R29 strict primitive controls | Coverage-guided fuzzing and independent review |
+| M42/M43 | Linux, Windows, macOS candidate builds twice on each host; smoke tests | Validate platform jobs; cross-host reproducibility and distributable wheel policy |
+| M44 | CycloneDX 1.5 candidate inventory with resolved Cargo checksums and installed Python metadata | Schema/tool verification, exact linkage scope, vulnerability and third-party notice review |
+| M40/M46/M47 | Reproducible handoff protocol below | Actual dedicated host, independent reviewer and consenting users |
+| M49/M50 | Preserve private interfaces; keep gate evidence separate | Explicit API approval, exact candidate qualification, merge/release decision |
+
+### Dedicated-host protocol (M40, not executed)
+
+Record hardware model, physical/logical core count, RAM, OS, rustc,
+Python and dependency versions, CPU governor/turbo, affinity and thermal
+conditions. Freeze source SHA and dependency locks. Use the same host,
+workload seeds and equivalent semantics for Ketary, Stim, Qiskit and
+QCEC. Separate setup, query, batch and output construction; report
+decisive coverage, median/P95, raw samples and peak RSS, with randomized
+interleaved order and repeated fresh processes. Preserve failures and
+inconclusive cases. Do not treat shared CI as dedicated hardware.
+
+### Independent review and usability packet (M46/M47, not executed)
+
+Reviewer receives pinned SHA, domain taxonomy, exact oracle and native
+implementation, evidence schemas, unsafe SSE2 boundary, allocation
+delegation, raw artifacts and instructions to reproduce the suites.
+Review phase assumptions, projection semantics, budget exhaustion,
+counterexamples, parsing and FFI; record findings with reproducible
+cases and severity. A reviewer must be independent of the implementation.
+
+Recruit consenting developers; record experience level without unnecessary
+personal data. Ask them to express a transition, distinguish state from
+all-input contract, diagnose a false property, and interpret INCONCLUSIVE
+without guidance. Measure completion, mistakes, time and qualitative
+feedback. No fabricated participants or ratings; no release gate closure
+until observations and remediation are recorded.
+
+R30 remains an unvalidated private candidate increment. No merge or
+release. Inventory is not a legal notice or a vulnerability-free claim.
