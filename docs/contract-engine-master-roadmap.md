@@ -484,3 +484,30 @@ Remaining P0: inspect CI, full resource accounting incl bit operations
 and witness/serialization, independent security/FFI review. P1: broader
 typed contract integration, general complex edges if justified, candidate
 SBOM and platform reproducibility. M40/M46/M47 remain external.
+
+
+## Round 30 — integrated qualification increment
+
+R28 27/27 and R29 29/29 reported workflows passed. R29 artifacts at
+9c1966c23d40015a0501d22d5962d06bfc1274ad inspected: 534 checks, 64-wire
+graph state fallback PASS/FAIL in median 0.500258 ms combined excluding
+preparation, all three OS limit controls triggered. Peak RSS approximately
+109–110 MiB including dependencies on four isolated workloads.
+
+R30 adds qualified30.py: a single private typed interface over transition,
+state eigencontract, clean inputs, relative coherent action, equivalence
+(strict packed vs phase-insensitive), pure-state separability and
+unnormalized Z branches. Request preflight and disjoint reservations.
+Unsupported domains are explicit; no public interface or general channel
+promotion. The native transition_metered experiment reserves validation,
+diagnostic and output-construction visits and reports final coefficient
+bits, not total bit operations, sorting comparisons or allocation costs.
+Generated positive/negative/admission cases supplement the R29 FFI suite.
+Candidate platform qualification builds twice on Linux/Windows/macOS and
+runs integration, SIMD and FFI smoke suites. CycloneDX inventory includes
+Cargo resolved graph/checksums and Python environment/metadata, not exact
+binary linkage, a vulnerability assertion or legal clearance. Same-host
+repeatability is diagnostic; cross-host reproducibility remains pending.
+All six R30 jobs pending CI. External qualification handoff protocols and
+remaining requirements in qualification ledger; no external study performed.
+No merge or release.
