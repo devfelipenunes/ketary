@@ -85,7 +85,20 @@ def main():
         @property
         def base_class(self):return HGate
     spoof=QuantumCircuit(1);spoof.append(Spoof("spoof_h",1,[]),[0])
-    reject(lambda:prepare(spoof))
+    # Qiskit may convert the claimed base class to its native standard
+    # representation during append. Test the actual stored instruction:
+    # reject a surviving custom type; if canonicalized, verify its
+    # resulting H semantics against Qiskit, not the pre-insertion object.
+    stored=spoof.data[0].operation
+    if type(stored) in (HGate,type(HGate())) and spoof.data[0].is_standard_gate():
+        from qiskit.quantum_info import Operator
+        assert Operator(spoof).equiv(Operator(HGate()))
+        check(prepare(spoof).check(Contract(requires=Pauli("Z"),ensures=Pauli("X"))).passed)
+    else:reject(lambda:prepare(spoof))
+    custom=QuantumCircuit(1)
+    custom.append(Gate("h",1,[]),[0])
+    check(not custom.data[0].is_standard_gate())
+    reject(lambda:prepare(custom))
     opened=QuantumCircuit(2);opened.cx(0,1,ctrl_state=0)
     reject(lambda:prepare(opened))
     # Standard singleton and canonical mutable gates remain admissible.
