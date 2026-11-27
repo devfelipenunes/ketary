@@ -93,6 +93,8 @@ def main():
         run([sys.executable,LAB/"wheel_audit10.py",pywheel],stdout=f)
     canonical_python_zip(pw)
     audit=audit_python(pw)
+    with (OUT/"runtime-closure.json").open("w",encoding="utf-8") as f:
+        run([sys.executable,LAB/"alpha"/"runtime_audit.py",pw],stdout=f)
     with (OUT/"python-record-audit.json").open("w",encoding="utf-8") as f:
         run([sys.executable,LAB/"wheel_audit10.py",pywheel],stdout=f)
     venv_dir=OUT/"venv";venv.EnvBuilder(with_pip=True,system_site_packages=False).create(venv_dir)
