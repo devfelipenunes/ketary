@@ -4,6 +4,7 @@ on:
     paths:
       - 'research/effect_contracts.py'
       - 'research/test_effect_contracts.py'
+      - 'research/benchmark_effect_contracts.py'
       - 'docs/effect-contracts-poc.md'
       - '.github/workflows/effect-contracts.yml'
   workflow_dispatch:
@@ -36,11 +37,15 @@ jobs:
         run: |
           python -m unittest discover -s research -p test_effect_contracts.py -v
           python research/effect_contracts.py > effect-results.json
+          python research/benchmark_effect_contracts.py > effect-benchmark.json
+          lscpu > host.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: effect-contract-evidence
           path: |
             effect-results.json
+            effect-benchmark.json
+            host.txt
             environment.txt
             commit.txt
