@@ -138,14 +138,15 @@ def near_clifford():
                 def native():return p.verify(*specs)
                 def numeric():return tuple(propagate_through_circuit(x,rot,max_terms=1<<tc,atol=0.0,frame="h") for x in op)
                 got=native();nums=numeric();res=[]
-                for r,v,t in zip(got,nums,target):
+                for r,(v,truncated_norm),t in zip(got,nums,target):
+                    assert truncated_norm==0.0, (n,tc,family,truncated_norm)
                     d=(v-t).simplify(atol=0,rtol=0)
                     residual=float(np.sum(np.abs(d.coeffs)))
                     status="NUMERIC_MATCH" if residual<1e-10 else "NUMERIC_DIFFERENT" if residual>1e-7 else "NUMERIC_UNCERTAIN"
                     if r.status in ("PASS","FAIL") and status!="NUMERIC_UNCERTAIN":
                         assert (r.status=="PASS")==(status=="NUMERIC_MATCH")
                         checks+=1
-                    res.append({"native":r.status,"numeric":status,"l1_residual":residual,"terms":len(v),"route":r.route})
+                    res.append({"native":r.status,"numeric":status,"l1_residual":residual,"terms":len(v),"truncated_norm":float(truncated_norm),"route":r.route})
                 assert got[0].status=="PASS"
                 if family=="commuting":assert got[2].status=="PASS" or got[2].status=="INCONCLUSIVE"
                 rows.append({"width":n,"t_count":tc,"family":family,"results":res,"timings":measure({"qcontract_reports":native,"pauli_prop_numeric":numeric},5)})
