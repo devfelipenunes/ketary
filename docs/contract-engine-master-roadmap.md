@@ -116,3 +116,17 @@ M11 Bell-state entanglement certification, M20–M22, M30–M31 and remaining ga
 are not implemented by this patch. M40/M46/M47 remain blocked.
 Any result with a budget/cap exhaustion is inconclusive. The phase-insensitive
 Rust circuit identity must not be used as a strict-phase evidence identity.
+
+
+## Round 19 — planner, reusable components and independent replay
+
+R18 #513 is still under CI; do not promote its partial gates yet. R19 stacks on its exact head 0c3959255560bff221a703924b4e2f273e64cfb5 so the preceding validation remains isolated.
+- M20/M21: immutable Clifford component registry, recheck actual circuit bytes and both source guarantees before multiplying Hermitian conjugation identities; reject anticommuting products and changed snapshots.
+- M22: native planner returns attempted route, status, circuit/obligation and a mathematical witness when definitive failure is found.
+- M24: separate exact Clifford implementation using ordered X/Z generator multiplication with powers of i. It does not call Rust propagation. Still shares the documented gate alphabet and Python admission helpers; no complete serialized-evidence verifier or non-Clifford certificate.
+- M30/M31: deterministic native direct/cone/component planner for signed Pauli transitions. Factoring uses disconnected interaction components and exact local Rust propagation. Local non-Pauli images remain inconclusive.
+- M32: disjoint conservative logical budget reservations, including estimated merge/witness work. Not a time, memory or full admission cap.
+- M35/M37/M39: held-out seeds, matrix/witness parity, invalid substitution and budget tests; raw timings are shared-runner pilot measurements only.
+- Three matrix CI jobs: independent, planner, library. Status remains experimental until exact-head results are inspected.
+
+R19 does not implement M11 entanglement, M33/M34 native allocator/SIMD experiments, M38 external full comparison, M43/M44 distribution/security, or M49/M50 public integration. External M40/M46/M47 still blocked. No production change or publication.
