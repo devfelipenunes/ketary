@@ -294,3 +294,20 @@ on cap. C05 coherent bit-flip repetition-code recovery with syndrome and
 specified X errors, not arbitrary noise or fault tolerance. C06 five jobs,
 matched timings only within scopes; C07 retain public API and release gates.
 No new dependency, public API, simulator, publication or merge.
+
+## Round 16 — specialized bounded action and sequential contracts
+
+Explicit monomial action route recognizes only the exact tested 15-gate CCX
+macro and primitive X/CX/S/Sdg/Z/T/Tdg. Compare exact basis permutation
+and phase modulo eight on each connected component of the union of both
+circuits, up to 12 free wires per component; same output and constant phase
+difference per component imply global coherent action up to one common phase.
+Record a mismatched basis output or two inputs with different relative phase.
+Unsupported patterns cannot pass via this route. Explicit planner may use
+projected action with reserved budget. No arbitrary simulator or new public IR.
+Work charge is conservative logical accounting, not a wall-time/RSS bound.
+Composition benchmark isolates capability improvement when each local proof
+fits but the full circuit exceeds its T cap. Sequential numerical effect
+contracts propagate adjoints backward and replay density forward without
+forming products of all Kraus branches; tolerance and diagnostic guard remain
+numerical. No new dependencies or public API; no release approval.

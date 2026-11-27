@@ -4,6 +4,7 @@ use pyo3::exceptions::{PyValueError, PyRuntimeError};
 use pyo3::types::{PyBytes,PyInt,PyAny};
 use std::collections::BTreeMap;
 mod core;
+mod monomial;
 type Signed=(u64,u64,u8);
 type Witness=(String,Vec<i8>,(i128,i128),u64);
 type Prop=(Vec<(u64,u64,i128,i128)>,u64,u64,u64);
@@ -213,6 +214,11 @@ impl PackedCircuit {
    }
    Ok((0,obs.len(),None,max_work-remaining))
   })
+ }
+ fn monomial_action(&self,py:Python<'_>,other:PyRef<'_,PackedCircuit>,mask:u64,max_work:u64)->PyResult<monomial::Outcome>{
+  if self.width!=other.width||mask==0||(self.width<64&&mask>>self.width!=0)||self.gates.len()+other.gates.len()>300_000||max_work==0||max_work>2_000_000{return Err(err(1))}
+  let b:&PackedCircuit=&other;
+  Ok(py.detach(||monomial::verify(&self.gates,&b.gates,self.width,mask,max_work)))
  }
 }
 #[pymodule]
