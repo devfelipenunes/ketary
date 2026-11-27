@@ -100,3 +100,22 @@ and a separate full-report performance/RSS job. Compare Qiskit Clifford
 routes with identical report scope and witnesses. Linux high-water RSS
 is whole subprocess including setup, not allocation peak; no guarantee.
 Still no public API, runtime changes, new dependencies or merge.
+
+## Round 5 — parallel research
+
+Eight independent Linux jobs A–H on one exact head: joint clean ancilla
+stabilizer subgroup and bounded numeric SVD; immutable Clifford sessions
+with aggregate budget and 64-lane chunks; adversarial sparse exact-ring
+tests; exact chains up to 100; bounded versioned evidence replay; stronger
+Qiskit PauliList and Stim 1.15.0 comparison (research-only dependency);
+externally sampled live RSS with ready/go/done handshake; four executable
+algorithm examples. These are research modules, not new public APIs.
+Session trust is internal and limited to frozen Prepared and immutable
+tuples/bytes; no mutable-circuit cache. A joint ancilla space can be
+preserved even when individual generators change (e.g. ancilla swap).
+Exact zero leakage and numerical tolerance are separate specifications.
+Evidence hashes do not authenticate. Re-evaluate against independent
+input/spec, not merely a checksum. No assumption that composition is
+faster; compare direct verification. No timing thresholds. Stim comparison
+checks same transformed Paulis rather than sampling or entire circuits.
+QFT/adder examples use research oracles, not new public contracts.

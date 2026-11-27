@@ -107,13 +107,16 @@ class Native:
 
 def verify(pre,obligations,*,native=None,method="auto",max_terms=4096,max_work=2_000_000):
     cid=admission(pre)
+    return _verify_admitted(pre,cid,any(g[0]>=6 for g in pre.gates),obligations,native=native,method=method,max_terms=max_terms,max_work=max_work)
+
+def _verify_admitted(pre,cid,has_t,obligations,*,native=None,method="auto",max_terms=4096,max_work=2_000_000):
+    # Private research helper; only call after admission of immutable Prepared.
     if type(obligations) not in (tuple,list) or not 1<=len(obligations)<=64:raise ValueError("obligation count")
     if method not in ("auto","scalar","batch","python","sparse"):raise ValueError("method")
     if type(max_terms) is not int or not 1<=max_terms<=4096 or type(max_work) is not int or not 1<=max_work<=2_000_000:raise ValueError("budget")
     for ob in obligations:
         if type(ob) is not Obligation:raise TypeError("obligation")
         valid_pauli(ob.pre,pre.width);valid_pauli(ob.post,pre.width)
-    has_t=any(g[0]>=6 for g in pre.gates)
     if method=="auto":
         method="sparse" if has_t else ("batch" if native is not None and len(obligations)>=8 else "scalar" if native is not None else "python")
     def report(ob,status,reason,w=None):
