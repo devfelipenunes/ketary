@@ -97,6 +97,8 @@ def main():
         run([python,"-I",LAB/"alpha"/"smoke.py"],cwd=OUT,stdout=f,env=env)
     with (OUT/"benchmark-api.json").open("w",encoding="utf-8") as f:
         run([python,"-I",LAB/"alpha"/"benchmark_api.py"],cwd=OUT,stdout=f,env=env)
+    with (OUT/"dispatch-parity.json").open("w",encoding="utf-8") as f:
+        run([python,"-I",LAB/"alpha"/"dispatch_parity.py"],cwd=OUT,stdout=f,env=env)
     # Static checking in same isolated environment after runtime measurements.
     run([python,"-m","pip","install","mypy==1.15.0"],env=env)
     positive=OUT/"typing_positive.py"
