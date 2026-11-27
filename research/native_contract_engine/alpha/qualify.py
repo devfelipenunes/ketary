@@ -72,8 +72,15 @@ def main():
     crate=OUT/"native-stage"
     with (OUT/"native-stage.json").open("w",encoding="utf-8") as f:
         run([sys.executable,LAB/"alpha"/"stage_native.py",crate],stdout=f)
-    run([sys.executable,"-m","maturin","build","--release","--locked","--interpreter",sys.executable,"--compatibility","off","--out",native],cwd=crate,env=env)
+    # Linux must pass Maturin's manylinux policy audit; never just rename
+    # a native wheel. Use the audited tag and independently check ELF.
+    compatibility="manylinux_2_34" if sys.platform=="linux" else "off"
+    run([sys.executable,"-m","maturin","build","--release","--locked","--interpreter",sys.executable,"--compatibility",compatibility,"--out",native],cwd=crate,env=env)
     nw,=native.glob("*.whl")
+    if sys.platform=="linux":
+        assert "manylinux_2_34_x86_64" in nw.name
+        with (OUT/"linux-abi.json").open("w",encoding="utf-8") as f:
+            run([sys.executable,LAB/"alpha"/"linux_abi.py",nw],stdout=f)
     with (OUT/"native-audit.json").open("w",encoding="utf-8") as f:
         run([sys.executable,LAB/"wheel_audit10.py",native],stdout=f)
     staged=OUT/"staged"
