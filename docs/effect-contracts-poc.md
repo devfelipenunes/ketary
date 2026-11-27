@@ -43,7 +43,7 @@ review, no release.
 
 Five-wire Grover search with a parity-and-conjunction oracle, two marked
 data states (13 and 14), one workspace wire, and a separate diffuser.
-Ten correct/defective variants distinguish workspace restoration,
+Twelve correct/defective variants distinguish workspace restoration,
 logical action on the clean-workspace subspace (up to common phase),
 and joint marked-state/clean-workspace probability. Two distinct oracle
 implementations and a global phase control are accepted. An independent
@@ -55,3 +55,10 @@ logical restriction residual are different numerical criteria; only
 classification of these well-separated examples is compared.
 No public API change. This is a small ideal simulation, not proof of
 scalable verification or actual user productivity.
+
+Two additional adversarial variants swap unmarked states 0 and 1 after
+an otherwise valid oracle or diffuser. The search still succeeds with
+probability .9453125 from uniform input, but the relevant logical action
+contract fails. The distinction matters for reusable subroutine semantics;
+these are not algorithm-outcome failures. No claim of detecting more bugs
+than equivalent handwritten subroutine tests.

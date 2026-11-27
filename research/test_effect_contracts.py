@@ -102,6 +102,15 @@ class GroverComposition(unittest.TestCase):
         s = np.ones(16) / 4
         dref = 2 * np.outer(s, s) - np.eye(16)
 
+        def swap_unmarked(c):
+            # Swap basis states 0 and 1, both unmarked. Uniform search is unchanged.
+            for wire in (1, 2, 3):
+                c.x(wire)
+            c.mcx([1, 2, 3], 0)
+            for wire in (3, 2, 1):
+                c.x(wire)
+            return c
+
         def oracle(kind):
             c = q.Circuit(5)
             if kind == "direct":
@@ -124,6 +133,8 @@ class GroverComposition(unittest.TestCase):
                 c.cx(1, 4).cx(0, 4)
             if kind == "phase":
                 c.x(0).z(0).x(0).z(0)
+            if kind == "swap_unmarked":
+                swap_unmarked(c)
             return c
 
         def diffuser(kind):
@@ -137,6 +148,8 @@ class GroverComposition(unittest.TestCase):
                 c.x(w).h(w)
             if kind == "wrong":
                 c.z(0)
+            if kind == "swap_unmarked":
+                swap_unmarked(c)
             return c
 
         def logical_ok(u, ref):
@@ -157,6 +170,8 @@ class GroverComposition(unittest.TestCase):
             ("good","identity",2,(True,True,True,False,False),.125),
             ("good","good",1,(True,True,True,True,False),.78125),
             ("good","good",3,(True,True,True,True,False),.330078125),
+            ("swap_unmarked","good",2,(True,False,True,True,True),.9453125),
+            ("good","swap_unmarked",2,(True,True,True,False,True),.9453125),
         ]
         for ok, dk, k, expected, prob in rows:
             with self.subTest(oracle=ok, diffuser=dk, iterations=k):
