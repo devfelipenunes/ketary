@@ -235,3 +235,39 @@ Four matrix suites exact/external/parallel/dag. No merge or production
 promotion. Explicit SIMD, native allocation accounting, persistent worker
 pool, weighted DD, cut decomposition and physical syndrome extraction
 remain open, as do M40/M46/M47 and public integration gates.
+
+
+## Round 23 — prepared reports, portable evidence and DAG state contracts
+
+R22 exact head 54c723c0ae8f1cf72a1d384561a17fa011cc1173: all four
+specialist jobs passed; overall 20/22 workflows succeeded at inspection
+(SDK and native dependency audit pending). Original four lab.json and
+commit.txt reports inspected. Exact tableau 5001 checks, external 512,
+DAG 110. Prepared single-query medians 0.547–1.033 us vs Stim
+2.017–4.923 us on eight shared-host scenarios. At 64 wires / 4096 gates:
+Rust setup 104.451 us, Stim setup 899.152 us; single 1.033 vs 4.923 us;
+64-query batch 37.586 vs Stim Python loop 231.674 us. Different output
+representations and native batching vs Python loop limit interpretation.
+Native scoped threads lose on most small batches; 64 wires/4096 queries
+1.376065 ms serial vs 1.153330 ms with four threads (pilot). No automatic
+threading recommendation. Direct DAG 20-wire uniform/GHZ/phase live
+nodes 21/59/140, historical arena 462/291/1967, simulation medians
+0.809066/0.455283/3.473005 ms; structured fixtures only.
+
+R23 adds three pending suites:
+- M19/M22/M27/M30: private prepared tableau dispatch with request-bound
+  reports and exact failure witnesses, logical budget admission, fallback
+  to old planner. Does not alter public APIs or enable native concurrency
+  automatically (max 64 contract reports in this adapter).
+- M23/M24/M35: canonical bounded JSON serialization of temporal Pauli
+  certificates, strict integer schema, duplicate rejection, original
+  snapshot binding and independent local replay. Hash is not signature;
+  forged digest with altered mathematical obligations is tested.
+- M02/M11/M29/M37: exact Pauli expectation via memoized DAG contraction
+  without materializing amplitudes; normalized zero-input pure-state
+  eigencontracts. Not arbitrary state or operator equivalence, no weighted
+  diagrams. Test dense oracle agreement and GHZ through 20 wires.
+
+No merge/public release. Physical recovery, weighted DD, native memory,
+SIMD, scalable cut decomposition, independent external review and
+dedicated-host qualification remain open.
