@@ -1,0 +1,34 @@
+name: Research native dependency audit
+on:
+  pull_request:
+    paths:
+      - 'research/native_contract_engine/pyo3/**'
+      - '.github/workflows/native-dependency-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Audit pinned research dependencies
+        run: |
+          cd research/native_contract_engine/pyo3
+          cp Cargo.lock ../../../cargo-resolved.lock
+          cd ../../..
+          git rev-parse HEAD > commit.txt
+          cargo install cargo-audit --version 0.23.0 --locked
+          cargo audit --file cargo-resolved.lock --json > cargo-audit.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: native-dependency-audit
+          path: |
+            cargo-resolved.lock
+            cargo-audit.json
+            commit.txt
