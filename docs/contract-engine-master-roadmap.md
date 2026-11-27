@@ -271,3 +271,37 @@ R23 adds three pending suites:
 No merge/public release. Physical recovery, weighted DD, native memory,
 SIMD, scalable cut decomposition, independent external review and
 dedicated-host qualification remain open.
+
+
+## Round 24 — full-contract latency and unified routing
+
+R22 and R23 each completed 22/22 workflows successfully. R23 specialized
+matrix 3/3 passed. R24 prototypes are intentionally private.
+
+- M22/M27/M33/M45: compact two-Pauli counterexample synthesis in Rust,
+  using bit masks for local axes and negative eigenvalues. One native
+  call returns bounded batches of at most 64 contracts. Deterministic
+  legacy witness parity is tested exhaustively at 2 wires, randomized
+  through 64 wires, and at several budget boundaries. Expansion remains
+  available for existing Python witness consumers.
+- M30/M32/M24: unified transition routing to prepared tableau, existing
+  exact planner, then independently checked temporal certificates.
+  Disjoint budgets for attempts and verification; an unsuccessful proof
+  search is INCONCLUSIVE, never FAIL. Certificate fallback proves PASS
+  only. No automatic public dispatch.
+- M33/M34/M39: component timing for raw images, native compact contracts,
+  compact reports, expanded reports and old reports at 0/50/100 percent
+  failures. Exact retained tableau payload from Rust size/capacity;
+  Python tracemalloc peak separately. No claim to measure all native
+  transient allocations or allocator metadata; timings overlap and
+  cannot be summed as a decomposition.
+- M29/M37: opt-in wide unweighted exact DAG structured cases 30/40/50/64
+  wires, uniform/GHZ/T-phase; unchanged node/work caps. No promise of
+  arbitrary circuit scalability.
+
+Four R24 matrix jobs: witnesses, routing, profile, wide. Results pending
+CI. Weighted DD, explicit SIMD, compact portable certificates, actual
+native allocator instrumentation, spatial cuts, physical syndrome
+extraction and arbitrary-rotation algorithm contracts remain pending.
+External hardware/review/user-study gates remain blocked. No release
+or merge.
