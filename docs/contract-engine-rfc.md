@@ -189,3 +189,24 @@ CPTP adjoints and independently replayed forward witnesses; separate
 from unitary contracts. Algorithm components and QCEC up-to-phase full
 equivalence use distinct scopes. Dedicated host protocol remains
 docs/release-validation.md / #100: shared CI is not controlled evidence.
+
+## Round 9: compiled Python extension, isolated research distribution
+
+Use a separate research Cargo crate and Maturin build. CPython 3.12 only;
+PyO3 0.27.2 and Maturin 1.9.6 pinned as direct dependencies. Existing
+setuptools distribution and public facade remain unchanged. No publication.
+Compiled frozen PackedCircuit owns its bytes and validates bounds, native
+calls detach the GIL only over Rust-owned data. No raw-pointer C interface
+in the new adapter. Integer coefficient bound from round 8 extends to
+witness conditioning by at most 4097 terms, still within i128. Native
+transition returns a deterministic product-state witness rather than
+transferring every sparse coefficient to Python. Python research adapter
+validates exact input types and aggregate work budget, preserves semantic
+report fields, assigns explicit binary v3 identity, and keeps optional
+cone optimization separate. No public Contract or Result changes.
+Cross-platform runner-local wheel builds and installed-wheel smoke;
+Linux matched complete contracts with exact witness parity, dense
+reference, budget parity, GHZ fixtures and explicit thread tests.
+Cargo.lock generated and captured in artifact on first build; commit
+reviewed lock before release, audit licenses/SBOM and reproducibility.
+Wheel portability beyond runner OS is not claimed; no upload to registry.

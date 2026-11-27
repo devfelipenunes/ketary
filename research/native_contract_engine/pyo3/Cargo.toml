@@ -1,0 +1,18 @@
+[package]
+name = "ketary-native-research"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[lib]
+name = "ketary_native_research"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "=0.27.2", features = ["extension-module"] }
+
+[profile.release]
+overflow-checks = true
+lto = "thin"
+codegen-units = 1
