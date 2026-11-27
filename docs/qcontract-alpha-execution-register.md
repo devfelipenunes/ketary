@@ -171,3 +171,28 @@ No status inflation: 14 evidenced, 83 partial/candidate, 21 pending,
 3 external blockers remain the conservative register classification.
 A3 post-merge qualification, all runtime API tests, broad CI cleanup,
 controlled hardware and external user studies are not closed.
+
+
+## Frozen 0.1.0a3 candidate — final package evidence
+
+Exact head `bc16ff0b74d7766d483a5bccd7258d998826c8b3`, run 46084014830:
+3/3 platforms passed. Original artifacts 15238856035 (Windows), 15238562005
+(Linux), 15237893203 (macOS). Independent wheel SHA-256 and every RECORD
+entry checked: six wheels, 144 RECORD rows including RECORD self-entries.
+Per host: 55 smoke, 8978 dispatch parity, 1040 comparison, 2195 contract-first
+checks; 12268 executions, 36804 total. MyPy positive and expected negative
+cases passed. Python wheel SHA-256 identical on all three:
+`3118ff1ad3a8ab45c87ba321a34efd667628fdb86ec992e58ddc97485273bdf4`.
+Comparative run 46084014678 passed 10/10 jobs. Mixed-batch correction validated.
+Native wheel hashes differ per target as expected. Linux tested glibc 2.35,
+macOS 15 ARM64, Windows AMD64, CPython 3.12. No older OS/other ABI guarantee.
+
+Scope frozen: no expansion of gate alphabet, contract types, research corpora,
+architecture or hardware support. Existing historical tests remain unchanged.
+At documentation preparation, 31/33 workflows passed, 1 legacy SDK workflow
+was running (benchmark job), 1 R30 historical macOS-14 job cancelled. The
+separate native-dependency workflow is not triggered by this candidate;
+comparison against qualified A4 confirms no pyo3, native staging or audit
+workflow source changes, and current SDK dependency-review passed.
+Do not imply a new native dependency audit executed at this head.
+No public tag, publication or general formal verification claim.
