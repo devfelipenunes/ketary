@@ -43,3 +43,42 @@ impl Tableau {
   })
  }
 }
+
+
+// Opt-in Four Russians-style 4-bit lookup, with the same ordered Pauli
+// multiplication as the baseline. At most 32*16 rows for 64 qubits.
+pub(crate) struct Lookup {n:u32,groups:Vec<[Row;16]>}
+impl Lookup {
+ pub(crate) fn build(t:&Tableau)->Self{
+  let mut groups=Vec::new();
+  let id=Row{x:0,z:0,k:0};
+  for rows in [&t.x,&t.z]{
+   for part in rows.chunks(4){
+    let mut g=[id;16];
+    for (mask,out) in g.iter_mut().enumerate().skip(1){
+     let mut r=id;
+     for (i,&row) in part.iter().enumerate(){if mask&(1<<i)!=0{r=r.mul(row);}}
+     *out=r;
+    }
+    groups.push(g);
+   }
+  }
+  Self{n:t.n,groups}
+ }
+ pub(crate) fn storage_bytes(&self)->usize{self.groups.capacity()*std::mem::size_of::<[Row;16]>()}
+ pub(crate) fn width(&self)->u32{self.n}
+ pub(crate) fn image(&self,p:Signed)->Signed{
+  let mut r=Row{x:0,z:0,k:(((p.0&p.1).count_ones()+2*p.2 as u32)&3) as u8};
+  let chunks=self.n.div_ceil(4) as usize;
+  for (offset,mut mask) in [(0,p.0),(chunks,p.1)]{
+   while mask!=0{
+    let i=mask.trailing_zeros() as usize/4;
+    let v=((mask>>(4*i))&15) as usize;
+    r=r.mul(self.groups[offset+i][v]);mask&=!(15u64<<(4*i));
+   }
+  }
+  let k=(r.k+4-((r.x&r.z).count_ones()&3) as u8)&3;
+  debug_assert!(k==0||k==2);
+  (r.x,r.z,k>>1)
+ }
+}
