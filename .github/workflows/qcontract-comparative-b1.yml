@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [clifford,state,near-clifford]
+        suite: [clifford,state,near-clifford,state-batch,design]
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     env:
@@ -43,7 +43,14 @@ jobs:
           lscpu > b1/host.txt
           b1/venv/bin/python -m pip freeze > b1/environment.txt
       - name: Run matched benchmark
-        run: b1/venv/bin/python -I benchmarks/qcontract/compare_b1.py "${{ matrix.suite }}" > b1/result.json
+        run: |
+          case "${{ matrix.suite }}" in
+            state-batch) b1/venv/bin/python -I benchmarks/qcontract/state_batch_b2.py > b1/result.json ;;
+            design)
+              b1/venv/bin/python -I benchmarks/qcontract/contract_language_lab.py > b1/result.json
+              b1/venv/bin/python -I benchmarks/qcontract/ci_inventory.py > b1/ci-inventory.json ;;
+            *) b1/venv/bin/python -I benchmarks/qcontract/compare_b1.py "${{ matrix.suite }}" > b1/result.json ;;
+          esac
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
