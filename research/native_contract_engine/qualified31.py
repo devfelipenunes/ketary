@@ -81,6 +81,10 @@ class Engine:
     def verify(self,items,*,max_work=2_000_000):
         bounds(4096,max_work)
         if type(items) is not tuple or not 1<=len(items)<=64:raise ValueError("items")
+        # Base-only requests have identical admission, identity and
+        # reservations in R30. Delegate once, without duplicate hashes.
+        if all(type(x) not in (SumTransition,NoiseAfter,Correctable) for x in items):
+            return self.base.verify(items,max_work=max_work)
         s=self.base.prepared.session;n=s.width;legacy=Legacy(s)
         keys=tuple(validate(s,x) for x in items)
         q=max_work//len(items);out=[]
