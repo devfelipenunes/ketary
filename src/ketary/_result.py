@@ -346,7 +346,10 @@ class _Math:
             return {label:float(abs(complex(data[int(label,2)]))**2/norm) for label in labels}
         if self._r._data.size>cap:
             raise ResourceLimit("probability dictionary exceeds outcome limit")
-        return {format(i,f"0{self._r._n}b"):float(p) for i,p in enumerate(np.abs(self._r._data)**2/self._r._norm_sq)}
+        p=np.abs(self._r._data)
+        np.square(p,out=p)
+        p/=self._r._norm_sq
+        return {format(i,f"0{self._r._n}b"):float(v) for i,v in enumerate(p)}
 
     def marginal_probabilities(self,wires,*,max_outcomes=65536):
         """Z-basis probabilities; output labels follow the given wire order.
@@ -360,7 +363,10 @@ class _Math:
             raise ValueError("invalid marginal wires")
         if (1<<len(wires))>_int(max_outcomes,1):
             raise ResourceLimit("marginal dictionary exceeds outcome limit")
-        p=(np.abs(self._r._data)**2/self._r._norm_sq).reshape((2,)*n)
+        p=np.abs(self._r._data)
+        np.square(p,out=p)
+        p/=self._r._norm_sq
+        p=p.reshape((2,)*n)
         axes=[n-1-i for i in wires]
         rest=[i for i in range(n) if i not in axes]
         marginal=p.transpose(axes+rest).reshape(1<<len(wires),-1).sum(axis=1)
@@ -649,9 +655,17 @@ class _Checks:
             raise TypeError("expected Result")
         if target.num_qubits!=self._r.num_qubits:
             raise ValueError("dimension mismatch")
-        p=np.abs(self._r._data)**2
-        q=np.abs(target._data)**2
-        distance=float(.5*np.sum(np.abs(p/p.sum()-q/q.sum())))
+        p=np.abs(self._r._data)
+        np.square(p,out=p)
+        q=np.abs(target._data)
+        np.square(q,out=q)
+        # Both arrays are fresh real buffers; retain the original
+        # normalization/reduction order without state-sized temporaries.
+        p/=p.sum()
+        q/=q.sum()
+        p-=q
+        np.abs(p,out=p)
+        distance=float(.5*np.sum(p))
         return CheckResult("PASS" if distance<=t else "FAIL",distance,0,t,"total variation distance")
 
     def expectation(self,pauli,expected,*,atol=1e-9):
@@ -670,5 +684,9 @@ class _Checks:
 
     def state(self,target,*,ignore_global_phase=True,atol=1e-9):
         """Maximum amplitude residual after optional phase alignment."""
+        # Reject invalid controls before converting a caller-owned target.
+        t=_tol(atol)
+        if type(ignore_global_phase) is not bool:
+            raise ValueError("ignore_global_phase must be bool")
         other=target if isinstance(target,Result) else Result(target)
-        return _residual(self._r._data,other._data,ignore_global_phase,atol)
+        return _residual(self._r._data,other._data,ignore_global_phase,t)
