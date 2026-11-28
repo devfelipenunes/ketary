@@ -77,3 +77,33 @@ def sufficiency():
     assert classify(("FAIL", "INCONCLUSIVE")) == "refuted"
     assert classify(("PASS", "UNSUPPORTED")) == "unresolved"
     return {"rows": rows, "counts": counts}
+
+
+def minimality():
+    x = zero_input("X correlation", stabilizes="XX")
+    z = zero_input("Z correlation", stabilizes="ZZ")
+    # X and Z are necessary against these controls. An exact duplicate
+    # with a different human-readable name is only diagnostic metadata.
+    duplicate = zero_input("Second label for X", stabilizes="XX")
+    cases = (("phase", bell((("z", 0),))),
+             ("bit", bell((("x", 0),))),
+             ("both", bell((("x", 0), ("z", 0)))))
+    rows = []
+    for name, c in cases:
+        p = prepare(c)
+        original = Plan((x, z)).verify(p)
+        extended = Plan((x, z, duplicate)).verify(p)
+        assert statuses(extended) == statuses(original) + statuses(original)[:1]
+        assert extended.results[0][1].obligation == extended.results[2][1].obligation
+        a = Plan((x,)).verify(p)
+        b = Plan((z,)).verify(p)
+        assert statuses(a) == statuses(original)[:1]
+        assert statuses(b) == statuses(original)[1:]
+        rows.append({"case": name, "both": statuses(original),
+                     "x_only": statuses(a), "z_only": statuses(b),
+                     "duplicate": statuses(extended)})
+    counts = {key: sum("FAIL" in r[key] for r in rows)
+              for key in ("both", "x_only", "z_only", "duplicate")}
+    assert counts == {"both": 3, "x_only": 2, "z_only": 2, "duplicate": 3}
+    return {"rows": rows, "detected": counts,
+            "scope": "three seeded defects; not general minimality"}
