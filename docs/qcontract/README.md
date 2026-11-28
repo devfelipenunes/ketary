@@ -16,3 +16,10 @@ integration. It checks restricted ideal-circuit properties, not the
 physical correctness of an actual device.
 
 See the [N-front roadmap](n-front-roadmap.md) for evidence gates and ongoing consolidation.
+
+## Contract-first consolidation
+
+Begin with the [design canvas and patterns](contract-design.md), then the
+[scope review lab](scope-review-lab.md). Follow the [ten-cycle roadmap](ten-cycle-roadmap.md)
+and the [candidate method evaluation](method-evaluation.md). The methodology
+is a practical workflow, not an externally demonstrated productivity result.

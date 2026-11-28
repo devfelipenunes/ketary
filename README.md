@@ -19,6 +19,15 @@ result.test.expectation(XX, 1).require()
 print(result.math.probabilities())
 ```
 
+## QContract — quantum contract-first development
+
+The experimental QContract layer keeps Qiskit as the source circuit model.
+Design a mathematical guarantee and its admitted scope before writing gates,
+then verify, challenge the contract with defects and allowed variations, and
+retain evidence. Start with the [QContract guide](docs/qcontract/README.md)
+and [contract design canvas](docs/qcontract/contract-design.md). It is a local
+Alpha candidate; no claim of arbitrary program correctness or hardware guarantees.
+
 ## Build. Understand. Verify.
 
 Build a circuit with fluent gates, analyze an independent snapshot using
