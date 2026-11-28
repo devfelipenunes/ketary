@@ -107,3 +107,34 @@ def minimality():
     assert counts == {"both": 3, "x_only": 2, "z_only": 2, "duplicate": 3}
     return {"rows": rows, "detected": counts,
             "scope": "three seeded defects; not general minimality"}
+
+
+def composition():
+    # Separate components can pass different local contracts, yet not
+    # establish the intended assembled all-input transformation.
+    h = circuit(1, (("h", 0),))
+    z = circuit(1, (("z", 0),))
+    h_plan = Plan((transition("H maps Z to X", before="Z", after="X"),
+                   transition("H maps X to Z", before="X", after="Z")))
+    z_plan = Plan((invariant("Z preserves Z", observable="Z"),))
+    assert h_plan.verify(prepare(h)).require().passed
+    assert z_plan.verify(prepare(z)).require().passed
+    final = Plan((invariant("Overall Z preserved", observable="Z"),))
+    pz = Pauli("Z").to_matrix()
+    rows = []
+    for name, gates, expected in (
+        ("compatible H H", (("h", 0), ("h", 0)), "PASS"),
+        ("incompatible H Z", (("h", 0), ("z", 0)), "FAIL"),
+        ("compatible Z Z", (("z", 0), ("z", 0)), "PASS"),
+        ("incompatible Z H", (("z", 0), ("h", 0)), "FAIL"),
+    ):
+        c = circuit(1, gates)
+        u = Operator(c).data
+        oracle = "PASS" if np.allclose(u.conj().T @ pz @ u, pz,
+                                       rtol=0, atol=1e-12) else "FAIL"
+        outcome = final.verify(prepare(c))
+        assert statuses(outcome) == (expected,) == (oracle,)
+        rows.append(dict(case=name, expected=expected, oracle=oracle,
+                         observed=statuses(outcome), reports=outcome.explain()))
+    return {"local_checks": 3, "rows": rows,
+            "scope": "final checks, not an assume-guarantee calculus"}
