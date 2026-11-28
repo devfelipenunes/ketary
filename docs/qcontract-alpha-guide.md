@@ -1,4 +1,4 @@
-# QContract Alpha — local candidate guide
+# QContract Alpha 0.1.0a3 — local candidate guide
 
 Provisional name and API. The local distribution is qcontract-alpha-local;
 the Python import is qcontract. Nothing is uploaded to a package registry.
@@ -9,8 +9,40 @@ previous SDK package. CPython 3.12 is the admitted interpreter.
 
 From a clean Python 3.12 virtual environment, install both wheels produced
 by the alpha qualification workflow in a single pip command, allowing
-Qiskit and NumPy dependencies to resolve. Use the exact wheels for your
-platform. No production compatibility or public PyPI availability is
+Qiskit and NumPy dependencies to resolve. Use the exact wheels for your platform, from the same commit. The Python wheel is
+`qcontract_alpha_local-0.1.0a3-py3-none-any.whl`; the native wheel is
+`qcontract_native_alpha_local-0.1.0-cp312-cp312-<platform>.whl`.
+Download the matching qualification archive from [run 46084014830](https://github.com/devfelipenunes/ketary/actions/runs/46084014830) and extract it. The qualified source commit is `bc16ff0b74d7766d483a5bccd7258d998826c8b3`. Compare SHA-256 against the following values and `qualification.json` before installation.
+
+| Artifact | Native wheel filename | SHA-256 |
+|---|---|---|
+| Linux 15238562005 | qcontract_native_alpha_local-0.1.0-cp312-cp312-manylinux_2_34_x86_64.whl | 8a5a2cb18ca2caa4f24ee6f0376cf1351afb94fb99fb1977eae157217c0cd41f |
+| Windows 15238856035 | qcontract_native_alpha_local-0.1.0-cp312-cp312-win_amd64.whl | 4315b7615f1fc09db000b8c4293e2c2f171ce92d08791920fba7844dc330f125 |
+| macOS 15237893203 | qcontract_native_alpha_local-0.1.0-cp312-cp312-macosx_11_0_arm64.whl | 2fec74810ee36ae02e255f558089089b34ac0212ce42b7a8b1a7bfe9b76a0b8b |
+
+The pure Python wheel has SHA-256 `3118ff1ad3a8ab45c87ba321a34efd667628fdb86ec992e58ddc97485273bdf4` on all three targets. From the extracted archive directory, using CPython 3.12:
+
+Linux/macOS:
+```sh
+python3.12 -m venv .venv
+. .venv/bin/activate
+python -m pip install qiskit==2.6.2 python/*.whl native/*.whl
+python -m pip check
+python -c "import qcontract; print(qcontract.__version__)"
+```
+
+Windows (PowerShell):
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\python.exe -m pip install qiskit==2.6.2 python\qcontract_alpha_local-0.1.0a3-py3-none-any.whl native\qcontract_native_alpha_local-0.1.0-cp312-cp312-win_amd64.whl
+.venv\Scripts\python.exe -m pip check
+.venv\Scripts\python.exe -c "import qcontract; print(qcontract.__version__)"
+```
+
+The printed version should be 0.1.0a3. For a strict replication of dependency versions, consult the matching environment.json; the install commands above are a quickstart, not a complete dependency lock.
+
+See [contract-first documentation](qcontract/README.md) for named plans,
+examples, reference and explanations. No production compatibility or public PyPI availability is
 implied.
 
 ## First exact contract
@@ -94,9 +126,9 @@ execution, arbitrary noisy circuits, general formal verification, external
 usability validation, or production readiness is claimed.
 
 
-## Typed API and benchmark evidence (A3)
+## Typed API and benchmark evidence
 
-The local candidate 0.1.0a2 includes a PEP 561 marker and public type
+The local candidate 0.1.0a3 includes a PEP 561 marker and public type
 stub. IDE completion and type checking cover the ten specifications,
 prepared session and Result. Run the isolated qualification workflow
 to see positive and deliberately invalid mypy examples. Runtime
@@ -117,5 +149,14 @@ The comparison uses shared CI hosts, not dedicated CPU performance.
 
 Linux candidate builds now request an audited manylinux_2_34_x86_64 tag,
 with an independent ELF requirements audit and installation on Ubuntu
-22.04. The portable build still needs CI qualification; other Linux
-architectures and CPython versions are not admitted by this matrix.
+22.04. The exact 0.1.0a3 candidate passed isolated installation on Ubuntu 22.04 x86_64
+(glibc 2.35), Windows AMD64 and macOS 15 ARM64 with CPython 3.12.
+The manylinux tag is not evidence of testing every compatible host, and the
+macOS wheel tag is not evidence of testing older macOS releases. Other
+architectures and CPython versions are outside the qualified matrix.
+
+`Plan`, `Named`, `Outcome`, and convenience constructors attach readable names
+to existing exact obligations; they do not expand the mathematical domains.
+`statuses()` omits full reports and evidence. Use `verify()` when diagnostics
+or replay matter. Eligible Clifford state obligations use the same tableau route
+in individual and mixed requests, with equal per-item logical budgets.

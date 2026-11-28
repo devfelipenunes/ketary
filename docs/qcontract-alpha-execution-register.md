@@ -171,3 +171,46 @@ No status inflation: 14 evidenced, 83 partial/candidate, 21 pending,
 3 external blockers remain the conservative register classification.
 A3 post-merge qualification, all runtime API tests, broad CI cleanup,
 controlled hardware and external user studies are not closed.
+
+
+## Frozen 0.1.0a3 candidate — final package evidence
+
+Exact head `bc16ff0b74d7766d483a5bccd7258d998826c8b3`, run 46084014830:
+3/3 platforms passed. Original artifacts 15238856035 (Windows), 15238562005
+(Linux), 15237893203 (macOS). Independent wheel SHA-256 and every RECORD
+entry checked: six wheels, 144 RECORD rows including RECORD self-entries.
+Per host: 55 smoke, 8978 dispatch parity, 1040 comparison, 2195 contract-first
+checks; 12268 executions, 36804 total. MyPy positive and expected negative
+cases passed. Python wheel SHA-256 identical on all three:
+`3118ff1ad3a8ab45c87ba321a34efd667628fdb86ec992e58ddc97485273bdf4`.
+Comparative run 46084014678 passed 10/10 jobs. Mixed-batch correction validated.
+Native wheel hashes differ per target as expected. Linux tested glibc 2.35,
+macOS 15 ARM64, Windows AMD64, CPython 3.12. No older OS/other ABI guarantee.
+
+Scope frozen: no expansion of gate alphabet, contract types, research corpora,
+architecture or hardware support. Existing historical tests remain unchanged.
+At documentation preparation, 31/33 workflows passed, 1 legacy SDK workflow
+was running (benchmark job), 1 R30 historical macOS-14 job cancelled. The
+separate native-dependency workflow is not triggered by this candidate;
+comparison against qualified A4 confirms no pyo3, native staging or audit
+workflow source changes, and current SDK dependency-review passed.
+Do not imply a new native dependency audit executed at this head.
+No public tag, publication or general formal verification claim.
+
+
+## Integrated local Alpha — scope frozen
+
+PR #530 was merged at `b931d5ffae5da0799362fc107c56ca5c3e522c4e`.
+The exact candidate `bc16ff0b74d7766d483a5bccd7258d998826c8b3`
+passed 32/33 workflows; R30 macOS-14 cancelled (not a pass). The
+legacy SDK completed all six jobs, including benchmark and packaging.
+GitHub comparison confirms zero missing commits and zero changed files
+between qualified candidate and integrated main. The available workflow
+lookup does not return a post-merge run for the merge commit; do not
+treat candidate checks or identical tree as a confirmed push CI.
+All runtime and mathematical scope remains frozen. This register is
+historical evidence, not an obligation to implement the deferred research
+before local Alpha use. #258 integration and #35 acceptance retain the
+remaining gates; #507/#510/#460 deferred; #100/#165/#462 external.
+No release tag or registry publication. Documentation correction does
+not change any tested runtime blob.
