@@ -138,3 +138,47 @@ def composition():
                          observed=statuses(outcome), reports=outcome.explain()))
     return {"local_checks": 3, "rows": rows,
             "scope": "final checks, not an assume-guarantee calculus"}
+
+
+def evolution():
+    # Preserve the same independently declared all-input observable
+    # contract across source revisions. Strict equality is separately
+    # reviewed because a common global phase is allowed by the intent.
+    intent = Plan((transition("H maps Z to X", before="Z", after="X"),
+                   transition("H maps X to Z", before="X", after="Z")))
+    reference = circuit(1, (("h", 0),))
+    ref = prepare(reference)
+    matrix = Operator(reference).data
+    rows = []
+    for name, gates, expected in (
+        ("original", (("h", 0),), ("PASS", "PASS", "PASS")),
+        ("HHH rewrite", (("h", 0), ("h", 0), ("h", 0)), ("PASS", "PASS", "PASS")),
+        ("common negative phase", (("h", 0), ("x", 0), ("z", 0),
+                                   ("x", 0), ("z", 0)), ("PASS", "PASS", "FAIL")),
+        ("wrong relative phase", (("h", 0), ("z", 0)), ("FAIL", "PASS", "FAIL")),
+    ):
+        c = circuit(1, gates)
+        p = prepare(c)
+        plan = Plan(intent.obligations + (
+            Named("Optional strict equality", p.equivalent_to(ref, strict=True)),))
+        result = plan.verify(p)
+        u = Operator(c).data
+        px, pz = Pauli("X").to_matrix(), Pauli("Z").to_matrix()
+        oracle = tuple("PASS" if np.allclose(a, b, rtol=0, atol=1e-12) else "FAIL"
+                       for a, b in ((u.conj().T @ px @ u, pz),
+                                    (u.conj().T @ pz @ u, px), (u, matrix)))
+        assert statuses(result) == expected == oracle
+        identities = [r.obligation for _, r in result.results[:2]]
+        if rows:
+            assert identities == rows[0]["intent_obligations"]
+        if name != "original":
+            assert result.results[0][1].snapshots != ref_outcome.results[0][1].snapshots
+        else:
+            ref_outcome = result
+        rows.append(dict(case=name, observed=statuses(result), expected=expected,
+                         oracle=oracle, intent_obligations=identities,
+                         reports=result.explain()))
+    # The strict check is diagnostic, not a release gate for this intent.
+    assert [classify(r["observed"][:2]) for r in rows] == [
+        "accepted", "accepted", "accepted", "refuted"]
+    return {"rows": rows, "scope": "observable intent, common phase allowed"}
