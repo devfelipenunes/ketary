@@ -57,7 +57,11 @@ spec = Plan((
 bell = QuantumCircuit(2)
 bell.h(0)
 bell.cx(0, 1)
-assert spec.verify(prepare(bell)).passed
+prepared = prepare(bell)
+assert spec.verify(prepared).passed
+assert [r.status for _, r in spec.verify(prepared, max_work=1).results] == [
+    "INCONCLUSIVE", "INCONCLUSIVE", "INCONCLUSIVE"
+]
 bell.z(0)
 mutated = spec.verify(prepare(bell))
 assert [result.status for _, result in mutated.results] == ["FAIL", "FAIL", "PASS"]
