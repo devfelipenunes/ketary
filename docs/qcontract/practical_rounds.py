@@ -70,3 +70,53 @@ def algorithm():
                      "oracle": oracle, "reports": result.explain()})
     return {"scope": "ideal zero-input coherent BV; no hardware or query advantage claim",
             "cases": rows}
+
+
+def parity_oracle_plan(secret):
+    """All-input parity oracle: map target Z and each data X."""
+    parity = pauli_on(4, tuple((w, "Z") for w, bit in enumerate(secret) if bit)
+                      + ((ANCILLA, "Z"),))
+    target_z = pauli_on(4, ((ANCILLA, "Z"),))
+    claims = [transition("Target Z parity", before=parity, after=target_z)]
+    for w, bit in enumerate(secret):
+        data_x = pauli_on(4, ((w, "X"),))
+        support = ((w, "X"), (ANCILLA, "X")) if bit else ((w, "X"),)
+        claims.append(transition(f"Data X {w}", before=pauli_on(4, support),
+                                 after=data_x))
+    return Plan(tuple(claims))
+
+
+def oracle_circuit(edges):
+    c = QuantumCircuit(4)
+    for w in edges:
+        c.cx(w, ANCILLA)
+    return c
+
+
+def modularity():
+    module = parity_oracle_plan(SECRET)
+    # Independently specified Pauli labels, separate from the mask authoring.
+    pairs = (("ZZIZ", "ZIII"), ("XIIX", "IIIX"),
+             ("IIXI", "IIXI"), ("XXII", "IXII"))
+    cases = (("oracle", (0, 2), ("PASS",)*4),
+             ("missing edge", (0,), ("FAIL", "PASS", "PASS", "FAIL")),
+             ("extra edge", (0, 1, 2), ("FAIL", "PASS", "FAIL", "PASS")))
+    rows = []
+    for name, edges, expected in cases:
+        c = oracle_circuit(edges)
+        p = prepare(c)
+        outcome = module.verify(p)
+        u = Operator(c).data
+        oracle = tuple("PASS" if np.allclose(
+            u.conj().T @ MatrixPauli(b).to_matrix() @ u,
+            MatrixPauli(a).to_matrix(), rtol=0, atol=1e-12) else "FAIL"
+            for a, b in pairs)
+        assert verdicts(outcome) == expected == oracle, (name, verdicts(outcome), oracle)
+        rows.append({"case": name, "snapshot": p.snapshot_id,
+                     "expected": expected, "reports": outcome.explain()})
+    # The oracle's local correctness cannot justify the whole algorithm.
+    local = module.verify(prepare(oracle_circuit((0, 2))))
+    final = output_plan(SECRET).verify(prepare(bv((0, 2), cleanup=False)))
+    assert local.passed and verdicts(final) == ("PASS", "PASS", "PASS", "FAIL")
+    return {"module_scope": "four selected all-input observables; not full unitary",
+            "cases": rows, "missing_cleanup_final": final.explain()}
