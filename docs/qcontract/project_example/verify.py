@@ -112,3 +112,42 @@ def architecture():
     assert len(rejected) == 3
     return {"accepted": accepted, "rejected": rejected,
             "boundary": "trusted local fixture; no untrusted-code sandbox"}
+
+
+def ergonomics():
+    # Compare three equivalent authoring forms, not subjective UX scores.
+    named = REQ["compute_claim"]().obligations[0]
+    raw = Named(named.name, Contract(requires=Pauli("ZZ"), ensures=Pauli("ZI")))
+    indexed = transition(named.name, before=pauli_on(2, ((0, "Z"), (1, "Z"))),
+                         after=pauli_on(2, ((1, "Z"),)))
+    assert named == raw == indexed
+    rows = []
+    for name, candidate, expected in (
+        ("compute", IMPL["compute"](), "PASS"),
+        ("identity", QuantumCircuit(2), "FAIL"),
+    ):
+        snapshot = prepare(candidate)
+        for budget in (1, 2_000_000):
+            outcomes = [Plan((claim,)).verify(snapshot, max_work=budget)
+                        for claim in (named, raw, indexed)]
+            want = "INCONCLUSIVE" if budget == 1 else expected
+            assert all(statuses(o) == (want,) for o in outcomes)
+            assert outcomes[0].explain() == outcomes[1].explain() == outcomes[2].explain()
+            rows.append({"case": name, "budget": budget, "reports": outcomes[0].explain()})
+    return {"comparisons": rows,
+            "decision": "Use the simplest readable syntax; no productivity claim."}
+
+
+def main():
+    assert sys.flags.isolated
+    assert qcontract.__version__ == "0.1.0a3"
+    assert pathlib.Path(qcontract.__file__).resolve().is_relative_to(
+        pathlib.Path(sys.prefix).resolve())
+    results = {"R16_expressivity": weighted(), "R17_modules": modular(),
+               "R18_architecture": architecture(), "R19_ergonomics": ergonomics()}
+    print(json.dumps({"scope": "bounded practical project example",
+                      "results": results}, indent=2, allow_nan=False))
+
+
+if __name__ == "__main__":
+    main()
