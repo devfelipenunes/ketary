@@ -73,8 +73,9 @@ equivalence would overconstrain the intended specification.
 | Workspace Z | PASS | PASS | FAIL |
 
 These are independently reasoned expected outcomes, not measured
-candidate results. The executable follow-up must qualify this matrix
-against the installed Alpha. The existing mutation examples in
+candidate results. The [executable design review](design_examples.py)
+checks these and three additional controls against the installed Alpha
+and a small independent numerical matrix oracle during qualification. The existing mutation examples in
 testing.md use a different explicit requirement (whole-register
 identity); do not mix the acceptance criteria.
 
