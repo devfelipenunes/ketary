@@ -187,14 +187,19 @@ class Named:
         if type(self.name) is not str or not 1<=len(self.name)<=96 or self.name!=self.name.strip() or not self.name.isprintable():raise ValueError("obligation name")
         if type(self.specification) not in (Transition,StateEigen,CleanInput,RelativeAction,Equivalent,Separable,ZBranch,SumTransition,NoiseAfter,Correctable):raise TypeError("explicit contract specification")
 
-def transition(name:str,*,before:str,after:str)->Named:
+def _observable(value:str|Signed)->Signed:
+    # Accept explicit wire masks without discarding or reinterpreting bits.
+    # Check the actual prepared width again during query admission.
+    return Pauli(value) if type(value) is str else _validate_pauli(64,value)
+
+def transition(name:str,*,before:str|Signed,after:str|Signed)->Named:
     """All-input observable equality U† after U = before."""
-    return Named(name,Contract(requires=Pauli(before),ensures=Pauli(after)))
-def invariant(name:str,*,observable:str)->Named:
+    return Named(name,Contract(requires=_observable(before),ensures=_observable(after)))
+def invariant(name:str,*,observable:str|Signed)->Named:
     return transition(name,before=observable,after=observable)
-def zero_input(name:str,*,stabilizes:str)->Named:
+def zero_input(name:str,*,stabilizes:str|Signed)->Named:
     """Signed Pauli stabilizes U|0...0>; not an all-input invariant."""
-    return Named(name,StateEigen(Pauli(stabilizes)))
+    return Named(name,StateEigen(_observable(stabilizes)))
 def clean_ancillas(name:str,*,wires:tuple[int,...])->Named:
     return Named(name,CleanInput(wires))
 
@@ -214,7 +219,8 @@ class Outcome:
                   "INCONCLUSIVE":"No proof or refutation within admitted resources","UNSUPPORTED":"Outside supported contract domain"}
         return tuple({"name":name,"status":r.status,"scope":r.domain,"meaning":meanings[r.status],"route":r.route,
                       "snapshot_ids":r.snapshots,"obligation_id":r.obligation,"has_witness":r.witness is not None,
-                      "expectation":r.expectation} for name,r in self.results)
+                      "expectation":r.expectation,"reserved_work":r.reserved,
+                      "has_evidence":r.evidence is not None} for name,r in self.results)
 
 @dataclass(frozen=True)
 class Plan:
