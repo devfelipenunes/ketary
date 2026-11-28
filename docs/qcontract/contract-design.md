@@ -55,11 +55,17 @@ correctness-by-construction calculus, or claim of scientific priority.
 | Check finite Pauli noise | NoiseAfter | Not arbitrary device noise |
 | Check a finite error set | Correctable | Not hardware fault tolerance |
 
+See [pattern review cards and anti-patterns](pattern-review.md) for a
+copyable design record and scope-specific controls.
+
 ## Worked design review: clean workspace versus logical identity
 
 Intent A: return workspace wire 1 to zero for arbitrary logical wire 0.
 Intent B: leave logical wire 0 unchanged, up to a common phase on
-the admitted clean-input subspace. These are independent requirements.
+the admitted clean-input subspace, with the workspace restored as in the
+reference. These are distinct requirements, but in this example the full
+relative-action predicate B implies A; A alone does not imply B. Keep
+A as a separate diagnostic, not as evidence of logical independence.
 A single Z on the logical wire satisfies A, but violates B. A Z on
 the workspace satisfies both A and B, yet is not the identity on
 the entire two-wire register. This is why strict full-register
