@@ -43,3 +43,10 @@ weaken a requirement or broaden the engine just to make a fixture pass.
 Capture actual errors, unsupported or unresolved results and API friction
 when the examples execute. Change the engine only for a concrete
 demonstrated need; external usability studies remain separate.
+
+## Integrated portfolio
+
+See [algorithm suite](algorithms.md) for fourteen additional workloads and
+[engineering evaluation](evaluation.md) for the integration and scaling
+controls. The 25 applications are distinct from the methodology rounds;
+the new integrated candidate requires fresh qualification.
