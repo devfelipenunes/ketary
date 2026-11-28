@@ -23,3 +23,6 @@ Begin with the [design canvas and patterns](contract-design.md), then the
 [scope review lab](scope-review-lab.md). Follow the [ten-cycle roadmap](ten-cycle-roadmap.md)
 and the [candidate method evaluation](method-evaluation.md). The methodology
 is a practical workflow, not an externally demonstrated productivity result.
+
+Continue with the [composition and ergonomics lab](composition-lab.md) to
+learn why local verification does not establish assembled behavior.
