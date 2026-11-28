@@ -102,3 +102,29 @@ def admission():
         raise AssertionError("mixed verdict must not open execution gate")
     return {"expected": expected, "observed": verdicts(outcome),
             "reports": outcome.explain()}
+
+
+def traceability():
+    # Keep a frozen mathematical claim and prepare a new snapshot after
+    # modifying the mutable circuit object.
+    c = QuantumCircuit(1)
+    c.h(0)
+    plan = Plan((transition("H maps Z to X", before="Z", after="X"),))
+    old = prepare(c)
+    first = plan.verify(old)
+    c.x(0)
+    c.z(0)
+    current = prepare(c)
+    stale = plan.verify(old)
+    revised = plan.verify(current)
+    assert verdicts(first) == verdicts(stale) == ("PASS",)
+    assert verdicts(revised) == ("FAIL",)
+    assert old.snapshot_id != current.snapshot_id
+    assert first.explain() == stale.explain()
+    a, b = first.results[0][1], revised.results[0][1]
+    assert a.obligation == b.obligation
+    assert a.snapshots != b.snapshots
+    assert current.replay(plan.obligations[0].specification, b) is True
+    return {"original": first.explain(), "stale": stale.explain(),
+            "revised": revised.explain(),
+            "rule": "Only reports bound to the intended snapshot qualify."}
