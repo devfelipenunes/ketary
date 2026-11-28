@@ -1,4 +1,5 @@
 """Practical author-created QContract exercises; not a public API."""
+import itertools
 import json
 import pathlib
 import sys
@@ -18,8 +19,16 @@ def verdicts(outcome):
     return tuple(r.status for _, r in outcome.results)
 
 
-def output_plan(secret):
+def validate_secret(secret):
+    if type(secret) is not tuple or len(secret) != 3 or any(
+            type(bit) is not int or bit not in (0, 1) for bit in secret):
+        raise ValueError("secret must contain three integer bits in wire order")
+    return secret
+
+
+def output_plan(secret: tuple[int, int, int]) -> Plan:
     """Zero-input output contract, independently chosen before circuit design."""
+    validate_secret(secret)
     return Plan(tuple(zero_input(f"Output bit {wire}",
                                  stabilizes=pauli_on(4, ((wire, "Z"),),
                                                      negative=bool(bit)))
@@ -72,8 +81,9 @@ def algorithm():
             "cases": rows}
 
 
-def parity_oracle_plan(secret):
+def parity_oracle_plan(secret: tuple[int, int, int]) -> Plan:
     """All-input parity oracle: map target Z and each data X."""
+    validate_secret(secret)
     parity = pauli_on(4, tuple((w, "Z") for w, bit in enumerate(secret) if bit)
                       + ((ANCILLA, "Z"),))
     target_z = pauli_on(4, ((ANCILLA, "Z"),))
@@ -120,3 +130,36 @@ def modularity():
     assert local.passed and verdicts(final) == ("PASS", "PASS", "PASS", "FAIL")
     return {"module_scope": "four selected all-input observables; not full unitary",
             "cases": rows, "missing_cleanup_final": final.explain()}
+
+
+def parameterized_authoring():
+    """Reuse the same project-local contract factory for every 3-bit intent."""
+    rows = []
+    for bits in itertools.product((0, 1), repeat=3):
+        plan = output_plan(bits)
+        edges = tuple(w for w, bit in enumerate(bits) if bit)
+        c = bv(edges)
+        p = prepare(c)
+        result = plan.verify(p)
+        assert result.require().passed
+        assert p.statuses(*(o.specification for o in plan.obligations)) == ("PASS",)*4
+        probabilities = Statevector.from_instruction(c).probabilities()
+        # The expected computational-basis index follows from the secret,
+        # not from observing the candidate output. Ancilla is zero.
+        target = sum(bit << w for w, bit in enumerate(bits))
+        expected = np.zeros(16)
+        expected[target] = 1
+        assert np.allclose(probabilities, expected, rtol=0, atol=1e-12)
+        rows.append({"secret_wire_order": bits, "basis_index": target,
+                     "reports": result.explain()})
+    invalid = []
+    for value in ((1, 0), (1, 0, 2), (True, 0, 1), [1, 0, 1]):
+        for factory in (output_plan, parity_oracle_plan):
+            try:
+                factory(value)
+            except ValueError:
+                invalid.append(factory.__name__)
+            else:
+                raise AssertionError("invalid project-local intent accepted")
+    assert len(invalid) == 8
+    return {"cases": rows, "invalid_intent_controls": len(invalid)}
