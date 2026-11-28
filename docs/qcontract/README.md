@@ -17,6 +17,7 @@ circuits, not a replacement for execution, compilation or hardware.
 | Design requirements and controls | [Canvas](contract-design.md), [patterns](pattern-review.md), [quality tests](testing.md) |
 | Look up API, scope and limits | [Reference](reference.md), [mathematical explanation](explanation.md) |
 | Integrate verification in CI | [CI guide](how-to.md) |
+| Evaluate concrete application decisions | [Application portfolio](applications/README.md) |
 | Build algorithms and projects | [Practical guide](practical-guide.md), [modular example](project_example/verify.py) |
 | Investigate composition | [Composition lab](composition-lab.md), [scope lab](scope-review-lab.md) |
 | Audit the method | [Final audit](final-audit.md), [consolidation register](consolidation.md) |
