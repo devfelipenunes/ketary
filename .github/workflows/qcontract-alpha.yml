@@ -6,6 +6,13 @@ on:
       - 'docs/qcontract-alpha-guide.md'
       - 'docs/qcontract/**'
       - '.github/workflows/qcontract-alpha.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'research/native_contract_engine/**'
+      - 'docs/qcontract-alpha-guide.md'
+      - 'docs/qcontract/**'
+      - '.github/workflows/qcontract-alpha.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -46,6 +53,10 @@ jobs:
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-review-rounds.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/review_rounds.py'],stdout=out,check=True); out.close()"
       - name: Execute practical programming rounds eleven to fifteen
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-practical-rounds.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/practical_rounds.py'],stdout=out,check=True); out.close()"
+      - name: Execute modular project rounds sixteen to nineteen
+        run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-project-rounds.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/project_example/verify.py'],stdout=out,check=True); out.close()"
+      - name: Audit integrated methodology evidence inventory
+        run: python -c "import pathlib, subprocess, sys; root=pathlib.Path('qcontract-qualification'); out=(root/'contract-method-audit.json').open('w', encoding='utf-8'); subprocess.run([sys.executable,'-I','docs/qcontract/audit_method.py',str(root)],stdout=out,check=True); out.close()"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
