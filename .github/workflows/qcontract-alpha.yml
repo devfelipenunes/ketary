@@ -59,6 +59,8 @@ jobs:
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-project-rounds.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/project_example/verify.py'],stdout=out,check=True); out.close()"
       - name: Execute final API audit and matched Qiskit comparison
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-final-rounds.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/final_rounds.py'],stdout=out,check=True); out.close()"
+      - name: Execute practical application portfolio
+        run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-application-portfolio.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/applications/run_portfolio.py'],stdout=out,check=True); out.close()"
       - name: Audit integrated methodology evidence inventory
         run: python -c "import pathlib, subprocess, sys; root=pathlib.Path('qcontract-qualification'); out=(root/'contract-method-audit.json').open('w', encoding='utf-8'); subprocess.run([sys.executable,'-I','docs/qcontract/audit_method.py',str(root)],stdout=out,check=True); out.close()"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
