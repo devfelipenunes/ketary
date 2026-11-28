@@ -130,13 +130,11 @@ def traceability():
             "rule": "Only reports bound to the intended snapshot qualify."}
 
 
-def verify_release_gate(snapshot, plan, required_names, *, budget):
+def verify_release_gate(snapshot, plan, reviewed_plan, *, budget):
     """Project-local example: verify afresh; never trust a saved PASS."""
-    names = tuple(o.name for o in plan.obligations)
-    if not required_names or len(set(required_names)) != len(required_names):
-        raise ValueError("nonempty unique required names")
-    if names != required_names:
-        raise ValueError("plan differs from reviewed requirement manifest")
+    required_names = tuple(o.name for o in reviewed_plan.obligations)
+    if plan.obligations != reviewed_plan.obligations:
+        raise ValueError("plan differs from reviewed specification and labels")
     outcome = plan.verify(snapshot, max_work=budget)
     if tuple(name for name, _ in outcome.results) != required_names:
         raise AssertionError("result manifest mismatch")
@@ -154,27 +152,34 @@ def evidence_gate():
     p = prepare(c)
     plan = Plan((transition("Z to X", before="Z", after="X"),
                  transition("X to Z", before="X", after="Z")))
-    required = ("Z to X", "X to Z")
-    evidence = verify_release_gate(p, plan, required, budget=2_000_000)
+    reviewed = Plan((transition("Z to X", before="Z", after="X"),
+                     transition("X to Z", before="X", after="Z")))
+    evidence = verify_release_gate(p, plan, reviewed, budget=2_000_000)
     assert all(row["status"] == "PASS" for row in evidence["reports"])
     reduced = Plan(plan.obligations[:1])
     blocked = []
     try:
-        verify_release_gate(p, reduced, required, budget=2_000_000)
+        verify_release_gate(p, reduced, reviewed, budget=2_000_000)
     except ValueError:
         blocked.append("missing obligation")
+    changed = Plan((transition("Z to X", before="Z", after="Z"),
+                    plan.obligations[1]))
     try:
-        verify_release_gate(p, plan, required, budget=1)
+        verify_release_gate(p, changed, reviewed, budget=2_000_000)
+    except ValueError:
+        blocked.append("same name changed specification")
+    try:
+        verify_release_gate(p, plan, reviewed, budget=1)
     except AssertionError:
         blocked.append("unresolved")
     c.z(0)
     try:
-        verify_release_gate(prepare(c), plan, required, budget=2_000_000)
+        verify_release_gate(prepare(c), plan, reviewed, budget=2_000_000)
     except AssertionError:
         blocked.append("refutation after edit")
-    assert blocked == ["missing obligation", "unresolved", "refutation after edit"]
+    assert blocked == ["missing obligation", "same name changed specification", "unresolved", "refutation after edit"]
     return {"accepted": evidence, "blocked": blocked,
-            "boundary": "Example checks names, not signed requirement provenance; "
+            "boundary": "Example checks frozen specifications and labels, not signed provenance; "
                         "source revision and specification review remain external."}
 
 
