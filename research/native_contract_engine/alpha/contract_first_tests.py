@@ -35,6 +35,26 @@ def main():
     check([r.status for _,r in both.results]==["PASS","FAIL"])
     q=QuantumCircuit(2);q.cx(0,1);q.cx(0,1);clean=Plan((clean_ancillas("Return workspace",wires=(1,)),))
     check(clean.verify(prepare(q)).passed);q.cx(0,1);check(not clean.verify(prepare(q)).passed)
+    # Explicit wire masks are ergonomic aliases, not a new domain.
+    # Verify exact object/report equality, including identities and budgets.
+    for label in ("I","X","Y","Z","-Y","-Z"):
+        mask=Pauli(label)
+        for a,b in ((invariant("same",observable=label),invariant("same",observable=mask)),
+                    (zero_input("same",stabilizes=label),zero_input("same",stabilizes=mask)),
+                    (transition("same",before=label,after=label),transition("same",before=mask,after=label))):
+            check(a==b)
+            for budget in (1,2_000_000):
+                left=Plan((a,)).verify(identity,max_work=budget)
+                right=Plan((b,)).verify(identity,max_work=budget)
+                check(left==right)
+                row=left.explain()[0];result=left.results[0][1]
+                check(row["reserved_work"]==result.reserved and row["has_evidence"]==(result.evidence is not None))
+    check(transition("wire 0",before=pauli_on(2,((0,"Z"),)),after="IZ").specification==Contract(requires=Pauli("IZ"),ensures=Pauli("IZ")))
+    for bad in ((True,0,0),(0,-1,0),(0,0,2),(1<<64,0,0),(0,0),[0,0,0],None):
+        reject(lambda:invariant("bad",observable=bad))
+        reject(lambda:zero_input("bad",stabilizes=bad))
+        reject(lambda:transition("bad",before="I",after=bad))
+    reject(lambda:Plan((zero_input("wide",stabilizes=pauli_on(2,((1,"Z"),))),)).verify(identity))
     # Six additional domain examples; no hidden simulation or hardware call.
     ref=prepare(QuantumCircuit(1));check(ref.check(ref.equivalent_to(ref,strict=True)).passed)
     check(ref.check(ref.action_matches(ref,ancillas=(0,))).passed)
