@@ -91,3 +91,9 @@ candidate and add an exact-checkout evidence inventory covering all 20
 rounds (18 executable, two documentation/integration milestones). Relevant
 main pushes trigger separate qualification. C09 external evidence and C10
 integrated acceptance are not closed by this inventory alone.
+
+[Final consolidation R21–R25](consolidation.md) adds an audit, onboarding,
+API semantics controls and matched Qiskit comparisons. Stop planned
+method expansion here; C09 external study and C10 integrated acceptance
+remain explicit gates. Do not interpret 25 implementation rounds as
+25 independent experimental results.
