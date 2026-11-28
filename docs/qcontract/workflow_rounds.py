@@ -41,3 +41,37 @@ def authoring():
                      "reports": outcome.explain()})
     return {"intent": "CNOT generator action, common phase permitted",
             "wire_roles": {"control": 0, "target": 1}, "cases": rows}
+
+
+def ergonomics():
+    c = QuantumCircuit(1)
+    c.s(0)
+    p = prepare(c)
+    # S dagger X S = -Y; S dagger Y S = X.
+    x = pauli_on(1, ((0, "X"),))
+    y = pauli_on(1, ((0, "Y"),))
+    minus_y = pauli_on(1, ((0, "Y"),), negative=True)
+    assert x == Pauli("X") and y == Pauli("Y") and minus_y == Pauli("-Y")
+    text = Plan((transition("Signed X image", before="-Y", after="X"),
+                 transition("Y image", before="X", after="Y")))
+    indexed = Plan((transition("Signed X image", before=minus_y, after=x),
+                    transition("Y image", before=x, after=y)))
+    rows = []
+    for budget in (1, 2_000_000):
+        a = text.verify(p, max_work=budget)
+        b = indexed.verify(p, max_work=budget)
+        expected = ("INCONCLUSIVE",)*2 if budget == 1 else ("PASS",)*2
+        assert verdicts(a) == verdicts(b) == expected
+        assert a.explain() == b.explain()
+        specs = tuple(o.specification for o in indexed.obligations)
+        assert p.statuses(*specs, max_work=budget) == expected
+        rows.append({"budget": budget, "reports": a.explain(), "statuses": expected})
+    # A mask does not retain the width of its authoring expression.
+    too_wide = invariant("Outside prepared width", observable=pauli_on(2, ((1, "Z"),)))
+    try:
+        Plan((too_wide,)).verify(p)
+    except ValueError:
+        invalid = "ValueError"
+    else:
+        raise AssertionError("out-of-width mask must be rejected")
+    return {"rows": rows, "invalid_width": invalid}
