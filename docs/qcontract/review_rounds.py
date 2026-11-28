@@ -182,3 +182,54 @@ def evolution():
     assert [classify(r["observed"][:2]) for r in rows] == [
         "accepted", "accepted", "accepted", "refuted"]
     return {"rows": rows, "scope": "observable intent, common phase allowed"}
+
+
+def diagnostics():
+    from qcontract import pauli_on
+    h = prepare(circuit(1, (("h", 0),)))
+    claim = transition("H maps Z to X", before="Z", after="X")
+    plan = Plan((claim,))
+    unresolved = plan.verify(h, max_work=1)
+    resolved = plan.verify(h)
+    wrong = prepare(circuit(1, (("z", 0),)))
+    failure = plan.verify(wrong)
+    assert statuses(unresolved) == ("INCONCLUSIVE",)
+    assert statuses(resolved) == ("PASS",)
+    assert statuses(failure) == ("FAIL",)
+    assert unresolved.results[0][1].obligation == resolved.results[0][1].obligation
+    assert unresolved.results[0][1].snapshots == resolved.results[0][1].snapshots
+    assert wrong.replay(claim.specification, failure.results[0][1]) is True
+    for outcome in (unresolved, failure):
+        try:
+            outcome.require()
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError("unresolved or refuted plan must not pass")
+    try:
+        pauli_on(2, ((0, "Z"), (0, "X")))
+    except ValueError:
+        invalid = "ValueError"
+    else:
+        raise AssertionError("duplicate wire must be rejected")
+    # Synthetic classifier control only: this is not an engine verdict.
+    assert classify(("UNSUPPORTED",)) == "unresolved"
+    return {"bounded": unresolved.explain(), "resolved": resolved.explain(),
+            "refuted": failure.explain(), "invalid_input": invalid,
+            "unsupported_classifier_control": "synthetic; not engine evidence"}
+
+
+def main():
+    assert sys.flags.isolated
+    assert qcontract.__version__ == "0.1.0a3"
+    assert pathlib.Path(qcontract.__file__).resolve().is_relative_to(
+        pathlib.Path(sys.prefix).resolve())
+    results = {"R1_sufficiency": sufficiency(), "R2_minimality": minimality(),
+               "R3_composition": composition(), "R4_evolution": evolution(),
+               "R5_diagnostics": diagnostics()}
+    print(json.dumps({"scope": "author-created bounded review exercises",
+                      "results": results}, indent=2, allow_nan=False))
+
+
+if __name__ == "__main__":
+    main()
