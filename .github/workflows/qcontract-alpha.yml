@@ -40,6 +40,8 @@ jobs:
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'documentation-examples.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/check_examples.py'],stdout=out,check=True); out.close()"
       - name: Execute scope-specific contract design review
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-design.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/design_examples.py'],stdout=out,check=True); out.close()"
+      - name: Execute five contract methodology review rounds
+        run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-review-rounds.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/review_rounds.py'],stdout=out,check=True); out.close()"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

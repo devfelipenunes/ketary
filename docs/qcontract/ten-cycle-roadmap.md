@@ -75,3 +75,7 @@ iterations. C09–C10 retain their independent evidence gates.
 Use [the design canvas](contract-design.md), [the method](methodology.md),
 [quality controls](testing.md), [the scope review lab](scope-review-lab.md)
 and [evaluation protocol](method-evaluation.md) as the working documents.
+
+The [five recursive review rounds](five-review-rounds.md) refine C03–C08
+with executable sufficiency, minimality, composition, evolution and
+failure-diagnosis controls. Their qualification is tracked separately.
