@@ -4,6 +4,7 @@ on:
     paths:
       - 'research/native_contract_engine/**'
       - 'docs/qcontract-alpha-guide.md'
+      - 'docs/qcontract/**'
       - '.github/workflows/qcontract-alpha.yml'
   workflow_dispatch:
 permissions:
@@ -35,6 +36,8 @@ jobs:
           ldd --version
           readelf --version
       - run: python research/native_contract_engine/alpha/qualify.py
+      - name: Execute documented Python examples in the qualified environment
+        run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'documentation-examples.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/check_examples.py'],stdout=out,check=True); out.close()"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
