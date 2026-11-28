@@ -34,3 +34,9 @@ workflow, a coherent Bernstein–Vazirani case study, reusable contract
 factories and a bounded developer/agent handoff. The executable review
 [rounds 1–5](five-review-rounds.md) and [6–10](workflow-rounds.md)
 cover specification quality, diagnostics and evidence gates.
+
+## Method v1.0 candidate
+
+Use the [consolidated method](method-v1.md) and its three-file executable
+project for modular non-Clifford programming. The version labels the method,
+not a public SDK release. Qualification and external study remain separate.
