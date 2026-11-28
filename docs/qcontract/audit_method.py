@@ -14,11 +14,13 @@ ARTIFACTS = {
                                       "R13_parameterized_authoring", "R14_agent_handoff"),
     "contract-project-rounds.json": ("R16_expressivity", "R17_modules",
                                     "R18_architecture", "R19_ergonomics"),
+    "contract-final-rounds.json": ("R23_api_audit", "R24_matched_qiskit"),
 }
 DOCS = ("README.md", "contract-design.md", "pattern-review.md", "five-review-rounds.md",
         "workflow-rounds.md", "practical-guide.md", "method-v1.md", "method-evaluation.md",
         "ten-cycle-roadmap.md", "project_example/requirements.py",
-        "project_example/implementation.py", "project_example/verify.py")
+        "project_example/implementation.py", "project_example/verify.py",
+        "final-audit.md", "quickstart.md", "final_rounds.py", "consolidation.md")
 
 
 def main():
@@ -34,13 +36,14 @@ def main():
         inventory[filename] = list(expected)
     for filename in DOCS:
         assert (ROOT / filename).is_file(), filename
-    # R15 and R20 are documentation/integration reviews, not engine tests.
+    # Documentation/integration reviews are not engine tests. R22 also
+    # runs a separate onboarding block through the documentation checker.
     sha = subprocess.check_output(["git", "rev-parse", "HEAD"],
                                   cwd=ROOT, text=True).strip()
     assert len(sha) == 40 and all(c in "0123456789abcdef" for c in sha)
     print(json.dumps({"commit": sha, "evidence_inventory": inventory,
                       "executable_rounds": sum(map(len, inventory.values())),
-                      "documentation_rounds": ["R15", "R20"],
+                      "documentation_rounds": ["R15", "R20", "R21", "R22", "R25"],
                       "required_files": list(DOCS),
                       "scope": "inventory of same-job evidence, not independent scientific evaluation"},
                      indent=2))
