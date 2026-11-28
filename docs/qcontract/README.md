@@ -1,42 +1,34 @@
 # QContract — contract-first quantum software
 
-Integrated experimental local Alpha 0.1.0a3 candidate. Not a public release.
-Start with [Tutorial](tutorial.md), then the [Contract-first development method](methodology.md),
-[Test the quality of your contracts](testing.md), [Practice tasks](practice.md), [How to verify in CI](how-to.md),
-[Contract reference](reference.md), and [Why these guarantees work](explanation.md).
-The [master roadmap](../qcontract-alpha-master-roadmap.md) and [execution
-register](../qcontract-alpha-execution-register.md) distinguish validated
-baseline, candidate work, and external research. Built on Diátaxis:
-tutorials teach, how-to guides solve tasks, reference specifies, explanations
-develop understanding. https://diataxis.fr/
+Experimental local Alpha 0.1.0a3 candidate; not a public release.
+QContract is a bounded contract and evidence layer for Qiskit source
+circuits, not a replacement for execution, compilation or hardware.
 
-Positioning: a contract and evidence layer for developers using Qiskit.
-QContract does not replace Qiskit's execution, compilation or hardware
-integration. It checks restricted ideal-circuit properties, not the
-physical correctness of an actual device.
+## Start here
 
-See the [N-front roadmap](n-front-roadmap.md) for evidence gates and ongoing consolidation.
+1. [Quickstart](quickstart.md): install, design one property, verify and challenge it.
+2. [Tutorial](tutorial.md) and [practice tasks](practice.md): learn scope and diagnosis.
+3. [Method v1.0 candidate](method-v1.md): the complete contract-first workflow.
 
-## Contract-first consolidation
+## Find what you need
 
-Begin with the [design canvas and patterns](contract-design.md), then the
-[scope review lab](scope-review-lab.md). Follow the [ten-cycle roadmap](ten-cycle-roadmap.md)
-and the [candidate method evaluation](method-evaluation.md). The methodology
-is a practical workflow, not an externally demonstrated productivity result.
+| Goal | Documentation |
+|---|---|
+| Design requirements and controls | [Canvas](contract-design.md), [patterns](pattern-review.md), [quality tests](testing.md) |
+| Look up API, scope and limits | [Reference](reference.md), [mathematical explanation](explanation.md) |
+| Integrate verification in CI | [CI guide](how-to.md) |
+| Build algorithms and projects | [Practical guide](practical-guide.md), [modular example](project_example/verify.py) |
+| Investigate composition | [Composition lab](composition-lab.md), [scope lab](scope-review-lab.md) |
+| Audit the method | [Final audit](final-audit.md), [consolidation register](consolidation.md) |
+| Research independent evaluation | [Evaluation protocol](method-evaluation.md) |
 
-Continue with the [composition and ergonomics lab](composition-lab.md) to
-learn why local verification does not establish assembled behavior.
+## Engineering history
 
-## Practical contract-first programming
+[Methodology foundation](methodology.md), [rounds 1–5](five-review-rounds.md),
+[rounds 6–10](workflow-rounds.md), [ten-cycle roadmap](ten-cycle-roadmap.md),
+[N-front roadmap](n-front-roadmap.md), [master roadmap](../qcontract-alpha-master-roadmap.md)
+and [execution register](../qcontract-alpha-execution-register.md).
+Documentation follows Diátaxis: tutorial, how-to, reference and explanation.
 
-Read the [candidate practical guide](practical-guide.md) for the full
-workflow, a coherent Bernstein–Vazirani case study, reusable contract
-factories and a bounded developer/agent handoff. The executable review
-[rounds 1–5](five-review-rounds.md) and [6–10](workflow-rounds.md)
-cover specification quality, diagnostics and evidence gates.
-
-## Method v1.0 candidate
-
-Use the [consolidated method](method-v1.md) and its three-file executable
-project for modular non-Clifford programming. The version labels the method,
-not a public SDK release. Qualification and external study remain separate.
+Guarantees are limited to admitted ideal mathematical properties. Neither
+external productivity nor hardware correctness follows from a passing contract.
