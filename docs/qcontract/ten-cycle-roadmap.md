@@ -85,3 +85,9 @@ The [developer workflow rounds 6–10](workflow-rounds.md) and
 admission, authoring, traceability, modularity, intent reuse and a bounded
 agent handoff. Qualification remains exact-head and external studies
 remain open; no automatic closure of the ten-cycle roadmap.
+
+[Project architecture rounds 16–20](method-v1.md) consolidate the method
+candidate and add an exact-checkout evidence inventory covering all 20
+rounds (18 executable, two documentation/integration milestones). Relevant
+main pushes trigger separate qualification. C09 external evidence and C10
+integrated acceptance are not closed by this inventory alone.
