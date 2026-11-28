@@ -79,3 +79,9 @@ and [evaluation protocol](method-evaluation.md) as the working documents.
 The [five recursive review rounds](five-review-rounds.md) refine C03–C08
 with executable sufficiency, minimality, composition, evolution and
 failure-diagnosis controls. Their qualification is tracked separately.
+
+The [developer workflow rounds 6–10](workflow-rounds.md) and
+[practical rounds 11–15](practical-guide.md) extend C02–C08 through
+admission, authoring, traceability, modularity, intent reuse and a bounded
+agent handoff. Qualification remains exact-head and external studies
+remain open; no automatic closure of the ten-cycle roadmap.

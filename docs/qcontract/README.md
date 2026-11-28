@@ -26,3 +26,11 @@ is a practical workflow, not an externally demonstrated productivity result.
 
 Continue with the [composition and ergonomics lab](composition-lab.md) to
 learn why local verification does not establish assembled behavior.
+
+## Practical contract-first programming
+
+Read the [candidate practical guide](practical-guide.md) for the full
+workflow, a coherent Bernstein–Vazirani case study, reusable contract
+factories and a bounded developer/agent handoff. The executable review
+[rounds 1–5](five-review-rounds.md) and [6–10](workflow-rounds.md)
+cover specification quality, diagnostics and evidence gates.
