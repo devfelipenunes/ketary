@@ -55,6 +55,9 @@ correctness-by-construction calculus, or claim of scientific priority.
 | Check finite Pauli noise | NoiseAfter | Not arbitrary device noise |
 | Check a finite error set | Correctable | Not hardware fault tolerance |
 
+See [pattern review cards and anti-patterns](pattern-review.md) for a
+copyable design record and scope-specific controls.
+
 ## Worked design review: clean workspace versus logical identity
 
 Intent A: return workspace wire 1 to zero for arbitrary logical wire 0.
