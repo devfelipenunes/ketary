@@ -47,6 +47,8 @@ jobs:
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'documentation-examples.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/check_examples.py'],stdout=out,check=True); out.close()"
       - name: Execute developer workflow rounds six to ten
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-workflow-rounds.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/workflow_rounds.py'],stdout=out,check=True); out.close()"
+      - name: Execute finite error-model application audit
+        run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'finite-error-application.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/applications/finite_error_audit.py'],stdout=out,check=True); out.close()"
       - name: Execute scope-specific contract design review
         run: python -c "import os, pathlib, subprocess; root=pathlib.Path('qcontract-qualification'); exe=root/'venv'/('Scripts/python.exe' if os.name=='nt' else 'bin/python'); out=(root/'contract-design.json').open('w', encoding='utf-8'); subprocess.run([str(exe),'-I','docs/qcontract/design_examples.py'],stdout=out,check=True); out.close()"
       - name: Execute five contract methodology review rounds
