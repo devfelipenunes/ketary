@@ -145,6 +145,9 @@ The numeric comparison is a small independent cross-check, not an exact
 proof or a scalable alternative to the contract engine. Reference and
 implementation must both remain within the admitted domain.
 
+See [test the quality of your contracts](testing.md) for an executable
+mutation matrix, allowed variants, and scope-specific reference controls.
+
 ## Review checklist
 
 - Name each obligation by intended behavior, not by gate sequence.
