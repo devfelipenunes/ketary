@@ -2,7 +2,7 @@
 
 Integrated experimental local Alpha 0.1.0a3 candidate. Not a public release.
 Start with [Tutorial](tutorial.md), then the [Contract-first development method](methodology.md),
-[Test the quality of your contracts](testing.md), [How to verify in CI](how-to.md),
+[Test the quality of your contracts](testing.md), [Practice tasks](practice.md), [How to verify in CI](how-to.md),
 [Contract reference](reference.md), and [Why these guarantees work](explanation.md).
 The [master roadmap](../qcontract-alpha-master-roadmap.md) and [execution
 register](../qcontract-alpha-execution-register.md) distinguish validated
@@ -14,3 +14,5 @@ Positioning: a contract and evidence layer for developers using Qiskit.
 QContract does not replace Qiskit's execution, compilation or hardware
 integration. It checks restricted ideal-circuit properties, not the
 physical correctness of an actual device.
+
+See the [N-front roadmap](n-front-roadmap.md) for evidence gates and ongoing consolidation.
