@@ -3,8 +3,8 @@
 Install the two local wheels from the same qualified commit in a clean
 CPython 3.12 environment (see [installation guide](../qcontract-alpha-guide.md)).
 Do not install an unrelated package with the same name from a registry.
-These examples are exercised by contract_first_tests.py in the candidate
-qualification; the 0.1.0a3 candidate still requires CI.
+The 0.1.0a3 candidate is integrated. These exact Python blocks are
+executed during isolated-wheel qualification by check_examples.py.
 
 ## 1. Predict a transformation
 
@@ -19,8 +19,11 @@ spec = Plan((transition("H maps Z to X", before="Z", after="X"),))
 circuit = QuantumCircuit(1)
 circuit.h(0)
 outcome = spec.verify(prepare(circuit))
-outcome.require()
+assert outcome.require().passed
 print(outcome.explain())
+wrong = QuantumCircuit(1)
+wrong.x(0)
+assert spec.verify(prepare(wrong)).results[0][1].status == "FAIL"
 ```
 
 Expect PASS. Change H to X and predict why the same property fails.
@@ -36,6 +39,7 @@ plan = Plan((
     zero_input("Zero state stabilizes X", stabilizes="X"),
 ))
 outcome = plan.verify(identity)
+assert [result.status for _, result in outcome.results] == ["PASS", "FAIL"]
 print([(name, result.status) for name, result in outcome.results])
 ```
 
@@ -53,9 +57,15 @@ spec = Plan((
 bell = QuantumCircuit(2)
 bell.h(0)
 bell.cx(0, 1)
-assert spec.verify(prepare(bell)).passed
+prepared = prepare(bell)
+assert spec.verify(prepared).passed
+assert [r.status for _, r in spec.verify(prepared, max_work=1).results] == [
+    "INCONCLUSIVE", "INCONCLUSIVE", "INCONCLUSIVE"
+]
 bell.z(0)
-print(spec.verify(prepare(bell)).explain())
+mutated = spec.verify(prepare(bell))
+assert [result.status for _, result in mutated.results] == ["FAIL", "FAIL", "PASS"]
+print(mutated.explain())
 ```
 
 Expect FAIL, FAIL, PASS after the mutation. Explain why a phase flip
@@ -76,7 +86,8 @@ c.cx(0, 1)
 assert not spec.verify(prepare(c)).passed
 ```
 
-A single CNOT copies information into the initially clean target.
+A single CNOT can correlate the initially clean target with the control;
+it is not a general quantum copying operation.
 The guarantee is for all logical inputs with the ancilla initially zero,
 not only an all-zero example.
 
