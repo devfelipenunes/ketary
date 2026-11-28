@@ -5,7 +5,10 @@ X, Z, CX, T, Tdg. Canonical closed controls; no classical bits,
 parameterized gates or nonzero source global phase. Input snapshot
 1–64 wires, at most 100,000 admitted gates. Individual domain bounds
 are stricter; logical max_work is 1–2,000,000, not a CPU/memory cap.
-All batches have 1–64 obligations. See source validation for precise
+All batches have 1–64 obligations. A batch of k obligations receives
+floor(max_work / k) logical work per item; a zero quota is unresolved.
+Splitting a batch into separate calls at the same total budget per call
+changes the resource policy. See source validation for precise
 limits; no arbitrary dynamic circuit support.
 
 | Contract | Predicate/scope | Important limitation |
@@ -23,8 +26,9 @@ limits; no arbitrary dynamic circuit support.
 
 Named(name, specification) works with all ten families. transition(),
 invariant(), zero_input(), clean_ancillas() are convenience constructors.
-A Plan is conjunction of independent obligations; it does not prove
-sequential composition or arbitrary Hoare implication. Named labels
+A Plan checks a conjunction of named obligations; they need not be
+mathematically independent. It does not prove sequential composition
+or arbitrary Hoare implication. Named labels
 are human metadata, not part of mathematical obligation identity.
 
 Pauli("IZ") uses highest wire first; pauli_on(width, ((0,"Z"),))
@@ -43,4 +47,6 @@ as well as refuted results.
 Status: PASS exact property holds in admitted domain, FAIL exact
 refutation, INCONCLUSIVE no decision, UNSUPPORTED outside implemented
 domain. Invalid input raises TypeError/ValueError rather than returning
-a mathematical verdict. Evidence replay only for supported routes.
+a mathematical verdict. Evidence replay only for supported routes. Correctable is circuit-independent
+and has no circuit snapshot IDs; do not apply a circuit-bound evidence
+gate indiscriminately to it.
