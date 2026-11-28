@@ -62,12 +62,65 @@ def api_audit():
                                     "obligation": left.obligation}}
 
 
+def matched_qiskit():
+    # Same authored requirements and same candidate circuits on both routes.
+    # The numerical baseline is a small matrix/statevector cross-check, not
+    # an exact proof or a representative performance/usability experiment.
+    rows = []
+    for name, gates, expected in (
+        ("H", ("h",), ("PASS", "PASS")),
+        ("HHH", ("h", "h", "h"), ("PASS", "PASS")),
+        ("HZ", ("h", "z"), ("FAIL", "PASS")),
+        ("identity", (), ("FAIL", "FAIL")),
+    ):
+        c = QuantumCircuit(1)
+        for gate in gates:
+            getattr(c, gate)(0)
+        pairs = (("Z", "X"), ("X", "Z"))
+        plan = Plan(tuple(transition(f"{a} to {b}", before=a, after=b)
+                          for a, b in pairs))
+        u = Operator(c).data
+        native = tuple("PASS" if np.allclose(
+            u.conj().T @ MatrixPauli(b).to_matrix() @ u,
+            MatrixPauli(a).to_matrix(), rtol=0, atol=1e-12) else "FAIL"
+            for a, b in pairs)
+        result = plan.verify(prepare(c))
+        assert statuses(result) == expected == native
+        rows.append({"family": "all-input observable", "case": name,
+                     "expected": expected, "qiskit_numeric": native,
+                     "qcontract": statuses(result), "reports": result.explain()})
+    for name, suffix, expected in (
+        ("Bell", (), ("PASS", "PASS")),
+        ("allowed rewrite", ("h", "h"), ("PASS", "PASS")),
+        ("phase error", ("z",), ("FAIL", "PASS")),
+        ("bit error", ("x",), ("PASS", "FAIL")),
+    ):
+        c = QuantumCircuit(2)
+        c.h(0)
+        c.cx(0, 1)
+        for gate in suffix:
+            getattr(c, gate)(0)
+        labels = ("XX", "ZZ")
+        plan = Plan(tuple(zero_input(label, stabilizes=label) for label in labels))
+        state = Statevector.from_instruction(c)
+        native = tuple("PASS" if np.isclose(
+            state.expectation_value(MatrixPauli(label)), 1,
+            rtol=0, atol=1e-12) else "FAIL" for label in labels)
+        result = plan.verify(prepare(c))
+        assert statuses(result) == expected == native
+        rows.append({"family": "zero-input state", "case": name,
+                     "expected": expected, "qiskit_numeric": native,
+                     "qcontract": statuses(result), "reports": result.explain()})
+    return {"cases": rows, "matched_status_comparisons": 2*len(rows),
+            "boundary": "authored small fixtures; no timings, participants or superiority claim"}
+
+
 def main():
     assert sys.flags.isolated
     assert qcontract.__version__ == "0.1.0a3"
     assert pathlib.Path(qcontract.__file__).resolve().is_relative_to(
         pathlib.Path(sys.prefix).resolve())
-    results = {"R23_api_audit": api_audit()}
+    results = {"R23_api_audit": api_audit(), "R24_matched_qiskit": matched_qiskit()}
     print(json.dumps({"scope": "author-created final qualification",
                       "results": results}, indent=2, allow_nan=False))
 
