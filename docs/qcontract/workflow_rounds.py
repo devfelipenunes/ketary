@@ -75,3 +75,30 @@ def ergonomics():
     else:
         raise AssertionError("out-of-width mask must be rejected")
     return {"rows": rows, "invalid_width": invalid}
+
+
+def admission():
+    # A valid specification can exceed an implemented domain without
+    # being mathematically false. Six wires exceed strict equality's
+    # limit but not common-phase equality's limit.
+    c = QuantumCircuit(6)
+    c.h(0)
+    p = prepare(c)
+    plan = Plan((Named("Common-phase equality", p.equivalent_to(p)),
+                 Named("Strict equality", p.equivalent_to(p, strict=True)),
+                 invariant("Z on untouched wire", observable=pauli_on(6, ((5, "Z"),))),
+                 invariant("X on H wire", observable=pauli_on(6, ((0, "X"),)))))
+    outcome = plan.verify(p)
+    expected = ("PASS", "UNSUPPORTED", "PASS", "FAIL")
+    assert verdicts(outcome) == expected, verdicts(outcome)
+    specs = tuple(o.specification for o in plan.obligations)
+    assert p.statuses(*specs) == expected
+    assert not outcome.passed
+    try:
+        outcome.require()
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("mixed verdict must not open execution gate")
+    return {"expected": expected, "observed": verdicts(outcome),
+            "reports": outcome.explain()}
