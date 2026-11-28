@@ -12,7 +12,7 @@ import re
 import sys
 
 ROOT=pathlib.Path(__file__).resolve().parent
-EXPECTED={"tutorial.md":4,"how-to.md":1,"methodology.md":4}
+EXPECTED={"tutorial.md":4,"how-to.md":1,"methodology.md":4,"testing.md":2}
 
 def main():
     import qcontract
