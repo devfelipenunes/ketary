@@ -65,12 +65,14 @@ to one and two qubits. No hardware claim or controlled speed comparison.
 ## Consolidation gates
 
 The [audit script](audit_method.py) checks the presence and expected keys
-of four same-job JSON artifacts and the required methodology files.
+of five same-job JSON artifacts and the required methodology files.
 It records the exact checkout SHA; it is an inventory, not an independent
 proof of the engine or of user productivity. All scripts must first pass
 their executable assertions on installed wheels. PR and main qualification
 remain separate; main qualification is triggered on relevant pushes.
 Keep the general SDK regression jobs and all previous checks.
+The [final consolidation register](consolidation.md) records R21–R25,
+the expanded inventory and the end of planned methodology expansion.
 
 C01–C08 engineering evidence is candidate until exact integrated CI passes.
 C09 requires independent reviewer approval and real participants;
