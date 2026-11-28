@@ -163,3 +163,58 @@ def parameterized_authoring():
                 raise AssertionError("invalid project-local intent accepted")
     assert len(invalid) == 8
     return {"cases": rows, "invalid_intent_controls": len(invalid)}
+
+
+def review_candidate(secret, candidate, proposed_plan, *, budget=2_000_000):
+    """Project-local acceptance example, not a trusted agent sandbox."""
+    reviewed = output_plan(secret)
+    if proposed_plan.obligations != reviewed.obligations:
+        raise ValueError("candidate specification differs from reviewed intent")
+    snapshot = prepare(candidate)
+    outcome = reviewed.verify(snapshot, max_work=budget)
+    outcome.require()
+    return {"secret_wire_order": secret, "snapshot": snapshot.snapshot_id,
+            "requested_work": budget, "reports": outcome.explain()}
+
+
+def agent_handoff():
+    reviewed = output_plan(SECRET)
+    accepted = review_candidate(SECRET, bv((0, 2), rewrite=True), reviewed)
+    weakened = Plan(reviewed.obligations[:-1] + (
+        zero_input("Ancilla returned to zero", stabilizes="IIII"),))
+    cases = (
+        ("wrong oracle", bv((0,)), reviewed, 2_000_000, AssertionError),
+        ("missing cleanup", bv((0, 2), cleanup=False), reviewed, 2_000_000, AssertionError),
+        ("same-name weakened intent", bv((0, 2), cleanup=False), weakened,
+         2_000_000, ValueError),
+        ("removed obligation", bv((0, 2), cleanup=False), Plan(reviewed.obligations[:-1]),
+         2_000_000, ValueError),
+        ("unresolved budget", bv((0, 2)), reviewed, 1, AssertionError),
+    )
+    rejected = []
+    for name, candidate, proposed, budget, expected_exception in cases:
+        try:
+            review_candidate(SECRET, candidate, proposed, budget=budget)
+        except expected_exception:
+            rejected.append(name)
+        else:
+            raise AssertionError(f"candidate must be rejected: {name}")
+    assert len(rejected) == 5
+    return {"accepted": accepted, "rejected": rejected,
+            "boundary": "trusted reviewed intent and fresh verifier; not agent evaluation"}
+
+
+def main():
+    assert sys.flags.isolated
+    assert qcontract.__version__ == "0.1.0a3"
+    assert pathlib.Path(qcontract.__file__).resolve().is_relative_to(
+        pathlib.Path(sys.prefix).resolve())
+    results = {"R11_algorithm": algorithm(), "R12_modularity": modularity(),
+               "R13_parameterized_authoring": parameterized_authoring(),
+               "R14_agent_handoff": agent_handoff()}
+    print(json.dumps({"scope": "author-created practical programming exercises",
+                      "results": results}, indent=2, allow_nan=False))
+
+
+if __name__ == "__main__":
+    main()
