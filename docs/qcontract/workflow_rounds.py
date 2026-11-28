@@ -128,3 +128,67 @@ def traceability():
     return {"original": first.explain(), "stale": stale.explain(),
             "revised": revised.explain(),
             "rule": "Only reports bound to the intended snapshot qualify."}
+
+
+def verify_release_gate(snapshot, plan, required_names, *, budget):
+    """Project-local example: verify afresh; never trust a saved PASS."""
+    names = tuple(o.name for o in plan.obligations)
+    if not required_names or len(set(required_names)) != len(required_names):
+        raise ValueError("nonempty unique required names")
+    if names != required_names:
+        raise ValueError("plan differs from reviewed requirement manifest")
+    outcome = plan.verify(snapshot, max_work=budget)
+    if tuple(name for name, _ in outcome.results) != required_names:
+        raise AssertionError("result manifest mismatch")
+    if any(not r.snapshots or r.snapshots[0] != snapshot.snapshot_id
+           for _, r in outcome.results):
+        raise AssertionError("result snapshot mismatch")
+    outcome.require()
+    return {"snapshot_id": snapshot.snapshot_id, "required_names": required_names,
+            "requested_work": budget, "reports": outcome.explain()}
+
+
+def evidence_gate():
+    c = QuantumCircuit(1)
+    c.h(0)
+    p = prepare(c)
+    plan = Plan((transition("Z to X", before="Z", after="X"),
+                 transition("X to Z", before="X", after="Z")))
+    required = ("Z to X", "X to Z")
+    evidence = verify_release_gate(p, plan, required, budget=2_000_000)
+    assert all(row["status"] == "PASS" for row in evidence["reports"])
+    reduced = Plan(plan.obligations[:1])
+    blocked = []
+    try:
+        verify_release_gate(p, reduced, required, budget=2_000_000)
+    except ValueError:
+        blocked.append("missing obligation")
+    try:
+        verify_release_gate(p, plan, required, budget=1)
+    except AssertionError:
+        blocked.append("unresolved")
+    c.z(0)
+    try:
+        verify_release_gate(prepare(c), plan, required, budget=2_000_000)
+    except AssertionError:
+        blocked.append("refutation after edit")
+    assert blocked == ["missing obligation", "unresolved", "refutation after edit"]
+    return {"accepted": evidence, "blocked": blocked,
+            "boundary": "Example checks names, not signed requirement provenance; "
+                        "source revision and specification review remain external."}
+
+
+def main():
+    assert sys.flags.isolated
+    assert qcontract.__version__ == "0.1.0a3"
+    assert pathlib.Path(qcontract.__file__).resolve().is_relative_to(
+        pathlib.Path(sys.prefix).resolve())
+    results = {"R6_authoring": authoring(), "R7_ergonomics": ergonomics(),
+               "R8_admission": admission(), "R9_traceability": traceability(),
+               "R10_evidence_gate": evidence_gate()}
+    print(json.dumps({"scope": "author-created developer-workflow exercises",
+                      "results": results}, indent=2, allow_nan=False))
+
+
+if __name__ == "__main__":
+    main()
